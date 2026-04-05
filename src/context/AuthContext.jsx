@@ -10,13 +10,22 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Check active session on load
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Auth Session Error:", error);
+        setLoading(false);
+        return;
+      }
       setCurrentUser(session?.user || null);
       if (session?.user) {
         checkOnboardedStatus(session.user.id);
       } else {
         setLoading(false);
       }
+    }).catch(err => {
+      console.error("Critical Auth Crash:", err);
+      // Failsafe so the app doesn't spin forever
+      setLoading(false);
     });
 
     // Listen for auth changes (login/logout)

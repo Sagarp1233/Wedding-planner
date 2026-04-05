@@ -191,17 +191,23 @@ export function AppProvider({ children, userId }) {
         let finalTasks = tasks || [];
         if (finalTasks.length === 0) {
            const generatedTasks = generateTasks(weddingData.wedding_date || new Date().toISOString());
-           const mappedTasks = generatedTasks.map(t => ({ wedding_id: wId, title: t.title, description: t.description || '', deadline: t.deadline || '', priority: t.priority, status: t.status }));
-           const { data: newTasks } = await supabase.from('tasks').insert(mappedTasks).select();
-           if(newTasks) finalTasks = newTasks;
+           const mappedTasks = generatedTasks.map(t => ({ wedding_id: wId, title: t.title, notes: t.description || '', due_date: t.deadline || '', status: t.status }));
+           try {
+              const { data: newTasks, error: taskErr } = await supabase.from('tasks').insert(mappedTasks).select();
+              if(newTasks) finalTasks = newTasks;
+              else console.error("Tasks insert failed:", taskErr);
+           } catch(e) { console.error(e); }
         }
 
         let finalEvents = events || [];
         if (finalEvents.length === 0) {
            const generatedEvents = generateEvents(weddingData.wedding_date || new Date().toISOString(), weddingData.wedding_style || 'hindu');
-           const mappedEvents = generatedEvents.map(e => ({ wedding_id: wId, time: e.time, end_time: e.endTime || '', title: e.title, description: e.description || '', location: e.location || '' }));
-           const { data: newEvents } = await supabase.from('timeline_events').insert(mappedEvents).select();
-           if(newEvents) finalEvents = newEvents;
+           const mappedEvents = generatedEvents.map(e => ({ wedding_id: wId, name: e.name || 'Event', date: e.date || new Date().toISOString().split('T')[0], start_time: e.time || '10:00', venue: e.location || '', notes: e.description || '' }));
+           try {
+              const { data: newEvents, error: evErr } = await supabase.from('timeline_events').insert(mappedEvents).select();
+              if(newEvents) finalEvents = newEvents;
+              else console.error("Events insert failed:", evErr);
+           } catch(e) { console.error(e); }
         }
 
         const payload = {
