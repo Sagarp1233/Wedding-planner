@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, useState } from 'react';
 import { generateId } from '../utils/helpers';
-import { generateBudgetCategories } from '../data/templates';
+import { generateBudgetCategories, generateTasks, generateEvents } from '../data/templates';
 import { supabase } from '../lib/supabase';
 
 const AppContext = createContext(null);
@@ -178,13 +178,39 @@ export function AppProvider({ children, userId }) {
           whatsappTemplate: weddingData.whatsapp_template || '',
         };
 
+        // --- AUTO-REPAIR FOR EXISTING USERS ---
+        const totalB = Number(weddingData.total_budget) || 0;
+        let finalCats = cats || [];
+        if (finalCats.length === 0 && totalB > 0) {
+           const generatedCats = generateBudgetCategories(totalB);
+           const mappedCats = generatedCats.map(c => ({ wedding_id: wId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated }));
+           const { data: newCats } = await supabase.from('budget_categories').insert(mappedCats).select();
+           if(newCats) finalCats = newCats;
+        }
+
+        let finalTasks = tasks || [];
+        if (finalTasks.length === 0) {
+           const generatedTasks = generateTasks(weddingData.wedding_date || new Date().toISOString());
+           const mappedTasks = generatedTasks.map(t => ({ wedding_id: wId, title: t.title, description: t.description || '', deadline: t.deadline || '', priority: t.priority, status: t.status }));
+           const { data: newTasks } = await supabase.from('tasks').insert(mappedTasks).select();
+           if(newTasks) finalTasks = newTasks;
+        }
+
+        let finalEvents = events || [];
+        if (finalEvents.length === 0) {
+           const generatedEvents = generateEvents(weddingData.wedding_date || new Date().toISOString(), weddingData.wedding_style || 'hindu');
+           const mappedEvents = generatedEvents.map(e => ({ wedding_id: wId, time: e.time, end_time: e.endTime || '', title: e.title, description: e.description || '', location: e.location || '' }));
+           const { data: newEvents } = await supabase.from('timeline_events').insert(mappedEvents).select();
+           if(newEvents) finalEvents = newEvents;
+        }
+
         const payload = {
           wedding: mappedWedding,
           guests: guests || [],
-          budgetCategories: cats || [],
+          budgetCategories: finalCats,
           expenses: (expenses || []).map(e => ({...e, categoryId: e.category_id})),
-          tasks: tasks || [],
-          events: (events || []).map(e => ({...e, startTime: e.start_time, endTime: e.end_time || ''})),
+          tasks: finalTasks,
+          events: finalEvents.map(e => ({...e, startTime: e.time || e.start_time, endTime: e.end_time || ''})),
           vendors: (vendors || []).map(v => ({...v, contactPerson: v.contact_person || '', quotedAmount: Number(v.quoted_amount)||0, advancePaid: Number(v.advance_paid)||0, nextPaymentDate: v.next_payment_date||''})),
           inspirations: (inspirations || []).map(i => ({...i, imageUrl: i.image_url}))
         };

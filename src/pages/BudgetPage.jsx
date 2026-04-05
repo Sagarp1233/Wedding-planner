@@ -23,14 +23,19 @@ export default function BudgetPage() {
   const [expForm, setExpForm] = useState({ name: '', amount: '', vendor: '', notes: '', paid: false });
 
   const totalBudget = wedding.totalBudget;
-  const totalAllocated = budgetCategories.reduce((s, c) => s + c.allocated, 0);
-  const totalSpent = budgetCategories.reduce((s, c) => s + c.spent, 0);
+  const enrichedCategories = budgetCategories.map(c => {
+    const spent = expenses.filter(e => e.categoryId === c.id).reduce((sum, e) => sum + Number(e.amount), 0);
+    return { ...c, spent };
+  });
+
+  const totalAllocated = enrichedCategories.reduce((s, c) => s + c.allocated, 0);
+  const totalSpent = enrichedCategories.reduce((s, c) => s + c.spent, 0);
   const remaining = totalBudget - totalSpent;
   const isOverBudget = remaining < 0;
   const isOverAllocated = totalAllocated > totalBudget;
 
-  const chartData = budgetCategories.filter(c => c.allocated > 0).map(c => ({ name: c.name, value: c.allocated, color: c.color }));
-  const barData = budgetCategories.map(c => ({ name: c.name.split(' ')[0], allocated: c.allocated, spent: c.spent }));
+  const chartData = enrichedCategories.filter(c => c.allocated > 0).map(c => ({ name: c.name, value: c.allocated, color: c.color }));
+  const barData = enrichedCategories.map(c => ({ name: c.name.split(' ')[0], allocated: c.allocated, spent: c.spent }));
 
   function handleAddCategory(e) {
     e.preventDefault();
@@ -49,13 +54,6 @@ export default function BudgetPage() {
     e.preventDefault();
     const amt = Number(expForm.amount) || 0;
     dispatch({ type: 'ADD_EXPENSE', payload: { categoryId: selectedCatId, name: expForm.name, amount: amt, vendor: expForm.vendor, notes: expForm.notes, paid: expForm.paid } });
-    // Update category spent
-    const cat = budgetCategories.find(c => c.id === selectedCatId);
-    if (cat) {
-      const catExpenses = [...expenses.filter(e => e.categoryId === selectedCatId), { amount: amt }];
-      const newSpent = catExpenses.reduce((s, e) => s + e.amount, 0);
-      dispatch({ type: 'UPDATE_CATEGORY', payload: { id: selectedCatId, spent: newSpent } });
-    }
     setExpForm({ name: '', amount: '', vendor: '', notes: '', paid: false });
     setShowAddExpense(false);
   }
@@ -97,12 +95,12 @@ export default function BudgetPage() {
     // Calculate new allocations proportionally, or evenly if current is 0
     let totalCurrentAllocated = budgetCategories.reduce((s, c) => s + c.allocated, 0);
     
-    budgetCategories.forEach(cat => {
+    enrichedCategories.forEach(cat => {
       let newAllocated = 0;
       if (totalCurrentAllocated > 0) {
         newAllocated = Math.round(totalBudget * (cat.allocated / totalCurrentAllocated));
       } else {
-        newAllocated = Math.round(totalBudget / budgetCategories.length);
+        newAllocated = Math.round(totalBudget / enrichedCategories.length);
       }
       dispatch({ type: 'UPDATE_CATEGORY', payload: { id: cat.id, allocated: newAllocated } });
     });
@@ -201,7 +199,7 @@ export default function BudgetPage() {
       </div>
 
       <div className="space-y-3">
-        {budgetCategories.map(cat => {
+        {enrichedCategories.map(cat => {
           const pct = cat.allocated > 0 ? Math.min(100, Math.round((cat.spent / cat.allocated) * 100)) : 0;
           const catExpenses = expenses.filter(e => e.categoryId === cat.id);
           const isOpen = expandedCat === cat.id;

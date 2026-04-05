@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const { wedding, budgetCategories, expenses, guests, tasks, events } = state;
 
   const totalBudget = wedding.totalBudget;
-  const totalSpent = budgetCategories.reduce((s, c) => s + c.spent, 0);
+  const totalSpent = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const totalAllocated = budgetCategories.reduce((s, c) => s + c.allocated, 0);
   const remaining = totalBudget - totalSpent;
   const isOverBudget = remaining < 0;
