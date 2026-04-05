@@ -212,30 +212,44 @@ export function AppProvider({ children, userId }) {
       const wId = state.wedding?.id;
 
       // Special case: Initial Wedding Creation (Onboarding)
-      if (action.type === 'UPDATE_WEDDING' && !wId) {
+      // Both Onboarding and loadSupabaseData can dispatch INIT_WEDDING.
+      if (action.type === 'INIT_WEDDING' && action.payload?.wedding && !action.payload.wedding.id) {
          // Create the wedding record
          const { data, error } = await supabase.from('weddings').insert({
             user_id: userId,
-            partner1: action.payload.partner1 || 'Partner 1',
-            partner2: action.payload.partner2 || 'Partner 2',
-            wedding_date: action.payload.weddingDate || '',
-            location: action.payload.location || '',
-            wedding_style: action.payload.weddingStyle || '',
-            total_budget: action.payload.totalBudget || 0,
+            partner1: action.payload.wedding.partner1 || 'Partner 1',
+            partner2: action.payload.wedding.partner2 || 'Partner 2',
+            wedding_date: action.payload.wedding.weddingDate || '',
+            location: action.payload.wedding.location || '',
+            wedding_style: action.payload.wedding.weddingStyle || '',
+            total_budget: action.payload.wedding.totalBudget || 0,
          }).select('id').single();
 
          if (data) {
-           // We must update local state with the real DB id
-           localDispatch({ type: 'UPDATE_WEDDING', payload: { id: data.id } });
+           const newWeddingId = data.id;
+           // Update local state with the real DB id
+           localDispatch({ type: 'UPDATE_WEDDING', payload: { id: newWeddingId } });
            
-           // After wedding is created, their budget categories are also generated locally by reducer.
-           // We need to push those initial categories to Supabase.
-           if (state.budgetCategories && state.budgetCategories.length === 0 && action.payload.totalBudget > 0) {
-              const cats = generateBudgetCategories(action.payload.totalBudget);
-              const mappedCats = cats.map(c => ({
-                 wedding_id: data.id, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated
+           // Now mass-insert the generated collections
+           if (action.payload.budgetCategories?.length > 0) {
+              const mappedCats = action.payload.budgetCategories.map(c => ({
+                 wedding_id: newWeddingId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated
               }));
               await supabase.from('budget_categories').insert(mappedCats);
+           }
+           
+           if (action.payload.tasks?.length > 0) {
+              const mappedTasks = action.payload.tasks.map(t => ({
+                 wedding_id: newWeddingId, title: t.title, description: t.description || '', deadline: t.deadline || '', priority: t.priority, status: t.status
+              }));
+              await supabase.from('tasks').insert(mappedTasks);
+           }
+
+           if (action.payload.events?.length > 0) {
+              const mappedEvents = action.payload.events.map(e => ({
+                 wedding_id: newWeddingId, time: e.time, end_time: e.endTime || '', title: e.title, description: e.description || '', location: e.location || ''
+              }));
+              await supabase.from('timeline_events').insert(mappedEvents);
            }
          }
          return;
@@ -254,22 +268,82 @@ export function AppProvider({ children, userId }) {
           if (action.payload.totalBudget !== undefined) updates.total_budget = action.payload.totalBudget;
           if (action.payload.whatsappTemplate !== undefined) updates.whatsapp_template = action.payload.whatsappTemplate;
           await supabase.from('weddings').update(updates).eq('id', wId);
-          
-          // Note: If totalBudget changes, local reducer regenerates categories. 
-          // For a true DB sync, we would need to push the updated categories arrays right here.
           break;
         }
+
+        // Guests
         case 'ADD_GUEST':
           await supabase.from('guests').insert({ wedding_id: wId, name: action.payload.name, phone: action.payload.phone, email: action.payload.email, category: action.payload.category, rsvp: action.payload.rsvp, plus_one: action.payload.plusOne, notes: action.payload.notes, table_number: action.payload.table });
           break;
         case 'UPDATE_GUEST':
-          await supabase.from('guests').update({ name: action.payload.name, phone: action.payload.phone, email: action.payload.email, category: action.payload.category, rsvp: action.payload.rsvp, plus_one: action.payload.plusOne, notes: action.payload.notes, table_number: action.payload.table }).eq('id', action.payload.id);
+          if(String(action.payload.id).includes('-')) await supabase.from('guests').update({ name: action.payload.name, phone: action.payload.phone, email: action.payload.email, category: action.payload.category, rsvp: action.payload.rsvp, plus_one: action.payload.plusOne, notes: action.payload.notes, table_number: action.payload.table }).eq('id', action.payload.id);
           break;
         case 'DELETE_GUEST':
-          await supabase.from('guests').delete().eq('id', action.payload);
+          if(String(action.payload).includes('-')) await supabase.from('guests').delete().eq('id', action.payload);
           break;
-        // The implementation can map every case recursively to Supabase.
-        // For brevity, the full scale sync engine covers exactly the tables.
+
+        // Tasks
+        case 'ADD_TASK':
+          await supabase.from('tasks').insert({ wedding_id: wId, title: action.payload.title, description: action.payload.description, deadline: action.payload.deadline, priority: action.payload.priority, status: action.payload.status });
+          break;
+        case 'UPDATE_TASK':
+          if(String(action.payload.id).includes('-')) await supabase.from('tasks').update({ title: action.payload.title, description: action.payload.description, deadline: action.payload.deadline, priority: action.payload.priority, status: action.payload.status }).eq('id', action.payload.id);
+          break;
+        case 'DELETE_TASK':
+          if(String(action.payload).includes('-')) await supabase.from('tasks').delete().eq('id', action.payload);
+          break;
+
+        // Vendors
+        case 'ADD_VENDOR':
+          await supabase.from('vendors').insert({ wedding_id: wId, category: action.payload.category, name: action.payload.name, contact_person: action.payload.contactPerson, phone: action.payload.phone, email: action.payload.email, quoted_amount: action.payload.quotedAmount, advance_paid: action.payload.advancePaid, next_payment_date: action.payload.nextPaymentDate, notes: action.payload.notes, status: action.payload.status });
+          break;
+        case 'UPDATE_VENDOR':
+          if(String(action.payload.id).includes('-')) await supabase.from('vendors').update({ category: action.payload.category, name: action.payload.name, contact_person: action.payload.contactPerson, phone: action.payload.phone, email: action.payload.email, quoted_amount: action.payload.quotedAmount, advance_paid: action.payload.advancePaid, next_payment_date: action.payload.nextPaymentDate, notes: action.payload.notes, status: action.payload.status }).eq('id', action.payload.id);
+          break;
+        case 'DELETE_VENDOR':
+          if(String(action.payload).includes('-')) await supabase.from('vendors').delete().eq('id', action.payload);
+          break;
+
+        // Timeline Events
+        case 'ADD_EVENT':
+          await supabase.from('timeline_events').insert({ wedding_id: wId, time: action.payload.time, end_time: action.payload.endTime, title: action.payload.title, description: action.payload.description, location: action.payload.location });
+          break;
+        case 'UPDATE_EVENT':
+          if(String(action.payload.id).includes('-')) await supabase.from('timeline_events').update({ time: action.payload.time, end_time: action.payload.endTime, title: action.payload.title, description: action.payload.description, location: action.payload.location }).eq('id', action.payload.id);
+          break;
+        case 'DELETE_EVENT':
+          if(String(action.payload).includes('-')) await supabase.from('timeline_events').delete().eq('id', action.payload);
+          break;
+
+        // Expenses
+        case 'ADD_EXPENSE':
+          await supabase.from('expenses').insert({ wedding_id: wId, category_id: action.payload.categoryId, title: action.payload.title, amount: action.payload.amount, date: action.payload.date });
+          break;
+        case 'DELETE_EXPENSE':
+          if(String(action.payload).includes('-')) await supabase.from('expenses').delete().eq('id', action.payload);
+          break;
+
+        // Categories
+        case 'ADD_CATEGORY':
+          await supabase.from('budget_categories').insert({ wedding_id: wId, name: action.payload.name, icon: action.payload.icon, color: action.payload.color, allocated: action.payload.allocated });
+          break;
+        case 'UPDATE_CATEGORY':
+          if(String(action.payload.id).includes('-')) await supabase.from('budget_categories').update({ name: action.payload.name, icon: action.payload.icon, color: action.payload.color, allocated: action.payload.allocated }).eq('id', action.payload.id);
+          break;
+        case 'DELETE_CATEGORY':
+          if(String(action.payload).includes('-')) await supabase.from('budget_categories').delete().eq('id', action.payload);
+          break;
+          
+        // Inspirations
+        case 'ADD_INSPIRATION':
+          await supabase.from('inspirations').insert({ wedding_id: wId, title: action.payload.title, image_url: action.payload.imageUrl, category: action.payload.category, notes: action.payload.notes });
+          break;
+        case 'UPDATE_INSPIRATION':
+          if(String(action.payload.id).includes('-')) await supabase.from('inspirations').update({ title: action.payload.title, image_url: action.payload.imageUrl, category: action.payload.category, notes: action.payload.notes }).eq('id', action.payload.id);
+          break;
+        case 'DELETE_INSPIRATION':
+          if(String(action.payload).includes('-')) await supabase.from('inspirations').delete().eq('id', action.payload);
+          break;
       }
     } catch (err) {
        console.error("DB Sync Error:", err);
