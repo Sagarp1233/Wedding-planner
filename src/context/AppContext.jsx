@@ -215,8 +215,18 @@ export function AppProvider({ children, userId }) {
           guests: guests || [],
           budgetCategories: finalCats,
           expenses: (expenses || []).map(e => ({...e, categoryId: e.category_id})),
-          tasks: finalTasks,
-          events: finalEvents.map(e => ({...e, startTime: e.time || e.start_time, endTime: e.end_time || ''})),
+          tasks: finalTasks.map(t => ({
+            ...t,
+            description: t.notes || '',
+            deadline: t.due_date || '',
+            priority: 'medium' // DB has no priority column, fallback to medium
+          })),
+          events: finalEvents.map(e => ({
+            ...e, 
+            time: e.start_time || '',
+            location: e.venue || '',
+            description: e.notes || ''
+          })),
           vendors: (vendors || []).map(v => ({...v, contactPerson: v.contact_person || '', quotedAmount: Number(v.quoted_amount)||0, advancePaid: Number(v.advance_paid)||0, nextPaymentDate: v.next_payment_date||''})),
           inspirations: (inspirations || []).map(i => ({...i, imageUrl: i.image_url}))
         };
@@ -316,10 +326,10 @@ export function AppProvider({ children, userId }) {
 
         // Tasks
         case 'ADD_TASK':
-          await supabase.from('tasks').insert({ wedding_id: wId, title: action.payload.title, description: action.payload.description, deadline: action.payload.deadline, priority: action.payload.priority, status: action.payload.status });
+          await supabase.from('tasks').insert({ wedding_id: wId, title: action.payload.title, notes: action.payload.description, due_date: action.payload.deadline, status: action.payload.status });
           break;
         case 'UPDATE_TASK':
-          if(String(action.payload.id).includes('-')) await supabase.from('tasks').update({ title: action.payload.title, description: action.payload.description, deadline: action.payload.deadline, priority: action.payload.priority, status: action.payload.status }).eq('id', action.payload.id);
+          if(String(action.payload.id).includes('-')) await supabase.from('tasks').update({ title: action.payload.title, notes: action.payload.description, due_date: action.payload.deadline, status: action.payload.status }).eq('id', action.payload.id);
           break;
         case 'DELETE_TASK':
           if(String(action.payload).includes('-')) await supabase.from('tasks').delete().eq('id', action.payload);
@@ -338,10 +348,10 @@ export function AppProvider({ children, userId }) {
 
         // Timeline Events
         case 'ADD_EVENT':
-          await supabase.from('timeline_events').insert({ wedding_id: wId, time: action.payload.time, end_time: action.payload.endTime, title: action.payload.title, description: action.payload.description, location: action.payload.location });
+          await supabase.from('timeline_events').insert({ wedding_id: wId, start_time: action.payload.time, name: action.payload.name, notes: action.payload.description, venue: action.payload.location, date: action.payload.date });
           break;
         case 'UPDATE_EVENT':
-          if(String(action.payload.id).includes('-')) await supabase.from('timeline_events').update({ time: action.payload.time, end_time: action.payload.endTime, title: action.payload.title, description: action.payload.description, location: action.payload.location }).eq('id', action.payload.id);
+          if(String(action.payload.id).includes('-')) await supabase.from('timeline_events').update({ start_time: action.payload.time, name: action.payload.name, notes: action.payload.description, venue: action.payload.location, date: action.payload.date }).eq('id', action.payload.id);
           break;
         case 'DELETE_EVENT':
           if(String(action.payload).includes('-')) await supabase.from('timeline_events').delete().eq('id', action.payload);
@@ -349,7 +359,7 @@ export function AppProvider({ children, userId }) {
 
         // Expenses
         case 'ADD_EXPENSE':
-          await supabase.from('expenses').insert({ wedding_id: wId, category_id: action.payload.categoryId, title: action.payload.title, amount: action.payload.amount, date: action.payload.date });
+          await supabase.from('expenses').insert({ wedding_id: wId, category_id: action.payload.categoryId, name: action.payload.title, amount: action.payload.amount, date: action.payload.date });
           break;
         case 'DELETE_EXPENSE':
           if(String(action.payload).includes('-')) await supabase.from('expenses').delete().eq('id', action.payload);
