@@ -1,0 +1,237 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
+
+  --color-rose-gold: #b76e79;
+  --color-rose-gold-light: #d4a0a7;
+  --color-plum: #4a2040;
+  --color-plum-light: #6b3a5c;
+  --color-gold: #c9a84c;
+  --color-gold-light: #e8d48b;
+  --color-blush: #fdf2f0;
+  --color-ivory: #faf8f5;
+  --color-sage: #87a878;
+  --color-dusty-blue: #7b9eb8;
+}
+
+/* Base styles */
+body {
+  @apply bg-white text-gray-900 font-sans antialiased;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(183, 110, 121, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(74, 32, 64, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.02) 0%, transparent 70%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', ui-serif, Georgia, serif;
+}
+
+/* Premium glass card utilities */
+@utility glass-card {
+  @apply bg-white/80 backdrop-blur-xl border border-white/40 rounded-2xl;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+@utility glass-card-hover {
+  @apply bg-white/80 backdrop-blur-xl border border-white/40 rounded-2xl transition-all duration-300;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 40px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+}
+
+@utility glass-sidebar {
+  @apply bg-white/90 backdrop-blur-2xl border-r border-gray-100;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03);
+}
+
+@utility gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-gold to-plum;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Fade-in and slide-up for page content */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes countPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Utility classes for animations */
+@utility animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+@utility animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out both;
+}
+
+@utility animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+@utility animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@utility animate-pulse-soft {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+@utility animate-count-pulse {
+  animation: countPulse 3s ease-in-out infinite;
+}
+
+/* Staggered children animation helper */
+@utility stagger-children {
+  & > * {
+    animation: fadeInUp 0.4s ease-out both;
+  }
+  & > *:nth-child(1) { animation-delay: 0ms; }
+  & > *:nth-child(2) { animation-delay: 60ms; }
+  & > *:nth-child(3) { animation-delay: 120ms; }
+  & > *:nth-child(4) { animation-delay: 180ms; }
+  & > *:nth-child(5) { animation-delay: 240ms; }
+  & > *:nth-child(6) { animation-delay: 300ms; }
+  & > *:nth-child(7) { animation-delay: 360ms; }
+  & > *:nth-child(8) { animation-delay: 420ms; }
+}
+
+/* Success/delete flash */
+@keyframes flashGreen {
+  0% { background-color: rgba(16, 185, 129, 0.15); }
+  100% { background-color: transparent; }
+}
+
+@utility flash-success {
+  animation: flashGreen 0.6s ease-out;
+}
+
+/* Focus ring */
+input:focus, select:focus, textarea:focus {
+  --tw-ring-color: rgba(183, 110, 121, 0.2);
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  accent-color: #b76e79;
+}
+
+/* Tooltip base */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #1f2937;
+  color: white;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* Print styles */
+@media print {
+  .glass-sidebar, .glass-card-hover:hover {
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}
