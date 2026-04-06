@@ -189,7 +189,7 @@ export default function SettingsPage() {
 
         {/* App Info */}
         <div className="mt-6 text-center text-xs text-gray-400">
-          <p>WedPlanner v2.0 — Built with React, TailwindCSS & Recharts</p>
+          <p>Wedora v2.0 — Built with React, TailwindCSS & Recharts</p>
           <p className="mt-1">Logged in as: {currentUser?.email || 'Unknown'}</p>
         </div>
       </div>

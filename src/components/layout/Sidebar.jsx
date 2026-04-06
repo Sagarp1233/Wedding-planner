@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <Heart className="w-5 h-5 text-white" fill="white" />
             </div>
             <div>
-              <h1 className="text-lg font-serif font-bold text-gray-900">WedPlanner</h1>
+              <h1 className="text-lg font-serif font-bold text-gray-900">Wedora</h1>
               <p className="text-xs text-gray-500 font-medium">
                 {state.wedding.partner1 && state.wedding.partner2
                   ? `${state.wedding.partner1} & ${state.wedding.partner2}`
@@ -132,7 +132,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
           )}
 
-          <p className="text-[10px] text-gray-300 text-center mt-1 mb-1">WedPlanner v2.0</p>
+          <p className="text-[10px] text-gray-300 text-center mt-1 mb-1">Wedora v2.0</p>
         </div>
       </aside>
     </>

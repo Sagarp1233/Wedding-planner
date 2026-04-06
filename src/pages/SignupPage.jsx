@@ -52,7 +52,7 @@ export default function SignupPage() {
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-lg shadow-rose-gold/20">
               <Heart className="w-5.5 h-5.5 text-white" fill="white" />
             </div>
-            <span className="text-2xl font-serif font-bold text-gray-900">WedPlanner</span>
+            <span className="text-2xl font-serif font-bold text-gray-900">Wedora</span>
           </Link>
         </div>
 
