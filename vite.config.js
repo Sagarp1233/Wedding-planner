@@ -7,4 +7,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  define: {
+    // Inject build timestamp as the app version — unique per deployment
+    '__BUILD_TIMESTAMP__': JSON.stringify(new Date().toISOString()),
+  },
 })

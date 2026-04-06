@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import AppLayout from './components/layout/AppLayout';
+import LoadingWatchdog from './components/LoadingWatchdog';
 
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -55,38 +56,40 @@ function LoadingScreen() {
   );
 }
 
-// Wrapper that provides AppContext with userId
+// Wrapper that provides AppContext with userId + Loading Watchdog
 function AppWithContext() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   return (
-    <AppProvider userId={currentUser?.id}>
-      <Routes>
-        {/* Public */}
-        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-        <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-        <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+    <LoadingWatchdog isLoading={loading}>
+      <AppProvider userId={currentUser?.id}>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
-        {/* Onboarding — uses the SAME AppProvider */}
-        <Route path="/onboarding" element={
-          <ProtectedRoute><OnboardingPage /></ProtectedRoute>
-        } />
+          {/* Onboarding — uses the SAME AppProvider */}
+          <Route path="/onboarding" element={
+            <ProtectedRoute><OnboardingPage /></ProtectedRoute>
+          } />
 
-        {/* Protected App */}
-        <Route element={<OnboardedRoute><AppLayout /></OnboardedRoute>}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/budget" element={<BudgetPage />} />
-          <Route path="/guests" element={<GuestsPage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/timeline" element={<TimelinePage />} />
-          <Route path="/vendors" element={<VendorsPage />} />
-          <Route path="/inspiration" element={<InspirationPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
+          {/* Protected App */}
+          <Route element={<OnboardedRoute><AppLayout /></OnboardedRoute>}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/budget" element={<BudgetPage />} />
+            <Route path="/guests" element={<GuestsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/timeline" element={<TimelinePage />} />
+            <Route path="/vendors" element={<VendorsPage />} />
+            <Route path="/inspiration" element={<InspirationPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppProvider>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppProvider>
+    </LoadingWatchdog>
   );
 }
 
