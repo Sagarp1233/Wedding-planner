@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const { state } = useApp();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const daysLeft = getDaysUntil(state.wedding.weddingDate);
 
@@ -99,6 +99,40 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="p-3 border-t border-gray-100 space-y-1">
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              onClick={onClose}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-gradient-to-r from-blue-600/15 to-blue-500/5 text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                }
+              `}
+            >
+              <Shield className="w-[18px] h-[18px]" />
+              Admin Dashboard
+            </NavLink>
+          )}
+
+          {isAdmin && (
+            <NavLink
+              to="/admin/blog"
+              onClick={onClose}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-gradient-to-r from-blue-600/15 to-blue-500/5 text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                }
+              `}
+            >
+              <PenTool className="w-[18px] h-[18px]" />
+              Admin Blog
+            </NavLink>
+          )}
+
           <NavLink
             to="/settings"
             onClick={onClose}

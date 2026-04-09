@@ -1,0 +1,191 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Clock, Copy } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { clearArticleJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
+
+export default function BlogPostPage() {
+  const { slug } = useParams();
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetchPost();
+  }, [slug]);
+
+  async function fetchPost() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (error) throw error;
+      setPost(data);
+
+      // Handle SEO updates
+      if (data) {
+        const canonicalUrl = `${window.location.origin}/blog/${data.slug}`;
+        setSEO({
+          title: data.meta_title || `${data.title} | Wedora Blog`,
+          description: data.meta_description || data.excerpt || 'Read this insightful article on Wedora.',
+          keywords: data.keywords || data.tags || '',
+          canonicalUrl,
+          ogType: 'article',
+          ogImage: data.featured_image
+        });
+        setArticleJsonLd({
+          title: data.title,
+          description: data.meta_description || data.excerpt || '',
+          image: data.featured_image,
+          datePublished: data.published_at || data.created_at,
+          dateModified: data.updated_at || data.created_at,
+          author: data.author || 'Wedora Team',
+          url: canonicalUrl
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching blog post:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      clearArticleJsonLd();
+    };
+  }, []);
+
+  function handleShareURL() {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-rose-gold/30 border-t-rose-gold rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+        <h1 className="text-3xl font-serif font-bold text-gray-900 mb-4">Post Not Found</h1>
+        <p className="text-gray-500 mb-8">The article you're looking for doesn't exist or has been removed.</p>
+        <Link to="/blog" className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors">
+          Back to Blog
+        </Link>
+      </div>
+    );
+  }
+
+  // Calculate read time based on word count
+  const wordCount = post.content.split(/\s+/).length;
+  const readTime = Math.ceil(wordCount / 200) || 1;
+
+  // Custom components for ReactMarkdown to add Tailwind styling
+  const MarkdownComponents = {
+    h1: ({node, ...props}) => <h1 className="text-3xl lg:text-4xl font-serif font-bold text-gray-900 mt-12 mb-6" {...props} />,
+    h2: ({node, ...props}) => <h2 className="text-2xl lg:text-3xl font-serif font-bold text-gray-900 mt-10 mb-5" {...props} />,
+    h3: ({node, ...props}) => <h3 className="text-xl font-serif font-bold text-gray-900 mt-8 mb-4" {...props} />,
+    p: ({node, ...props}) => <p className="text-lg text-gray-700 leading-relaxed mb-6" {...props} />,
+    a: ({node, ...props}) => <a className="text-rose-gold hover:underline font-medium" {...props} />,
+    ul: ({node, ...props}) => <ul className="list-disc pl-6 text-lg text-gray-700 mb-6 space-y-2" {...props} />,
+    ol: ({node, ...props}) => <ol className="list-decimal pl-6 text-lg text-gray-700 mb-6 space-y-2" {...props} />,
+    li: ({node, ...props}) => <li className="pl-2" {...props} />,
+    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-rose-gold pl-4 italic text-gray-600 my-8 bg-rose-gold/5 py-4 pr-4 rounded-r-lg" {...props} />,
+    code: ({node, inline, ...props}) => 
+      inline 
+      ? <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+      : <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-6"><code {...props} /></pre>,
+    img: ({node, ...props}) => <img className="w-full h-auto rounded-2xl mb-8 mt-4 shadow-sm" {...props} alt={props.alt || "Blog image"} loading="lazy" />,
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navbar Minimal */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/blog" className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Blog
+          </Link>
+          <Link to="/" className="text-xl font-serif font-bold text-gray-900 tracking-tight">Wedora</Link>
+        </div>
+      </nav>
+
+      <main className="pt-24 pb-32 max-w-3xl mx-auto px-4 lg:px-8">
+        
+        {/* Header */}
+        <header className="mb-12 text-center animate-fade-in">
+          {post.tags && (
+            <div className="flex justify-center flex-wrap gap-2 mb-6">
+              {post.tags.split(',').map(tag => (
+                <span key={tag} className="px-3 py-1 bg-rose-gold/10 text-rose-gold text-xs font-semibold rounded-full uppercase tracking-wider">
+                  {tag.trim()}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6 leading-tight">
+            {post.title}
+          </h1>
+
+          <div className="flex items-center justify-center gap-4 text-sm font-medium text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4" />
+              {new Date(post.published_at || post.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+            <span>•</span>
+            <span>{readTime} min read</span>
+          </div>
+          <p className="text-xs uppercase tracking-wider text-gray-400 mt-4">
+            By {(post.author || 'Wedora Team')}
+          </p>
+        </header>
+
+        {/* Featured Image */}
+        {post.featured_image && (
+          <div className="mb-12 rounded-3xl overflow-hidden shadow-lg animate-slide-up">
+            <img src={post.featured_image} alt={post.title} className="w-full object-cover aspect-video" loading="lazy" />
+          </div>
+        )}
+
+        {/* Article Body */}
+        <article className="prose prose-lg max-w-none text-gray-800 animate-slide-up animation-delay-100">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
+            {post.content}
+          </ReactMarkdown>
+        </article>
+
+        {/* Footer actions */}
+        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+          
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+            <span className="mr-2">Share this article:</span>
+            <button onClick={handleShareURL} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors relative" title="Copy Link">
+              <Copy className="w-4 h-4" />
+              {copied && <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded">Copied!</span>}
+            </button>
+          </div>
+
+          <Link to="/" className="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-rose-gold/20 transition-all">
+            Plan Your Wedding For Free
+          </Link>
+        </div>
+
+      </main>
+    </div>
+  );
+}

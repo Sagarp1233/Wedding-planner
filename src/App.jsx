@@ -17,6 +17,14 @@ import VendorsPage from './pages/VendorsPage';
 import InspirationPage from './pages/InspirationPage';
 import SettingsPage from './pages/SettingsPage';
 
+// Blog Pages
+import BlogListingPage from './pages/BlogListingPage';
+import BlogPostPage from './pages/BlogPostPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminBlogPage from './pages/admin/AdminBlogPage';
+import AdminBlogEditorPage from './pages/admin/AdminBlogEditorPage';
+
 // Route guard: redirect to login if not authenticated
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -43,6 +51,23 @@ function PublicRoute({ children }) {
   return children;
 }
 
+// Admin Route: restricts access to users with isAdmin
+function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+function AdminPublicRoute({ children }) {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (isAuthenticated && isAdmin) return <Navigate to="/admin" replace />;
+  if (isAuthenticated && !isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
 function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-blush to-ivory">
@@ -63,10 +88,15 @@ function AppWithContext() {
     <LoadingWatchdog isLoading={loading}>
       <AppProvider userId={currentUser?.id}>
         <Routes>
-          {/* Public */}
+          {/* Public Auth/Landing */}
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+
+          {/* Truly Public Pages (accessible whether logged in or not) */}
+          <Route path="/blog" element={<BlogListingPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
 
           {/* Onboarding — uses the SAME AppProvider */}
           <Route path="/onboarding" element={
@@ -83,6 +113,14 @@ function AppWithContext() {
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/inspiration" element={<InspirationPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+
+          {/* Admin Routes inside AppLayout so they get the sidebar */}
+          <Route element={<AdminRoute><AppLayout /></AdminRoute>}>
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/blog" element={<AdminBlogPage />} />
+            <Route path="/admin/blog/new" element={<AdminBlogEditorPage />} />
+            <Route path="/admin/blog/:id/edit" element={<AdminBlogEditorPage />} />
           </Route>
 
           {/* Fallback */}
