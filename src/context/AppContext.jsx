@@ -214,7 +214,12 @@ export function AppProvider({ children, userId }) {
           wedding: mappedWedding,
           guests: guests || [],
           budgetCategories: finalCats,
-          expenses: (expenses || []).map(e => ({...e, categoryId: e.category_id})),
+          expenses: (expenses || []).map(e => ({
+            ...e,
+            // Keep backward compatibility if older rows used a different key.
+            name: e.name || e.title || '',
+            categoryId: e.category_id
+          })),
           tasks: finalTasks.map(t => ({
             ...t,
             description: t.notes || '',
@@ -359,7 +364,13 @@ export function AppProvider({ children, userId }) {
 
         // Expenses
         case 'ADD_EXPENSE':
-          await supabase.from('expenses').insert({ wedding_id: wId, category_id: action.payload.categoryId, name: action.payload.title, amount: action.payload.amount, date: action.payload.date });
+          await supabase.from('expenses').insert({
+            wedding_id: wId,
+            category_id: action.payload.categoryId,
+            name: action.payload.name,
+            amount: action.payload.amount,
+            date: action.payload.date || new Date().toISOString().split('T')[0]
+          });
           break;
         case 'DELETE_EXPENSE':
           if(String(action.payload).includes('-')) await supabase.from('expenses').delete().eq('id', action.payload);
