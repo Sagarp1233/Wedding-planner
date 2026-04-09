@@ -97,6 +97,7 @@ export function AuthProvider({ children }) {
       markOnboarded,
       isAuthenticated: !!currentUser,
       isOnboarded,
+      isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin'
     }}>
       {children}
     </AuthContext.Provider>
