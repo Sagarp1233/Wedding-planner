@@ -50,6 +50,8 @@ function reducer(state, action) {
     // Expenses
     case 'ADD_EXPENSE':
       return { ...state, expenses: [...state.expenses, { id: generateId(), ...action.payload }] };
+    case 'UPDATE_EXPENSE':
+      return { ...state, expenses: state.expenses.map(e => e.id === action.payload.id ? { ...e, ...action.payload } : e) };
     case 'DELETE_EXPENSE':
       return { ...state, expenses: state.expenses.filter(e => e.id !== action.payload) };
 
@@ -287,14 +289,23 @@ export function AppProvider({ children, userId }) {
            
            if (action.payload.tasks?.length > 0) {
               const mappedTasks = action.payload.tasks.map(t => ({
-                 wedding_id: newWeddingId, title: t.title, description: t.description || '', deadline: t.deadline || '', priority: t.priority, status: t.status
+                 wedding_id: newWeddingId,
+                 title: t.title,
+                 notes: t.description || '',
+                 due_date: t.deadline || '',
+                 status: t.status
               }));
               await supabase.from('tasks').insert(mappedTasks);
            }
 
            if (action.payload.events?.length > 0) {
               const mappedEvents = action.payload.events.map(e => ({
-                 wedding_id: newWeddingId, time: e.time, end_time: e.endTime || '', title: e.title, description: e.description || '', location: e.location || ''
+                 wedding_id: newWeddingId,
+                 start_time: e.time || '',
+                 name: e.name || 'Event',
+                 notes: e.description || '',
+                 venue: e.location || '',
+                 date: e.date || new Date().toISOString().split('T')[0]
               }));
               await supabase.from('timeline_events').insert(mappedEvents);
            }
@@ -372,6 +383,20 @@ export function AppProvider({ children, userId }) {
             date: action.payload.date || new Date().toISOString().split('T')[0]
           });
           break;
+        case 'UPDATE_EXPENSE': {
+          if (String(action.payload.id).includes('-')) {
+            const updates = {};
+            if (action.payload.categoryId !== undefined) updates.category_id = action.payload.categoryId;
+            if (action.payload.name !== undefined) updates.name = action.payload.name;
+            if (action.payload.amount !== undefined) updates.amount = action.payload.amount;
+            if (action.payload.vendor !== undefined) updates.vendor = action.payload.vendor;
+            if (action.payload.notes !== undefined) updates.notes = action.payload.notes;
+            if (action.payload.paid !== undefined) updates.paid = action.payload.paid;
+            if (action.payload.date !== undefined) updates.date = action.payload.date;
+            await supabase.from('expenses').update(updates).eq('id', action.payload.id);
+          }
+          break;
+        }
         case 'DELETE_EXPENSE':
           if(String(action.payload).includes('-')) await supabase.from('expenses').delete().eq('id', action.payload);
           break;

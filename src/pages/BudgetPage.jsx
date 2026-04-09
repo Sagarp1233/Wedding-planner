@@ -4,7 +4,7 @@ import TopBar from '../components/layout/TopBar';
 import Modal from '../components/ui/Modal';
 import { useApp } from '../context/AppContext';
 import { formatINR } from '../utils/helpers';
-import { Plus, Trash2, Edit3, ChevronDown, ChevronUp, AlertTriangle, Download, RefreshCcw } from 'lucide-react';
+import { Plus, Trash2, Edit3, ChevronDown, ChevronUp, AlertTriangle, Download, RefreshCcw, Wallet } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 export default function BudgetPage() {
@@ -16,6 +16,7 @@ export default function BudgetPage() {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAutoAllocate, setShowAutoAllocate] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
+  const [editExpense, setEditExpense] = useState(null);
   const [expandedCat, setExpandedCat] = useState(null);
   const [selectedCatId, setSelectedCatId] = useState(null);
 
@@ -53,8 +54,24 @@ export default function BudgetPage() {
   function handleAddExpense(e) {
     e.preventDefault();
     const amt = Number(expForm.amount) || 0;
-    dispatch({ type: 'ADD_EXPENSE', payload: { categoryId: selectedCatId, name: expForm.name, amount: amt, vendor: expForm.vendor, notes: expForm.notes, paid: expForm.paid } });
+    const payload = {
+      categoryId: selectedCatId,
+      name: expForm.name,
+      amount: amt,
+      vendor: expForm.vendor,
+      notes: expForm.notes,
+      paid: expForm.paid
+    };
+
+    if (editExpense) {
+      dispatch({ type: 'UPDATE_EXPENSE', payload: { id: editExpense.id, ...payload } });
+    } else {
+      dispatch({ type: 'ADD_EXPENSE', payload });
+    }
+
     setExpForm({ name: '', amount: '', vendor: '', notes: '', paid: false });
+    setEditExpense(null);
+    setSelectedCatId(null);
     setShowAddExpense(false);
   }
 
@@ -66,13 +83,27 @@ export default function BudgetPage() {
 
   function openAddExpense(catId) {
     setSelectedCatId(catId);
+    setEditExpense(null);
     setExpForm({ name: '', amount: '', vendor: '', notes: '', paid: false });
+    setShowAddExpense(true);
+  }
+
+  function openEditExpense(expense, catId) {
+    setSelectedCatId(catId);
+    setEditExpense(expense);
+    setExpForm({
+      name: expense.name || '',
+      amount: expense.amount ?? '',
+      vendor: expense.vendor || '',
+      notes: expense.notes || '',
+      paid: !!expense.paid
+    });
     setShowAddExpense(true);
   }
 
   function exportBudgetCSV() {
     let csv = 'Category,Allocated,Spent,Remaining,Items\n';
-    budgetCategories.forEach(cat => {
+    enrichedCategories.forEach(cat => {
       const catExp = expenses.filter(e => e.categoryId === cat.id);
       const items = catExp.map(e => e.name).join('; ');
       csv += `"${cat.name}",${cat.allocated},${cat.spent},${cat.allocated - cat.spent},"${items}"\n`;
@@ -258,6 +289,13 @@ export default function BudgetPage() {
                               {exp.paid ? '✓ Paid' : 'Unpaid'}
                             </button>
                             <p className="text-sm font-bold text-gray-900">{formatINR(exp.amount)}</p>
+                            <button
+                              onClick={() => openEditExpense(exp, cat.id)}
+                              className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                              title="Edit expense"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
                             <button onClick={() => dispatch({ type: 'DELETE_EXPENSE', payload: exp.id })}
                               className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500">
                               <Trash2 className="w-3.5 h-3.5" />
@@ -329,7 +367,15 @@ export default function BudgetPage() {
       </Modal>
 
       {/* Add Expense Modal */}
-      <Modal isOpen={showAddExpense} onClose={() => setShowAddExpense(false)} title="Add Expense">
+      <Modal
+        isOpen={showAddExpense}
+        onClose={() => {
+          setShowAddExpense(false);
+          setEditExpense(null);
+          setSelectedCatId(null);
+        }}
+        title={editExpense ? 'Edit Expense' : 'Add Expense'}
+      >
         <form onSubmit={handleAddExpense} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -348,13 +394,34 @@ export default function BudgetPage() {
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm" />
             </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              value={expForm.notes}
+              onChange={e => setExpForm({ ...expForm, notes: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm resize-none h-20"
+              placeholder="Optional notes"
+            />
+          </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="expPaid" checked={expForm.paid} onChange={e => setExpForm({ ...expForm, paid: e.target.checked })} className="rounded" />
             <label htmlFor="expPaid" className="text-sm text-gray-700">Already paid</label>
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setShowAddExpense(false)} className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-            <button type="submit" className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all">Add Expense</button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddExpense(false);
+                setEditExpense(null);
+                setSelectedCatId(null);
+              }}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all">
+              {editExpense ? 'Save Changes' : 'Add Expense'}
+            </button>
           </div>
         </form>
       </Modal>
