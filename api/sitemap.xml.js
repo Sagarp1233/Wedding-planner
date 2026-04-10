@@ -20,8 +20,8 @@ function getBaseUrl(req) {
 }
 
 async function fetchPublishedPosts() {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnon = process.env.SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnon) return [];
 
   const url = `${supabaseUrl}/rest/v1/blogs?select=slug,updated_at,created_at,published_at,status&status=eq.published&order=updated_at.desc.nullslast`;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Image as ImageIcon, Upload } from 'lucide-react';
+import { useNavigate, useParams, Link, useOutletContext } from 'react-router-dom';
+import { ArrowLeft, Save, Image as ImageIcon, Upload, Loader2, Menu } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // Helper to create slug from title
@@ -14,12 +14,14 @@ const generateSlug = (title) => {
 export default function AdminBlogEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { onMenuClick } = useOutletContext();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -128,6 +130,21 @@ export default function AdminBlogEditorPage() {
     return [...new Set(merged)].join(', ');
   }
 
+  async function withTimeout(promise, timeoutMs = 15000) {
+    let timerId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timerId = window.setTimeout(() => {
+        reject(new Error('Request timed out. Please try again.'));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      window.clearTimeout(timerId);
+    }
+  }
+
   async function saveWithFallback(postData, postStatus) {
     const withOptional = {
       ...postData,
@@ -155,14 +172,18 @@ export default function AdminBlogEditorPage() {
   }
 
   async function handleSave(statusOverride = null) {
+    if (saving) return;
+
     if (!formData.title || !formData.slug || !formData.content) {
-      alert('Title, Slug, and Content are required.');
+      setError('Title, Slug, and Content are required.');
+      setNotice(null);
       return;
     }
 
     try {
       setSaving(true);
       setError(null);
+      setNotice(null);
       const postStatus = statusOverride || formData.status;
 
       const postData = {
@@ -178,7 +199,7 @@ export default function AdminBlogEditorPage() {
         updated_at: new Date().toISOString()
       };
 
-      const result = await saveWithFallback(postData, postStatus);
+      const result = await withTimeout(saveWithFallback(postData, postStatus));
       if (isEditing) {
         if (result) throw result;
       } else {
@@ -189,11 +210,14 @@ export default function AdminBlogEditorPage() {
       }
       
       setFormData(prev => ({ ...prev, status: postStatus }));
-      alert('Post saved successfully!');
+      setNotice({
+        type: 'success',
+        message: postStatus === 'published' ? 'Post published successfully.' : 'Draft saved successfully.'
+      });
 
     } catch (err) {
-      console.error(err);
-      setError(err.message);
+      setError(err?.message || 'Failed to save post.');
+      setNotice(null);
     } finally {
       setSaving(false);
     }
@@ -205,8 +229,16 @@ export default function AdminBlogEditorPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5 text-gray-700" />
+          </button>
           <Link to="/admin/blog" className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -221,20 +253,27 @@ export default function AdminBlogEditorPage() {
           <button
             onClick={() => handleSave('draft')}
             disabled={saving}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Draft
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {saving ? 'Saving...' : 'Save Draft'}
           </button>
           <button
             onClick={() => handleSave('published')}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-gold to-plum rounded-xl hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-200 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-gold to-plum rounded-xl hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Save className="w-4 h-4" />
-            Publish
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saving ? 'Saving...' : 'Publish'}
           </button>
         </div>
       </div>
+
+      {notice?.type === 'success' && (
+        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-sm">
+          {notice.message}
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm">

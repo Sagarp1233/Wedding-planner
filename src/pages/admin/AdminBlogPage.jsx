@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Globe, FileText, AlertCircle, LayoutDashboard } from 'lucide-react';
+import { Link, useOutletContext } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Globe, FileText, AlertCircle, LayoutDashboard, Menu } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export default function AdminBlogPage() {
+  const { onMenuClick } = useOutletContext();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -80,12 +81,22 @@ export default function AdminBlogPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-gray-900">Blog Management</h1>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onMenuClick}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5 text-gray-700" />
+            </button>
+            <h1 className="text-2xl font-serif font-bold text-gray-900">Blog Management</h1>
+          </div>
           <p className="text-sm text-gray-500 mt-1">Create, edit, and organize your SEO articles</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/admin"
             className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
