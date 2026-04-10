@@ -16,7 +16,7 @@ const STORAGE_KEY_RELOAD_GUARD = 'wedora_reload_guard';
 // App-specific localStorage key prefixes to clear on version mismatch
 const APP_KEY_PREFIXES = [
   'wedora_',
-  'sb-',           // Supabase auth tokens — forces re-auth with fresh session
+  // Keep Supabase auth keys to avoid logging users out on refresh/deploy.
 ];
 
 // Keys that should NEVER be cleared (user preferences etc.)

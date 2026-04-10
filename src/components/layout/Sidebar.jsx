@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
   { to: '/vendors', label: 'Vendors', icon: Store },
   { to: '/inspiration', label: 'Inspiration', icon: Camera },
+  { to: '/blog', label: 'Blog', icon: Newspaper },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {

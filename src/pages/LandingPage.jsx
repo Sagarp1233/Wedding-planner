@@ -47,6 +47,9 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <div className="hidden sm:flex items-center gap-2">
+            <Link to="/blog" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
+              Blog
+            </Link>
             <Link to="/login" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
               Log In
             </Link>
@@ -68,6 +71,9 @@ export default function LandingPage() {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl px-4 py-4 space-y-2 animate-fade-in">
+            <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+              Blog
+            </Link>
             <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
               Log In
             </Link>
@@ -257,6 +263,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <a href="#features" className="hover:text-gray-700 transition-colors">Features</a>
+            <Link to="/blog" className="hover:text-gray-700 transition-colors">Blog</Link>
             <Link to="/login" className="hover:text-gray-700 transition-colors">Login</Link>
             <Link to="/signup" className="hover:text-gray-700 transition-colors">Sign Up</Link>
           </div>
