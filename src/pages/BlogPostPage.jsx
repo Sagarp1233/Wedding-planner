@@ -112,10 +112,10 @@ export default function BlogPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
       {/* Navbar Minimal */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/blog" className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to Blog
@@ -124,10 +124,10 @@ export default function BlogPostPage() {
         </div>
       </nav>
 
-      <main className="pt-24 pb-32 max-w-3xl mx-auto px-4 lg:px-8">
+      <main className="pt-24 pb-32 max-w-6xl mx-auto px-4 lg:px-8">
         
         {/* Header */}
-        <header className="mb-12 text-center animate-fade-in">
+        <header className="mb-12 text-center animate-fade-in max-w-4xl mx-auto">
           {post.tags && (
             <div className="flex justify-center flex-wrap gap-2 mb-6">
               {post.tags.split(',').map(tag => (
@@ -138,7 +138,7 @@ export default function BlogPostPage() {
             </div>
           )}
           
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6 leading-tight">
             {post.title}
           </h1>
 
@@ -155,22 +155,24 @@ export default function BlogPostPage() {
           </p>
         </header>
 
-        {/* Featured Image */}
-        {post.featured_image && (
-          <div className="mb-12 rounded-3xl overflow-hidden shadow-lg animate-slide-up">
-            <img src={post.featured_image} alt={post.title} className="w-full object-cover aspect-video" loading="lazy" />
-          </div>
-        )}
+        <div className="max-w-5xl mx-auto">
+          {/* Featured Image */}
+          {post.featured_image && (
+            <div className="mb-10 rounded-3xl overflow-hidden shadow-xl shadow-rose-gold/10 border border-white/70 animate-slide-up">
+              <img src={post.featured_image} alt={post.title} className="w-full object-cover aspect-[16/7]" loading="lazy" />
+            </div>
+          )}
 
-        {/* Article Body */}
-        <article className="prose prose-lg max-w-none text-gray-800 animate-slide-up animation-delay-100">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-            {post.content}
-          </ReactMarkdown>
-        </article>
+          {/* Article Body */}
+          <article className="prose prose-lg max-w-none text-gray-800 animate-slide-up animation-delay-100 bg-white/95 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-lg p-6 md:p-10 lg:p-12">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
+              {post.content}
+            </ReactMarkdown>
+          </article>
+        </div>
 
         {/* Footer actions */}
-        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6 max-w-5xl mx-auto">
           
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
             <span className="mr-2">Share this article:</span>

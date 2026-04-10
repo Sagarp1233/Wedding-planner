@@ -44,10 +44,10 @@ export default function BlogListingPage() {
   const getReadTime = () => "3 min read";
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
       {/* Navbar Minimal */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-xl font-serif font-bold text-gray-900 tracking-tight">Wedora</Link>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Log in</Link>
@@ -59,17 +59,20 @@ export default function BlogListingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="pt-32 pb-16 px-4 text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4 animate-fade-in">
+      <div className="pt-32 pb-14 px-4 text-center max-w-4xl mx-auto">
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-rose-gold/10 text-rose-gold text-xs font-semibold tracking-wider uppercase mb-4">
+          Wedora Journal
+        </span>
+        <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-4 animate-fade-in leading-tight">
           Wedding Planning <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-gold to-plum">Insights</span>
         </h1>
-        <p className="text-lg text-gray-600 animate-slide-up animation-delay-100">
+        <p className="text-lg text-gray-600 animate-slide-up animation-delay-100 max-w-2xl mx-auto">
           Expert tips, checklists, and guides to help you plan your dream Indian wedding without the stress.
         </p>
       </div>
 
       {/* Blog Grid */}
-      <main className="max-w-6xl mx-auto px-4 lg:px-8 pb-32">
+      <main className="max-w-7xl mx-auto px-4 lg:px-8 pb-32">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(n => (
@@ -97,7 +100,7 @@ export default function BlogListingPage() {
               <Link 
                 to={`/blog/${post.slug}`} 
                 key={post.slug}
-                className={`group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-rose-gold/5 transition-all duration-300 animate-slide-up`}
+                className={`group bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-2xl hover:shadow-rose-gold/10 transition-all duration-300 animate-slide-up`}
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
@@ -122,14 +125,14 @@ export default function BlogListingPage() {
                   )}
                 </div>
                 
-                <div className="p-6">
+                <div className="p-6 md:p-7">
                   <div className="flex items-center gap-3 text-xs text-gray-400 font-medium mb-3">
                     <span>{new Date(post.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     <span>•</span>
                     <span>{getReadTime()}</span>
                   </div>
                   
-                  <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-rose-gold transition-colors">
+                  <h2 className="text-2xl font-serif font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-rose-gold transition-colors">
                     {post.title}
                   </h2>
                   
