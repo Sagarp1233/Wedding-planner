@@ -83,9 +83,9 @@ function LoadingScreen() {
 
 // Wrapper that provides AppContext with userId + Loading Watchdog
 function AppWithContext() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, authReady } = useAuth();
   return (
-    <LoadingWatchdog isLoading={loading}>
+    <LoadingWatchdog isLoading={!authReady}>
       <AppProvider userId={currentUser?.id}>
         <Routes>
           {/* Public Auth/Landing */}

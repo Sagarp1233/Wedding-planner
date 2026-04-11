@@ -1,89 +1,143 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
+const ONBOARDING_FETCH_MS = 8000;
+
+async function fetchIsOnboarded(userId) {
+  try {
+    const query = supabase
+      .from('weddings')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const { data, error } = await Promise.race([
+      query,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('onboarding-fetch-timeout')), ONBOARDING_FETCH_MS)
+      ),
+    ]);
+
+    if (error) return false;
+    return !!data;
+  } catch (e) {
+    if (e?.message === 'onboarding-fetch-timeout') {
+      console.warn('[Wedora] Onboarding check timed out; treating as not onboarded for this request.');
+    }
+    return false;
+  }
+}
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  /** Session is known from Supabase (getSession / auth listener). Watchdog should use this, not full bootstrap. */
+  const [authReady, setAuthReady] = useState(false);
+  const [onboardingResolved, setOnboardingResolved] = useState(false);
   const [isOnboarded, setIsOnboarded] = useState(false);
-  const onboardCheckSeq = useRef(0);
+
+  const loading = !authReady || (!!currentUser && !onboardingResolved);
 
   useEffect(() => {
-    // Check active session on load
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Auth Session Error:", error);
-        setLoading(false);
-        return;
-      }
-      setCurrentUser(session?.user || null);
-      if (session?.user) {
-        checkOnboardedStatus(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    }).catch(err => {
-      console.error("Critical Auth Crash:", err);
-      // Failsafe so the app doesn't spin forever
-      setLoading(false);
-    });
+    let alive = true;
+    let subscription = null;
 
-    // Listen for auth changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setCurrentUser(session?.user || null);
-      if (session?.user) {
-        // Token refresh keeps the same onboarding; only (re)verify on sign-in / initial session
-        if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+    const finishNoUser = () => {
+      if (!alive) return;
+      setIsOnboarded(false);
+      setOnboardingResolved(true);
+    };
+
+    const applyOnboardingForUser = async (userId) => {
+      if (!alive) return;
+      setOnboardingResolved(false);
+      const ok = await fetchIsOnboarded(userId);
+      if (!alive) return;
+      setIsOnboarded(ok);
+      setOnboardingResolved(true);
+    };
+
+    (async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!alive) return;
+        if (error) {
+          console.error('Auth Session Error:', error);
+          setCurrentUser(null);
+          setAuthReady(true);
+          finishNoUser();
           return;
         }
-        setLoading(true);
-        await checkOnboardedStatus(session.user.id);
-      } else {
-        setIsOnboarded(false);
-        setLoading(false);
+        setCurrentUser(session?.user ?? null);
+        // End "stuck app" watchdog ASAP — do not wait for Postgres
+        setAuthReady(true);
+        if (session?.user) {
+          await applyOnboardingForUser(session.user.id);
+        } else {
+          finishNoUser();
+        }
+      } catch (err) {
+        console.error('Critical Auth Crash:', err);
+        if (!alive) return;
+        setCurrentUser(null);
+        setAuthReady(true);
+        finishNoUser();
       }
-    });
 
-    return () => subscription.unsubscribe();
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'INITIAL_SESSION') return;
+
+        if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          setCurrentUser(session?.user ?? null);
+          return;
+        }
+
+        setCurrentUser(session?.user ?? null);
+        if (!session?.user) {
+          finishNoUser();
+          return;
+        }
+        await applyOnboardingForUser(session.user.id);
+      });
+      subscription = sub;
+    })();
+
+    const failsafe = window.setTimeout(() => {
+      if (!alive) return;
+      setAuthReady((ready) => {
+        if (ready) return ready;
+        console.warn('[Wedora] Auth bootstrap timed out; continuing without session.');
+        return true;
+      });
+    }, 12000);
+
+    return () => {
+      alive = false;
+      window.clearTimeout(failsafe);
+      subscription?.unsubscribe();
+    };
   }, []);
 
-  async function checkOnboardedStatus(userId) {
-    const seq = ++onboardCheckSeq.current;
-    try {
-      const { data } = await supabase
-        .from('weddings')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (seq !== onboardCheckSeq.current) return;
-      setIsOnboarded(!!data);
-    } catch (e) {
-      if (seq !== onboardCheckSeq.current) return;
-      setIsOnboarded(false);
-    } finally {
-      if (seq === onboardCheckSeq.current) {
-        setLoading(false);
-      }
-    }
-  }
-
-  /** Call after sign-in/sign-up so route guards see session + onboarding before navigate() */
   async function refreshSessionAndOnboarding() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
       console.error('Session refresh error:', error);
-      setLoading(false);
+      setCurrentUser(null);
+      setIsOnboarded(false);
+      setOnboardingResolved(true);
+      setAuthReady(true);
       return;
     }
-    setCurrentUser(session?.user || null);
+    setCurrentUser(session?.user ?? null);
+    setAuthReady(true);
     if (session?.user) {
-      setLoading(true);
-      await checkOnboardedStatus(session.user.id);
+      setOnboardingResolved(false);
+      setIsOnboarded(await fetchIsOnboarded(session.user.id));
+      setOnboardingResolved(true);
     } else {
       setIsOnboarded(false);
-      setLoading(false);
+      setOnboardingResolved(true);
     }
   }
 
@@ -120,6 +174,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       currentUser,
       loading,
+      authReady,
       signup,
       login,
       logout,
