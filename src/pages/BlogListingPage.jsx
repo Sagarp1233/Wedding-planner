@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, ArrowRight } from 'lucide-react';
-import { WedoraTextMark } from '../components/branding/WedoraLogo';
 import { supabase } from '../lib/supabase';
 import { clearArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
@@ -50,7 +49,7 @@ export default function BlogListingPage() {
       {/* Navbar Minimal */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
-          <WedoraTextMark to="/" />
+          <Link to="/" className="text-xl font-serif font-bold text-gray-900 tracking-tight">Wedora</Link>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Log in</Link>
             <Link to="/signup" className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-rose-gold to-plum text-white rounded-lg hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-300">

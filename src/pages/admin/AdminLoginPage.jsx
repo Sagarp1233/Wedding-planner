@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, ArrowRight } from 'lucide-react';
-import { WedoraLogoCentered } from '../../components/branding/WedoraLogo';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLoginPage() {
@@ -39,9 +38,6 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-white via-blush to-ivory">
       <div className="w-full max-w-md bg-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm p-8">
         <div className="text-center mb-6">
-          <div className="mb-4 flex justify-center">
-            <WedoraLogoCentered to="/" className="scale-90" />
-          </div>
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center mx-auto mb-3">
             <Shield className="w-5 h-5 text-white" />
           </div>

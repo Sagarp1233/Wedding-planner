@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { WEDDING_TYPES, generateBudgetCategories, generateTasks, generateEvents } from '../data/templates';
-import { ArrowRight, ArrowLeft, MapPin, Calendar, Wallet, Users, Sparkles, Check } from 'lucide-react';
-import { WedoraLogoCentered } from '../components/branding/WedoraLogo';
+import { Heart, ArrowRight, ArrowLeft, MapPin, Calendar, Wallet, Users, Sparkles, Check } from 'lucide-react';
 
 const TOTAL_STEPS = 4;
 
@@ -84,9 +83,14 @@ export default function OnboardingPage() {
 
       <div className="relative w-full max-w-lg animate-fade-in-up">
         {/* Logo */}
-        <div className="mb-6">
-          <WedoraLogoCentered to="/" />
-          <p className="text-sm text-gray-500 mt-4 text-center">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-lg shadow-rose-gold/20">
+              <Heart className="w-5 h-5 text-white" fill="white" />
+            </div>
+            <span className="text-xl font-serif font-bold text-gray-900">Wedora</span>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
             Welcome, <span className="font-semibold text-gray-700">{currentUser?.name}</span>! Let's set up your wedding.
           </p>
         </div>

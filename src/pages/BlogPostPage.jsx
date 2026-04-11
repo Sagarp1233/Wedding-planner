@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Copy } from 'lucide-react';
-import { WedoraTextMark } from '../components/branding/WedoraLogo';
 import { supabase } from '../lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -190,7 +189,7 @@ export default function BlogPostPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Blog
           </Link>
-          <WedoraTextMark to="/" />
+          <Link to="/" className="text-xl font-serif font-bold text-gray-900 tracking-tight">Wedora</Link>
         </div>
       </nav>
 

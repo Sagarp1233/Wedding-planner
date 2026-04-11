@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, Wallet, Users, CheckSquare, CalendarHeart, Camera, Star, ArrowRight, Sparkles, ShieldCheck, Store, Menu, X } from 'lucide-react';
-import { WedoraNavMark, WedoraMarkOnDark, WedoraTextMark } from '../components/branding/WedoraLogo';
+import { Heart, Wallet, Users, CheckSquare, CalendarHeart, Camera, Star, ArrowRight, Sparkles, ShieldCheck, Store, ChevronRight, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clearArticleJsonLd, clearHomepageJsonLd, setHomepageJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
@@ -63,7 +62,13 @@ export default function LandingPage() {
       {/* ─── Navbar ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <WedoraNavMark to="/" surface="adaptive" />
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-md">
+              <Heart className="w-4.5 h-4.5 text-white" fill="white" />
+            </div>
+            <span className="text-xl font-serif font-bold text-gray-900">Wedora</span>
+          </Link>
 
           {/* Desktop nav */}
           <div className="hidden sm:flex items-center gap-2">
@@ -275,26 +280,21 @@ export default function LandingPage() {
       </main>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t border-gray-100">
-        <div className="py-8 sm:py-10 px-4 sm:px-6">
-          <div className="max-w-6xl mx-auto flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <WedoraTextMark to="/" className="opacity-90 hover:opacity-100 transition-opacity" />
-            <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-gray-500">
-              <a href="#features" className="hover:text-gray-700 transition-colors">Features</a>
-              <Link to="/blog" className="hover:text-gray-700 transition-colors">Blog</Link>
-              <Link to="/login" className="hover:text-gray-700 transition-colors">Login</Link>
-              <Link to="/signup" className="hover:text-gray-700 transition-colors">Sign Up</Link>
+      <footer className="py-8 sm:py-10 px-4 sm:px-6 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center">
+              <Heart className="w-3.5 h-3.5 text-white" fill="white" />
             </div>
-            <p className="text-xs text-gray-400 text-center sm:text-right">© 2026 Wedora. Made with ❤️ in India.</p>
+            <span className="font-serif font-bold text-gray-900">Wedora</span>
           </div>
-        </div>
-        <div className="bg-charcoal text-white/90 py-5 px-4 sm:px-6">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
-            <WedoraMarkOnDark to="/" className="justify-center" />
-            <p className="text-xs text-white/55 text-center sm:text-right font-medium">
-              Premium wedding planning — budget, guests & timeline in one place.
-            </p>
+          <div className="flex items-center gap-6 text-sm text-gray-500">
+            <a href="#features" className="hover:text-gray-700 transition-colors">Features</a>
+            <Link to="/blog" className="hover:text-gray-700 transition-colors">Blog</Link>
+            <Link to="/login" className="hover:text-gray-700 transition-colors">Login</Link>
+            <Link to="/signup" className="hover:text-gray-700 transition-colors">Sign Up</Link>
           </div>
+          <p className="text-xs text-gray-400">© 2026 Wedora. Made with ❤️ in India.</p>
         </div>
       </footer>
     </div>

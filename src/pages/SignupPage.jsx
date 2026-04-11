@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { WedoraLogoCentered } from '../components/branding/WedoraLogo';
+import { Heart, User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -47,8 +46,13 @@ export default function SignupPage() {
 
       <div className="relative w-full max-w-md animate-fade-in-up">
         {/* Logo */}
-        <div className="mb-8">
-          <WedoraLogoCentered to="/" />
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-2.5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-lg shadow-rose-gold/20">
+              <Heart className="w-5.5 h-5.5 text-white" fill="white" />
+            </div>
+            <span className="text-2xl font-serif font-bold text-gray-900">Wedora</span>
+          </Link>
         </div>
 
         {/* Card */}

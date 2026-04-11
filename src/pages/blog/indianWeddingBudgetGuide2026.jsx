@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { WedoraNavMark } from '../../components/branding/WedoraLogo';
 import {
   ArrowLeft,
   Clock,
@@ -235,7 +234,9 @@ export function IndianWeddingBudgetGuide2026Article({ post, readTime, copied, on
             <ArrowLeft className="w-4 h-4" />
             Back to Blog
           </Link>
-          <WedoraNavMark to="/" surface="adaptive" />
+          <Link to="/" className="text-xl font-serif font-bold bg-gradient-to-r from-rose-gold to-plum bg-clip-text text-transparent">
+            Wedora
+          </Link>
         </div>
       </nav>
 
