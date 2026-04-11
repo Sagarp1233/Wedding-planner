@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper } from 'lucide-react';
+import { WedoraSidebarBrand } from '../branding/WedoraLogo';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
@@ -41,19 +42,13 @@ export default function Sidebar({ isOpen, onClose }) {
       `}>
         {/* Brand */}
         <div className="p-6 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-lg shadow-rose-gold/20">
-              <Heart className="w-5 h-5 text-white" fill="white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-serif font-bold text-gray-900">Wedora</h1>
-              <p className="text-xs text-gray-500 font-medium">
-                {state.wedding.partner1 && state.wedding.partner2
-                  ? `${state.wedding.partner1} & ${state.wedding.partner2}`
-                  : 'Your Wedding'}
-              </p>
-            </div>
-          </div>
+          <WedoraSidebarBrand
+            subtitle={
+              state.wedding.partner1 && state.wedding.partner2
+                ? `${state.wedding.partner1} & ${state.wedding.partner2}`
+                : 'Your Wedding'
+            }
+          />
         </div>
 
         {/* Countdown */}

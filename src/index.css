@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
+/* Wedora brand tokens (also exposed for plain CSS / .btn-primary) */
+:root {
+  --color-blush: #fee7e7;
+  --color-rose-gold: #dca09e;
+  --color-champagne: #cbb694;
+  --color-ivory: #f5f5f3;
+  --color-charcoal: #2e2e33;
+  --color-rose-gold-hover: #c98c8a;
+}
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
+  --font-serif: 'Gilda Display', 'Playfair Display', ui-serif, Georgia, serif;
 
-  --color-rose-gold: #b76e79;
-  --color-rose-gold-light: #d4a0a7;
+  --color-rose-gold: #dca09e;
+  --color-rose-gold-light: #e8bdbb;
   --color-plum: #4a2040;
   --color-plum-light: #6b3a5c;
-  --color-gold: #c9a84c;
+  --color-gold: #cbb694;
   --color-gold-light: #e8d48b;
-  --color-blush: #fdf2f0;
-  --color-ivory: #faf8f5;
+  --color-blush: #fee7e7;
+  --color-ivory: #f5f5f3;
+  --color-charcoal: #2e2e33;
+  --color-champagne: #cbb694;
   --color-sage: #87a878;
   --color-dusty-blue: #7b9eb8;
 }
@@ -27,7 +39,23 @@ body {
 }
 
 h1, h2, h3, h4 {
-  font-family: 'Playfair Display', ui-serif, Georgia, serif;
+  font-family: 'Gilda Display', 'Playfair Display', ui-serif, Georgia, serif;
+}
+
+.brand {
+  font-family: 'Gilda Display', 'Playfair Display', ui-serif, Georgia, serif;
+}
+
+@utility btn-primary {
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+  color: white;
+  background-color: var(--color-rose-gold);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    background-color: var(--color-rose-gold-hover);
+  }
 }
 
 /* Premium glass card utilities */
@@ -196,12 +224,12 @@ h1, h2, h3, h4 {
 
 /* Focus ring */
 input:focus, select:focus, textarea:focus {
-  --tw-ring-color: rgba(183, 110, 121, 0.2);
+  --tw-ring-color: rgba(220, 160, 158, 0.35);
 }
 
 /* Checkbox styling */
 input[type="checkbox"] {
-  accent-color: #b76e79;
+  accent-color: var(--color-rose-gold);
 }
 
 /* Tooltip base */
