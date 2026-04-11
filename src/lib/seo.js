@@ -90,6 +90,28 @@ export function clearArticleJsonLd() {
   if (existing) existing.remove();
 }
 
+export function setFaqPageJsonLd(items) {
+  const existing = document.getElementById('faq-jsonld');
+  if (existing) existing.remove();
+  const script = document.createElement('script');
+  script.id = 'faq-jsonld';
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  });
+  document.head.appendChild(script);
+}
+
+export function clearFaqPageJsonLd() {
+  document.getElementById('faq-jsonld')?.remove();
+}
+
 const HOMEPAGE_JSONLD_ID = 'homepage-jsonld';
 
 export function setHomepageJsonLd({ siteUrl, siteName = DEFAULT_SITE_NAME, description }) {

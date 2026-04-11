@@ -4,7 +4,12 @@ import { ArrowLeft, Clock, Copy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { clearArticleJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
+import { clearArticleJsonLd, clearFaqPageJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
+import {
+  BUDGET_GUIDE_SLUG,
+  getStaticBudgetGuidePost,
+  IndianWeddingBudgetGuide2026Article,
+} from './blog/indianWeddingBudgetGuide2026';
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -16,9 +21,45 @@ export default function BlogPostPage() {
     fetchPost();
   }, [slug]);
 
+  function applyPostSEO(data) {
+    const canonicalUrl = `${(import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '')}/blog/${data.slug}`;
+    setSEO({
+      title: data.meta_title || `${data.title} | Wedora Blog`,
+      description: data.meta_description || data.excerpt || 'Read this insightful article on Wedora.',
+      keywords: data.keywords || data.tags || '',
+      canonicalUrl,
+      ogType: 'article',
+      ogImage: data.featured_image,
+    });
+    setArticleJsonLd({
+      title: data.title,
+      description: data.meta_description || data.excerpt || '',
+      image: data.featured_image,
+      datePublished: data.published_at || data.created_at,
+      dateModified: data.updated_at || data.created_at,
+      author: data.author || 'Wedora Team',
+      url: canonicalUrl,
+    });
+  }
+
   async function fetchPost() {
     try {
       setLoading(true);
+
+      if (slug === BUDGET_GUIDE_SLUG) {
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('slug', slug)
+          .eq('status', 'published')
+          .maybeSingle();
+
+        const resolved = !error && data ? data : getStaticBudgetGuidePost();
+        setPost(resolved);
+        applyPostSEO(resolved);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('blogs')
         .select('*')
@@ -28,27 +69,7 @@ export default function BlogPostPage() {
 
       if (error) throw error;
       setPost(data);
-
-      if (data) {
-        const canonicalUrl = `${window.location.origin}/blog/${data.slug}`;
-        setSEO({
-          title: data.meta_title || `${data.title} | Wedora Blog`,
-          description: data.meta_description || data.excerpt || 'Read this insightful article on Wedora.',
-          keywords: data.keywords || data.tags || '',
-          canonicalUrl,
-          ogType: 'article',
-          ogImage: data.featured_image
-        });
-        setArticleJsonLd({
-          title: data.title,
-          description: data.meta_description || data.excerpt || '',
-          image: data.featured_image,
-          datePublished: data.published_at || data.created_at,
-          dateModified: data.updated_at || data.created_at,
-          author: data.author || 'Wedora Team',
-          url: canonicalUrl
-        });
-      }
+      if (data) applyPostSEO(data);
     } catch (err) {
       console.error('Error fetching blog post:', err);
       setPost(null);
@@ -68,6 +89,7 @@ export default function BlogPostPage() {
   useEffect(() => {
     return () => {
       clearArticleJsonLd();
+      clearFaqPageJsonLd();
     };
   }, []);
 
@@ -97,10 +119,6 @@ export default function BlogPostPage() {
     );
   }
 
-  // Calculate read time based on word count
-  const wordCount = post.content.split(/\s+/).length;
-  const readTime = Math.ceil(wordCount / 200) || 1;
-
   let affiliateHref = null;
   if (post.affiliate_link && typeof post.affiliate_link === 'string') {
     try {
@@ -111,6 +129,24 @@ export default function BlogPostPage() {
     }
   }
   const affiliateCtaLabel = (post.affiliate_label && String(post.affiliate_label).trim()) || 'Learn more';
+
+  if (post.slug === BUDGET_GUIDE_SLUG) {
+    const readTime = 14;
+    return (
+      <IndianWeddingBudgetGuide2026Article
+        post={post}
+        readTime={readTime}
+        copied={copied}
+        onShare={handleShareURL}
+        affiliateHref={affiliateHref}
+        affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
+  }
+
+  // Calculate read time based on word count
+  const wordCount = (post.content || '').split(/\s+/).filter(Boolean).length;
+  const readTime = Math.ceil(wordCount / 200) || 1;
 
   // Custom components for ReactMarkdown to add Tailwind styling
   const MarkdownComponents = {
