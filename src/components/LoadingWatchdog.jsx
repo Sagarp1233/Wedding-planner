@@ -8,7 +8,8 @@ import { clearAllCaches } from '../utils/versionCheck';
  * it shows a recovery UI and auto-reloads (with loop protection).
  */
 
-const TIMEOUT_MS = 6000; // 6 seconds
+// Auth + onboarding fetch can exceed a few seconds on slow networks; avoid reload that disrupts session restore
+const TIMEOUT_MS = 20000; // 20 seconds
 const RELOAD_KEY = 'wedora_watchdog_reload';
 const RELOAD_COOLDOWN_MS = 30000; // Don't auto-reload more than once per 30s
 

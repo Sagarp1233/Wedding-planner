@@ -89,3 +89,40 @@ export function clearArticleJsonLd() {
   const existing = document.getElementById('article-jsonld');
   if (existing) existing.remove();
 }
+
+const HOMEPAGE_JSONLD_ID = 'homepage-jsonld';
+
+export function setHomepageJsonLd({ siteUrl, siteName = DEFAULT_SITE_NAME, description }) {
+  const existing = document.getElementById(HOMEPAGE_JSONLD_ID);
+  if (existing) existing.remove();
+
+  const base = siteUrl.replace(/\/$/, '');
+  const script = document.createElement('script');
+  script.id = HOMEPAGE_JSONLD_ID;
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${base}/#website`,
+        url: base,
+        name: siteName,
+        description: description || undefined,
+        publisher: { '@id': `${base}/#organization` },
+        inLanguage: 'en-IN',
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${base}/#organization`,
+        name: siteName,
+        url: base,
+      },
+    ],
+  });
+  document.head.appendChild(script);
+}
+
+export function clearHomepageJsonLd() {
+  document.getElementById(HOMEPAGE_JSONLD_ID)?.remove();
+}

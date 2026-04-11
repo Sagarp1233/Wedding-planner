@@ -36,6 +36,8 @@ export default function AdminBlogEditorPage() {
     tags: '',
     meta_title: '',
     meta_description: '',
+    affiliate_link: '',
+    affiliate_label: '',
     status: 'draft'
   });
 
@@ -72,6 +74,8 @@ export default function AdminBlogEditorPage() {
           tags: data.category ? tags.filter((tag) => tag !== data.category).join(', ') : tags.slice(1).join(', '),
           meta_title: data.meta_title || '',
           meta_description: data.meta_description || '',
+          affiliate_link: data.affiliate_link || '',
+          affiliate_label: data.affiliate_label || '',
           status: data.status || 'draft'
         });
       }
@@ -151,6 +155,8 @@ export default function AdminBlogEditorPage() {
       category: formData.category || null,
       keywords: formData.keywords || null,
       author: formData.author || 'Wedora Team',
+      affiliate_link: formData.affiliate_link?.trim() || null,
+      affiliate_label: formData.affiliate_label?.trim() || null,
       published_at: postStatus === 'published'
         ? (formData.publish_date ? new Date(formData.publish_date).toISOString() : new Date().toISOString())
         : null
@@ -195,6 +201,8 @@ export default function AdminBlogEditorPage() {
         featured_image: formData.featured_image,
         meta_title: formData.meta_title,
         meta_description: formData.meta_description,
+        affiliate_link: formData.affiliate_link?.trim() || null,
+        affiliate_label: formData.affiliate_label?.trim() || null,
         status: postStatus,
         updated_at: new Date().toISOString()
       };
@@ -462,6 +470,35 @@ export default function AdminBlogEditorPage() {
                 <span className={`text-xs ${formData.meta_description.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
                   {formData.meta_description.length} / 160
                 </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-gray-100 space-y-4">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Affiliate / partner link</h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Shown as a call-to-action on the published post. Use full URLs (https://). Disclose partnerships in your article where required.
+              </p>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Affiliate URL</label>
+                <input
+                  type="url"
+                  name="affiliate_link"
+                  value={formData.affiliate_link}
+                  onChange={handleChange}
+                  placeholder="https://example.com/affiliate-product"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/50 focus:border-rose-gold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Button label</label>
+                <input
+                  type="text"
+                  name="affiliate_label"
+                  value={formData.affiliate_label}
+                  onChange={handleChange}
+                  placeholder="e.g. Shop the look, View deals"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/50 focus:border-rose-gold"
+                />
               </div>
             </div>
 

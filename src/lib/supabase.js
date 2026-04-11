@@ -9,6 +9,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Provide a structural fallback so the app boots and allows UI debugging even without credentials
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'public-anon-key'
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'public-anon-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    },
+  }
 );

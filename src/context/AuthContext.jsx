@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isOnboarded, setIsOnboarded] = useState(false);
+  const onboardCheckSeq = useRef(0);
 
   useEffect(() => {
     // Check active session on load
@@ -32,6 +33,11 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setCurrentUser(session?.user || null);
       if (session?.user) {
+        // Token refresh keeps the same onboarding; only (re)verify on sign-in / initial session
+        if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          return;
+        }
+        setLoading(true);
         await checkOnboardedStatus(session.user.id);
       } else {
         setIsOnboarded(false);
@@ -43,17 +49,40 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function checkOnboardedStatus(userId) {
+    const seq = ++onboardCheckSeq.current;
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('weddings')
         .select('id')
         .eq('user_id', userId)
-        .single();
-      
+        .maybeSingle();
+
+      if (seq !== onboardCheckSeq.current) return;
       setIsOnboarded(!!data);
     } catch (e) {
+      if (seq !== onboardCheckSeq.current) return;
       setIsOnboarded(false);
     } finally {
+      if (seq === onboardCheckSeq.current) {
+        setLoading(false);
+      }
+    }
+  }
+
+  /** Call after sign-in/sign-up so route guards see session + onboarding before navigate() */
+  async function refreshSessionAndOnboarding() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Session refresh error:', error);
+      setLoading(false);
+      return;
+    }
+    setCurrentUser(session?.user || null);
+    if (session?.user) {
+      setLoading(true);
+      await checkOnboardedStatus(session.user.id);
+    } else {
+      setIsOnboarded(false);
       setLoading(false);
     }
   }
@@ -95,6 +124,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       markOnboarded,
+      refreshSessionAndOnboarding,
       isAuthenticated: !!currentUser,
       isOnboarded,
       isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin'

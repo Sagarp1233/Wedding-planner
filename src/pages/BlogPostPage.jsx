@@ -29,7 +29,6 @@ export default function BlogPostPage() {
       if (error) throw error;
       setPost(data);
 
-      // Handle SEO updates
       if (data) {
         const canonicalUrl = `${window.location.origin}/blog/${data.slug}`;
         setSEO({
@@ -52,6 +51,15 @@ export default function BlogPostPage() {
       }
     } catch (err) {
       console.error('Error fetching blog post:', err);
+      setPost(null);
+      const origin = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
+      setSEO({
+        title: 'Article not found | Wedora Blog',
+        description: 'This article may have been removed or the link is incorrect.',
+        canonicalUrl: `${origin}/blog`,
+        ogType: 'website',
+      });
+      clearArticleJsonLd();
     } finally {
       setLoading(false);
     }
@@ -92,6 +100,17 @@ export default function BlogPostPage() {
   // Calculate read time based on word count
   const wordCount = post.content.split(/\s+/).length;
   const readTime = Math.ceil(wordCount / 200) || 1;
+
+  let affiliateHref = null;
+  if (post.affiliate_link && typeof post.affiliate_link === 'string') {
+    try {
+      const u = new URL(post.affiliate_link.trim());
+      if (u.protocol === 'http:' || u.protocol === 'https:') affiliateHref = u.href;
+    } catch {
+      /* ignore invalid */
+    }
+  }
+  const affiliateCtaLabel = (post.affiliate_label && String(post.affiliate_label).trim()) || 'Learn more';
 
   // Custom components for ReactMarkdown to add Tailwind styling
   const MarkdownComponents = {
@@ -169,6 +188,20 @@ export default function BlogPostPage() {
               {post.content}
             </ReactMarkdown>
           </article>
+
+          {affiliateHref && (
+            <aside className="mt-10 max-w-5xl mx-auto rounded-2xl border border-rose-gold/20 bg-gradient-to-br from-rose-gold/5 to-plum/5 p-6 md:p-8 text-center shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-rose-gold/80 mb-3">Partner pick</p>
+              <a
+                href={affiliateHref}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg shadow-rose-gold/20 hover:shadow-xl transition-all hover:-translate-y-0.5"
+              >
+                {affiliateCtaLabel}
+              </a>
+            </aside>
+          )}
         </div>
 
         {/* Footer actions */}

@@ -5,7 +5,7 @@ import { Heart, User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, refreshSessionAndOnboarding } = useAuth();
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
@@ -25,9 +25,8 @@ export default function SignupPage() {
     try {
       const result = await signup(form.name.trim(), form.email.trim(), form.password);
       if (result.success) {
-        setTimeout(() => {
-          navigate('/onboarding');
-        }, 500);
+        await refreshSessionAndOnboarding();
+        navigate('/onboarding', { replace: true });
       } else {
         setError(result.error || 'Failed to sign up');
       }

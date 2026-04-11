@@ -5,7 +5,7 @@ import { Heart, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, refreshSessionAndOnboarding } = useAuth();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -23,10 +23,8 @@ export default function LoginPage() {
     try {
       const result = await login(form.email.trim(), form.password);
       if (result.success) {
-        // Wait briefly for auth state to sync the onboarded check
-        setTimeout(() => {
-          navigate('/'); // AppLayout redirects based on isOnboarded
-        }, 500);
+        await refreshSessionAndOnboarding();
+        navigate('/dashboard', { replace: true });
       } else {
         setError(result.error || 'Failed to login');
       }

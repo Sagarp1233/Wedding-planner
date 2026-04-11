@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Heart, Wallet, Users, CheckSquare, CalendarHeart, Camera, Star, ArrowRight, Sparkles, ShieldCheck, Store, ChevronRight, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { clearArticleJsonLd, clearHomepageJsonLd, setHomepageJsonLd, setSEO } from '../lib/seo';
+
+const SITE_DESCRIPTION =
+  'Free Indian wedding planner app: budget tracker, guest list & RSVPs, vendor management, checklist, and timeline. Plan your dream wedding with Wedora.';
+
+const SEO_KEYWORDS =
+  'wedding planner India, free wedding planner, Indian wedding checklist, wedding budget tracker, guest list app, wedding timeline, Wedora';
 
 const FEATURES = [
   { icon: Wallet, title: 'Smart Budget', desc: 'Track every rupee with auto-allocated categories, charts, and over-budget warnings.', color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-200/50' },
@@ -31,6 +38,23 @@ const STATS = [
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const origin = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
+    clearArticleJsonLd();
+    setSEO({
+      title: 'Wedora — Free Wedding Planner App for Indian Couples | Budget, Guests & Timeline',
+      description: SITE_DESCRIPTION,
+      keywords: SEO_KEYWORDS,
+      canonicalUrl: `${origin}/`,
+      ogType: 'website',
+    });
+    setHomepageJsonLd({
+      siteUrl: origin,
+      description: SITE_DESCRIPTION,
+    });
+    return () => clearHomepageJsonLd();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
@@ -84,8 +108,9 @@ export default function LandingPage() {
         )}
       </nav>
 
+      <main id="main-content">
       {/* ─── Hero ─── */}
-      <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 overflow-hidden" aria-label="Introduction">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-gradient-to-br from-rose-gold/10 to-plum/5 blur-3xl" />
@@ -251,6 +276,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ─── Footer ─── */}
       <footer className="py-8 sm:py-10 px-4 sm:px-6 border-t border-gray-100">
