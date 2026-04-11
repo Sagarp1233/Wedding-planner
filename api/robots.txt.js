@@ -1,11 +1,21 @@
+function forceHttps(url) {
+  if (!url || typeof url !== 'string') return url;
+  const t = url.trim();
+  if (/\blocalhost\b|127\.0\.0\.1/i.test(t)) return t;
+  if (t.startsWith('//')) return `https:${t}`;
+  return t.replace(/^http:\/\//i, 'https://');
+}
+
 function getBaseUrl(req) {
   const envUrl = process.env.SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
   if (envUrl) {
-    return envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
+    const normalized = envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
+    return forceHttps(normalized);
   }
-  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+  const safeProto = proto === 'http' ? 'https' : proto;
   const host = req.headers.host;
-  return `${proto}://${host}`;
+  return forceHttps(`${safeProto}://${host}`);
 }
 
 export default function handler(req, res) {

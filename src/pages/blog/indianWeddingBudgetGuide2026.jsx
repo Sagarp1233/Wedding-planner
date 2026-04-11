@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clearFaqPageJsonLd, setFaqPageJsonLd } from '../../lib/seo';
+import { ensureHttps } from '../../utils/ensureHttps';
 
 export const BUDGET_GUIDE_SLUG = 'indian-wedding-budget-guide-2026';
 
@@ -272,7 +273,7 @@ export function IndianWeddingBudgetGuide2026Article({ post, readTime, copied, on
         {post.featured_image && (
           <div className="max-w-5xl mx-auto mt-12 rounded-3xl overflow-hidden shadow-2xl shadow-rose-gold/15 border-4 border-white ring-1 ring-rose-100">
             <img
-              src={post.featured_image}
+              src={ensureHttps(post.featured_image)}
               alt="Indian wedding celebration — rings and festive details"
               className="w-full aspect-[21/9] object-cover"
               loading="eager"

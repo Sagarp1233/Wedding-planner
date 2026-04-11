@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link, useOutletContext } from 'react-router-dom';
 import { ArrowLeft, Save, Image as ImageIcon, Upload, Loader2, Menu } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { ensureHttps } from '../../utils/ensureHttps';
 
 // Helper to create slug from title
 const generateSlug = (title) => {
@@ -378,7 +379,7 @@ export default function AdminBlogEditorPage() {
                 </label>
                 {formData.featured_image ? (
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <img src={formData.featured_image} alt="Featured Preview" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={ensureHttps(formData.featured_image)} alt="Featured Preview" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                 ) : (
                   <div className="aspect-video rounded-lg bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">

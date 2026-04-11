@@ -1,3 +1,5 @@
+import { ensureHttps } from '../utils/ensureHttps';
+
 const DEFAULT_SITE_NAME = 'Wedora';
 
 function upsertMeta({ attr, key, value }) {
@@ -48,12 +50,14 @@ export function setSEO({
   upsertMeta({ attr: 'name', key: 'twitter:card', value: 'summary_large_image' });
 
   if (canonicalUrl) {
-    setCanonical(canonicalUrl);
-    upsertMeta({ attr: 'property', key: 'og:url', value: canonicalUrl });
+    const c = ensureHttps(canonicalUrl);
+    setCanonical(c);
+    upsertMeta({ attr: 'property', key: 'og:url', value: c });
   }
   if (ogImage) {
-    upsertMeta({ attr: 'property', key: 'og:image', value: ogImage });
-    upsertMeta({ attr: 'name', key: 'twitter:image', value: ogImage });
+    const img = ensureHttps(ogImage);
+    upsertMeta({ attr: 'property', key: 'og:image', value: img });
+    upsertMeta({ attr: 'name', key: 'twitter:image', value: img });
   }
 }
 
@@ -69,7 +73,7 @@ export function setArticleJsonLd(article) {
     '@type': 'Article',
     headline: article.title,
     description: article.description,
-    image: article.image ? [article.image] : undefined,
+    image: article.image ? [ensureHttps(article.image)] : undefined,
     datePublished: article.datePublished,
     dateModified: article.dateModified || article.datePublished,
     author: {
@@ -80,7 +84,7 @@ export function setArticleJsonLd(article) {
       '@type': 'Organization',
       name: DEFAULT_SITE_NAME
     },
-    mainEntityOfPage: article.url
+    mainEntityOfPage: article.url ? ensureHttps(article.url) : undefined
   });
   document.head.appendChild(script);
 }

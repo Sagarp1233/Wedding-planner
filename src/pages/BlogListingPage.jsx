@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { clearArticleJsonLd, setSEO } from '../lib/seo';
+import { ensureHttps } from '../utils/ensureHttps';
 
 export default function BlogListingPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const canonicalUrl = `${window.location.origin}/blog`;
+    const canonicalUrl = `${ensureHttps(window.location.origin)}/blog`;
     setSEO({
       title: 'Wedding Planning Blog | Wedora',
       description: 'Read the latest wedding planning tips, budget guides, and inspiration on the Wedora blog.',
@@ -106,7 +107,7 @@ export default function BlogListingPage() {
                 <div className="aspect-[16/10] bg-gray-100 relative overflow-hidden">
                   {post.featured_image ? (
                     <img 
-                      src={post.featured_image} 
+                      src={ensureHttps(post.featured_image)} 
                       alt={post.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"

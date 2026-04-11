@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Heart, Wallet, Users, CheckSquare, CalendarHeart, Camera, Star, ArrowRight, Sparkles, ShieldCheck, Store, ChevronRight, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clearArticleJsonLd, clearHomepageJsonLd, setHomepageJsonLd, setSEO } from '../lib/seo';
+import { ensureHttps } from '../utils/ensureHttps';
 
 const SITE_DESCRIPTION =
   'Free Indian wedding planner app: budget tracker, guest list & RSVPs, vendor management, checklist, and timeline. Plan your dream wedding with Wedora.';
@@ -40,7 +41,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const origin = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
+    const origin = ensureHttps((import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, ''));
     clearArticleJsonLd();
     setSEO({
       title: 'Wedora — Free Wedding Planner App for Indian Couples | Budget, Guests & Timeline',

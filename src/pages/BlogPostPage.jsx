@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { clearArticleJsonLd, clearFaqPageJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
+import { ensureHttps } from '../utils/ensureHttps';
 import {
   BUDGET_GUIDE_SLUG,
   getStaticBudgetGuidePost,
@@ -22,7 +23,8 @@ export default function BlogPostPage() {
   }, [slug]);
 
   function applyPostSEO(data) {
-    const canonicalUrl = `${(import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '')}/blog/${data.slug}`;
+    const base = ensureHttps((import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, ''));
+    const canonicalUrl = `${base}/blog/${data.slug}`;
     setSEO({
       title: data.meta_title || `${data.title} | Wedora Blog`,
       description: data.meta_description || data.excerpt || 'Read this insightful article on Wedora.',
@@ -73,7 +75,7 @@ export default function BlogPostPage() {
     } catch (err) {
       console.error('Error fetching blog post:', err);
       setPost(null);
-      const origin = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
+      const origin = ensureHttps((import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, ''));
       setSEO({
         title: 'Article not found | Wedora Blog',
         description: 'This article may have been removed or the link is incorrect.',
@@ -122,8 +124,8 @@ export default function BlogPostPage() {
   let affiliateHref = null;
   if (post.affiliate_link && typeof post.affiliate_link === 'string') {
     try {
-      const u = new URL(post.affiliate_link.trim());
-      if (u.protocol === 'http:' || u.protocol === 'https:') affiliateHref = u.href;
+      const u = new URL(ensureHttps(post.affiliate_link.trim()));
+      if (u.protocol === 'https:') affiliateHref = u.href;
     } catch {
       /* ignore invalid */
     }
@@ -154,7 +156,11 @@ export default function BlogPostPage() {
     h2: ({node, ...props}) => <h2 className="text-2xl lg:text-3xl font-serif font-bold text-gray-900 mt-10 mb-5" {...props} />,
     h3: ({node, ...props}) => <h3 className="text-xl font-serif font-bold text-gray-900 mt-8 mb-4" {...props} />,
     p: ({node, ...props}) => <p className="text-lg text-gray-700 leading-relaxed mb-6" {...props} />,
-    a: ({node, ...props}) => <a className="text-rose-gold hover:underline font-medium" {...props} />,
+    a: ({node, href, children, ...props}) => (
+      <a {...props} href={href ? ensureHttps(href) : undefined} className="text-rose-gold hover:underline font-medium">
+        {children}
+      </a>
+    ),
     ul: ({node, ...props}) => <ul className="list-disc pl-6 text-lg text-gray-700 mb-6 space-y-2" {...props} />,
     ol: ({node, ...props}) => <ol className="list-decimal pl-6 text-lg text-gray-700 mb-6 space-y-2" {...props} />,
     li: ({node, ...props}) => <li className="pl-2" {...props} />,
@@ -163,7 +169,15 @@ export default function BlogPostPage() {
       inline 
       ? <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
       : <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-6"><code {...props} /></pre>,
-    img: ({node, ...props}) => <img className="w-full h-auto rounded-2xl mb-8 mt-4 shadow-sm" {...props} alt={props.alt || "Blog image"} loading="lazy" />,
+    img: ({node, src, alt, ...props}) => (
+      <img
+        {...props}
+        src={src ? ensureHttps(src) : undefined}
+        className="w-full h-auto rounded-2xl mb-8 mt-4 shadow-sm"
+        alt={alt || 'Blog image'}
+        loading="lazy"
+      />
+    ),
   };
 
   return (
@@ -214,7 +228,7 @@ export default function BlogPostPage() {
           {/* Featured Image */}
           {post.featured_image && (
             <div className="mb-10 rounded-3xl overflow-hidden shadow-xl shadow-rose-gold/10 border border-white/70 animate-slide-up">
-              <img src={post.featured_image} alt={post.title} className="w-full object-cover aspect-[16/7]" loading="lazy" />
+              <img src={ensureHttps(post.featured_image)} alt={post.title} className="w-full object-cover aspect-[16/7]" loading="lazy" />
             </div>
           )}
 

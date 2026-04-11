@@ -4,6 +4,7 @@ import TopBar from '../components/layout/TopBar';
 import Modal from '../components/ui/Modal';
 import { useApp } from '../context/AppContext';
 import { INSPIRATION_CATEGORIES } from '../data/templates';
+import { ensureHttps } from '../utils/ensureHttps';
 import { Plus, Trash2, Heart, X, Link2, Tag, ImagePlus, ExternalLink } from 'lucide-react';
 
 export default function InspirationPage() {
@@ -83,7 +84,7 @@ export default function InspirationPage() {
             {/* Image */}
             <div className="relative cursor-pointer" onClick={() => setViewImg(ins)}>
               <img
-                src={ins.imageUrl}
+                src={ensureHttps(ins.imageUrl)}
                 alt={ins.title || 'Wedding inspiration'}
                 className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => { e.target.src = 'https://placehold.co/400x300/fdf2f0/b76e79?text=Image+Not+Found'; }}
@@ -140,7 +141,7 @@ export default function InspirationPage() {
 
           {form.imageUrl && (
             <div className="rounded-xl overflow-hidden border border-gray-200 max-h-48">
-              <img src={form.imageUrl} alt="Preview" className="w-full h-48 object-cover"
+              <img src={ensureHttps(form.imageUrl)} alt="Preview" className="w-full h-48 object-cover"
                 onError={(e) => { e.target.src = 'https://placehold.co/400x200/fee2e2/991b1b?text=Invalid+URL'; }} />
             </div>
           )}
@@ -181,7 +182,7 @@ export default function InspirationPage() {
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setViewImg(null)}>
           <div className="relative max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()}>
-            <img src={viewImg.imageUrl} alt={viewImg.title} className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl" />
+            <img src={ensureHttps(viewImg.imageUrl)} alt={viewImg.title} className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl" />
             <button onClick={() => setViewImg(null)}
               className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
               <X className="w-4 h-4 text-gray-600" />
