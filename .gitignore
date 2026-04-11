@@ -25,3 +25,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local brand source (not used in app build)
+/Logo.jpeg
+/Logo.jpg
+/logo.jpeg
+/wedora-brand.png
