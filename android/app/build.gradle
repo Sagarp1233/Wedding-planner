@@ -17,7 +17,12 @@ android {
         }
     }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            // Ensure this is not testOnly
+        }
         release {
+            signingConfig signingConfigs.debug // Temporary: use debug key for release if no release key provided
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
