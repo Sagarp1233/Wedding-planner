@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">WedPlanner</string>
-    <string name="title_activity_main">WedPlanner</string>
+    <string name="app_name">Wedora</string>
+    <string name="title_activity_main">Wedora</string>
     <string name="package_name">com.wedplanner.app</string>
     <string name="custom_url_scheme">com.wedplanner.app</string>
 </resources>

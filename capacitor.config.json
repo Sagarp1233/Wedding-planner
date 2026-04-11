@@ -1,5 +1,11 @@
 {
   "appId": "com.wedplanner.app",
   "appName": "WedPlanner",
-  "webDir": "dist"
+  "webDir": "dist",
+  "android": {
+    "path": "android",
+    "buildOptions": {
+      "releaseType": "AAB"
+    }
+  }
 }
