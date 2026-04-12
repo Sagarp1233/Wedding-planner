@@ -65,17 +65,17 @@ export default function DashboardPage() {
       )}
 
       {/* Wedding Countdown Hero */}
-      <div className="mb-8 max-w-2xl mx-auto relative overflow-hidden rounded-3xl animate-fade-in-up shadow-xl shadow-gray-900/10">
+      <div className="mb-8 relative overflow-hidden rounded-3xl animate-fade-in-up shadow-xl shadow-gray-900/10">
         {/* Dark elegant gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
         {/* Subtle decorative elements */}
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-amber-400/5 blur-2xl" />
         <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-amber-400/5 blur-2xl" />
 
-        <div className="relative z-10 px-5 py-7 sm:px-8 sm:py-9 text-center">
+        <div className="relative z-10 px-5 py-5 sm:px-8 sm:py-6 text-center">
           {/* Couple Names */}
-          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-amber-300/50 mb-2">The Wedding of</p>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight mb-4">
+          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-amber-300/50 mb-1.5">The Wedding of</p>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight mb-3">
             {wedding.partner1}
             <span className="inline-block mx-2 text-amber-400/60">&</span>
             {wedding.partner2}
@@ -96,7 +96,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Thin gold divider */}
-          <div className="flex items-center justify-center gap-3 my-5">
+          <div className="flex items-center justify-center gap-3 my-3">
             <div className="h-px w-10 bg-gradient-to-r from-transparent to-amber-400/30" />
             <div className="w-1.5 h-1.5 rounded-full bg-amber-400/40" />
             <div className="h-px w-10 bg-gradient-to-l from-transparent to-amber-400/30" />
@@ -106,7 +106,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-center gap-4 sm:gap-6">
             {daysLeft > 30 && (
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center">
                   <span className="text-xl sm:text-2xl font-serif font-bold text-amber-300">{months}</span>
                 </div>
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-white/35 mt-1.5">Months</span>
