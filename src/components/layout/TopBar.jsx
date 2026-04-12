@@ -36,30 +36,36 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Share / Invite Partner button */}
         <button
           onClick={() => setShowInviteModal(true)}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:text-plum hover:border-plum/30 hover:bg-plum/5 transition-all shadow-sm group"
+          className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:text-plum hover:border-plum/30 hover:bg-plum/5 transition-all shadow-sm group"
+          title="Share Invite"
         >
-          <Users className="w-3.5 h-3.5 text-gray-400 group-hover:text-plum transition-colors" /> Share Invite
+          <Users className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-gray-400 group-hover:text-plum transition-colors" />
+          <span className="hidden sm:inline">Share Invite</span>
         </button>
 
         {/* Switch Plan button */}
         <button
           onClick={() => navigate('/weddings')}
-          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-md shadow-amber-200/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+          className="inline-flex items-center gap-1.5 p-2 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-md shadow-amber-200/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+          title="Switch Wedding Plan"
         >
-          <ArrowLeftRight className="w-3.5 h-3.5" /> Switch Wedding Plan
+          <ArrowLeftRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+          <span className="hidden sm:inline">Switch Wedding Plan</span>
         </button>
 
         {/* Upgrade to Pro CTA — only shown to free users */}
         {!isPro && (
           <a
             href="mailto:support@wedora.in?subject=Upgrade%20to%20Wedora%20Pro&body=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Wedora%20account%20to%20Pro."
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-md shadow-amber-200/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center gap-1.5 p-2 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-md shadow-amber-200/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            title="Upgrade to Pro"
           >
-            <Crown className="w-3.5 h-3.5" /> Upgrade to Pro
+            <Crown className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">Upgrade to Pro</span>
           </a>
         )}
         <div className="relative" ref={dropdownRef}>
