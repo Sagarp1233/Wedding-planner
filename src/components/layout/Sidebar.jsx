@@ -58,20 +58,25 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Countdown */}
         {state.wedding.weddingDate && (
-          <div className="mx-4 mb-4 p-4 rounded-xl bg-gradient-to-br from-rose-gold/10 to-plum/5 border border-rose-gold/10">
-            <p className="text-xs font-semibold text-rose-gold uppercase tracking-wider mb-1">Wedding Day</p>
-            <div className="flex items-baseline gap-1.5">
-              <p className="text-3xl font-serif font-bold text-gray-900 animate-count-pulse">{daysLeft > 0 ? daysLeft : 0}</p>
-              <span className="text-sm font-sans font-medium text-gray-500">days to go</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {new Date(state.wedding.weddingDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
-            {state.wedding.location && (
-              <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                📍 {state.wedding.location}
+          <div className="mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-rose-gold via-[#c77d8a] to-plum relative overflow-hidden">
+            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/10" />
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-white/5" />
+            <div className="relative z-10">
+              <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mb-2">Wedding Day</p>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-3xl font-serif font-bold text-white">{daysLeft > 0 ? daysLeft : 0}</p>
+                <span className="text-sm font-medium text-white/70">days to go</span>
+              </div>
+              <div className="h-px bg-white/15 my-2.5" />
+              <p className="text-xs text-white/80 font-medium">
+                {new Date(state.wedding.weddingDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
-            )}
+              {state.wedding.location && (
+                <p className="text-xs text-white/60 mt-0.5 flex items-center gap-1">
+                  📍 {state.wedding.location}
+                </p>
+              )}
+            </div>
           </div>
         )}
 

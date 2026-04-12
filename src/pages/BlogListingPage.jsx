@@ -4,10 +4,12 @@ import { Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { clearArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
+import { useAuth } from '../context/AuthContext';
 
 export default function BlogListingPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const canonicalUrl = `${ensureHttps(window.location.origin)}/blog`;
@@ -51,10 +53,18 @@ export default function BlogListingPage() {
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-xl font-serif font-bold text-gray-900 tracking-tight">Wedora</Link>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Log in</Link>
-            <Link to="/signup" className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-rose-gold to-plum text-white rounded-lg hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-300">
-              Start Planning
-            </Link>
+            {currentUser ? (
+              <Link to="/dashboard" className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-rose-gold to-plum text-white rounded-lg hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-300">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Log in</Link>
+                <Link to="/signup" className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-rose-gold to-plum text-white rounded-lg hover:shadow-lg hover:shadow-rose-gold/20 transition-all duration-300">
+                  Start Planning
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

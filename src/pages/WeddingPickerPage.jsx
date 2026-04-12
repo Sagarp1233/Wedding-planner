@@ -186,7 +186,7 @@ export default function WeddingPickerPage() {
             </div>
             <p className="text-sm font-semibold text-gray-900 mb-1">Upgrade to Wedora Pro</p>
             <p className="text-xs text-gray-500 mb-4">
-              Free plan allows {maxWeddings} wedding plan. Upgrade to Pro for up to 5 plans, priority support, and more!
+              Free plan allows 1 wedding plan. Upgrade to Pro for up to 5 plans, priority support, and more!
             </p>
             <a
               href="mailto:support@wedora.in?subject=Upgrade%20to%20Pro&body=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Wedora%20account%20to%20Pro."
