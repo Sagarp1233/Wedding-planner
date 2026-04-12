@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import TopBar from '../components/layout/TopBar';
 import Modal from '../components/ui/Modal';
 import { useApp } from '../context/AppContext';
@@ -10,7 +10,8 @@ import { Save, RotateCcw, Heart, MapPin, Calendar, Wallet, AlertTriangle } from 
 export default function SettingsPage() {
   const { onMenuClick } = useOutletContext();
   const { state, dispatch, resetAll } = useApp();
-  const { currentUser } = useAuth();
+  const { currentUser, setActiveWeddingId, refreshWeddings } = useAuth();
+  const navigate = useNavigate();
   const { wedding } = state;
 
   const [form, setForm] = useState({
@@ -40,10 +41,12 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2500);
   }
 
-  function handleReset() {
-    resetAll();
+  async function handleReset() {
+    await resetAll();
+    setActiveWeddingId(null);
+    await refreshWeddings();
     setShowReset(false);
-    window.location.reload();
+    navigate('/weddings');
   }
 
   return (

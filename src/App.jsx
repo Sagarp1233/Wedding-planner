@@ -16,6 +16,7 @@ import TimelinePage from './pages/TimelinePage';
 import VendorsPage from './pages/VendorsPage';
 import InspirationPage from './pages/InspirationPage';
 import SettingsPage from './pages/SettingsPage';
+import WeddingPickerPage from './pages/WeddingPickerPage';
 
 // Blog Pages
 import BlogListingPage from './pages/BlogListingPage';
@@ -35,18 +36,20 @@ function ProtectedRoute({ children }) {
 
 // Route guard: redirect to onboarding if not onboarded
 function OnboardedRoute({ children }) {
-  const { isAuthenticated, isOnboarded, loading } = useAuth();
+  const { isAuthenticated, isOnboarded, activeWeddingId, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isOnboarded) return <Navigate to="/onboarding" replace />;
+  if (!activeWeddingId) return <Navigate to="/weddings" replace />;
   return children;
 }
 
 // Public route: redirect to dashboard if already logged in
 function PublicRoute({ children }) {
-  const { isAuthenticated, isOnboarded, loading } = useAuth();
+  const { isAuthenticated, isOnboarded, activeWeddingId, loading } = useAuth();
   if (loading) return <LoadingScreen />;
-  if (isAuthenticated && isOnboarded) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated && isOnboarded && activeWeddingId) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated && isOnboarded && !activeWeddingId) return <Navigate to="/weddings" replace />;
   if (isAuthenticated && !isOnboarded) return <Navigate to="/onboarding" replace />;
   return children;
 }
@@ -83,10 +86,10 @@ function LoadingScreen() {
 
 // Wrapper that provides AppContext with userId + Loading Watchdog
 function AppWithContext() {
-  const { currentUser, authReady } = useAuth();
+  const { currentUser, authReady, activeWeddingId } = useAuth();
   return (
     <LoadingWatchdog isLoading={!authReady}>
-      <AppProvider userId={currentUser?.id}>
+      <AppProvider userId={currentUser?.id} weddingId={activeWeddingId}>
         <Routes>
           {/* Public Auth/Landing */}
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
@@ -97,6 +100,11 @@ function AppWithContext() {
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
+
+          {/* Wedding Picker */}
+          <Route path="/weddings" element={
+            <ProtectedRoute><WeddingPickerPage /></ProtectedRoute>
+          } />
 
           {/* Onboarding — uses the SAME AppProvider */}
           <Route path="/onboarding" element={

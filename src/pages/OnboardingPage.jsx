@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { supabase } from '../lib/supabase';
 import { WEDDING_TYPES, generateBudgetCategories, generateTasks, generateEvents } from '../data/templates';
 import { Heart, ArrowRight, ArrowLeft, MapPin, Calendar, Wallet, Users, Sparkles, Check } from 'lucide-react';
 
@@ -9,7 +10,7 @@ const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { markOnboarded, currentUser } = useAuth();
+  const { markOnboarded, currentUser, setActiveWeddingId, refreshWeddings } = useAuth();
   const { dispatch } = useApp();
 
   const [step, setStep] = useState(1);
@@ -40,7 +41,7 @@ export default function OnboardingPage() {
     }
   }
 
-  function handleComplete() {
+  async function handleComplete() {
     const budget = Number(form.totalBudget) || 500000;
     const weddingData = {
       partner1: form.partner1.trim(),
@@ -56,20 +57,44 @@ export default function OnboardingPage() {
     const tasks = generateTasks(form.weddingDate);
     const events = generateEvents(form.weddingDate, form.weddingType);
 
-    dispatch({
-      type: 'INIT_WEDDING',
-      payload: {
-        wedding: weddingData,
-        budgetCategories,
-        expenses: [],
-        guests: [],
-        tasks,
-        events,
-        vendors: [],
-        inspirations: [],
-      },
-    });
+    // Create the wedding directly in Supabase so we can get the real ID back
+    const { data: newWedding, error } = await supabase.from('weddings').insert({
+      user_id: currentUser.id,
+      partner1: weddingData.partner1 || 'Partner 1',
+      partner2: weddingData.partner2 || 'Partner 2',
+      wedding_date: weddingData.weddingDate || '',
+      location: weddingData.location || '',
+      wedding_style: weddingData.weddingType || '',
+      total_budget: weddingData.totalBudget || 0,
+    }).select('id').single();
 
+    if (error || !newWedding) {
+      console.error('Failed to create wedding:', error);
+      return;
+    }
+
+    const newWeddingId = newWedding.id;
+
+    // Insert generated data
+    if (budgetCategories.length > 0) {
+      await supabase.from('budget_categories').insert(
+        budgetCategories.map(c => ({ wedding_id: newWeddingId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated }))
+      );
+    }
+    if (tasks.length > 0) {
+      await supabase.from('tasks').insert(
+        tasks.map(t => ({ wedding_id: newWeddingId, title: t.title, notes: t.description || '', due_date: t.deadline || '', status: t.status }))
+      );
+    }
+    if (events.length > 0) {
+      await supabase.from('timeline_events').insert(
+        events.map(e => ({ wedding_id: newWeddingId, start_time: e.time || '', name: e.name || 'Event', notes: e.description || '', venue: e.location || '', date: e.date || new Date().toISOString().split('T')[0] }))
+      );
+    }
+
+    // Set this new wedding as the active plan & refresh the wedding list
+    setActiveWeddingId(newWeddingId);
+    await refreshWeddings();
     markOnboarded();
     navigate('/dashboard');
   }

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
@@ -54,6 +54,13 @@ export default function Sidebar({ isOpen, onClose }) {
               </p>
             </div>
           </div>
+          {/* Switch Plan button */}
+          <button
+            onClick={() => navigate('/weddings')}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-rose-gold bg-gray-50 hover:bg-rose-gold/5 border border-gray-100 hover:border-rose-gold/20 transition-all"
+          >
+            <ArrowLeftRight className="w-3 h-3" /> Switch Plan
+          </button>
         </div>
 
         {/* Countdown */}

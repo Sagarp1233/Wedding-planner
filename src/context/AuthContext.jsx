@@ -1,43 +1,70 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
 const ONBOARDING_FETCH_MS = 8000;
+const ACTIVE_WEDDING_KEY = 'wedora_active_wedding';
 
-async function fetchIsOnboarded(userId) {
+// Plan limits
+const FREE_PLAN_LIMIT = 1;
+const PRO_PLAN_LIMIT = 5;
+
+async function fetchUserWeddings(userId) {
   try {
     const query = supabase
       .from('weddings')
-      .select('id')
+      .select('id, partner1, partner2, wedding_date, location, total_budget, updated_at, created_at')
       .eq('user_id', userId)
-      .maybeSingle();
+      .order('updated_at', { ascending: false, nullsFirst: false });
 
     const { data, error } = await Promise.race([
       query,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('onboarding-fetch-timeout')), ONBOARDING_FETCH_MS)
+        setTimeout(() => reject(new Error('weddings-fetch-timeout')), ONBOARDING_FETCH_MS)
       ),
     ]);
 
-    if (error) return false;
-    return !!data;
-  } catch (e) {
-    if (e?.message === 'onboarding-fetch-timeout') {
-      console.warn('[Wedora] Onboarding check timed out; treating as not onboarded for this request.');
+    if (error) {
+      console.error('[Wedora] Failed to fetch weddings:', error);
+      return [];
     }
-    return false;
+    return data || [];
+  } catch (e) {
+    if (e?.message === 'weddings-fetch-timeout') {
+      console.warn('[Wedora] Wedding list fetch timed out.');
+    }
+    return [];
   }
 }
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  /** Session is known from Supabase (getSession / auth listener). Watchdog should use this, not full bootstrap. */
   const [authReady, setAuthReady] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
-  const [isOnboarded, setIsOnboarded] = useState(false);
 
+  // Multi-plan state
+  const [weddings, setWeddings] = useState([]);
+  const [activeWeddingId, setActiveWeddingIdState] = useState(() => {
+    try { return localStorage.getItem(ACTIVE_WEDDING_KEY) || null; } catch { return null; }
+  });
+
+  const isOnboarded = weddings.length > 0;
   const loading = !authReady || (!!currentUser && !onboardingResolved);
+
+  // Persist active wedding ID to localStorage
+  const setActiveWeddingId = useCallback((id) => {
+    setActiveWeddingIdState(id);
+    try {
+      if (id) localStorage.setItem(ACTIVE_WEDDING_KEY, id);
+      else localStorage.removeItem(ACTIVE_WEDDING_KEY);
+    } catch { /* storage unavailable */ }
+  }, []);
+
+  // Check if the user can create more weddings (plan limits)
+  const isPro = currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin' || currentUser?.user_metadata?.plan === 'pro';
+  const maxWeddings = isPro ? PRO_PLAN_LIMIT : FREE_PLAN_LIMIT;
+  const canCreateWedding = weddings.length < maxWeddings;
 
   useEffect(() => {
     let alive = true;
@@ -45,16 +72,27 @@ export function AuthProvider({ children }) {
 
     const finishNoUser = () => {
       if (!alive) return;
-      setIsOnboarded(false);
+      setWeddings([]);
       setOnboardingResolved(true);
     };
 
-    const applyOnboardingForUser = async (userId) => {
+    const loadWeddingsForUser = async (userId) => {
       if (!alive) return;
       setOnboardingResolved(false);
-      const ok = await fetchIsOnboarded(userId);
+      const list = await fetchUserWeddings(userId);
       if (!alive) return;
-      setIsOnboarded(ok);
+      setWeddings(list);
+
+      // Auto-select: if stored active ID is still valid, keep it; otherwise pick first
+      const storedId = (() => { try { return localStorage.getItem(ACTIVE_WEDDING_KEY); } catch { return null; } })();
+      if (storedId && list.some(w => w.id === storedId)) {
+        setActiveWeddingIdState(storedId);
+      } else if (list.length > 0) {
+        setActiveWeddingId(list[0].id);
+      } else {
+        setActiveWeddingId(null);
+      }
+
       setOnboardingResolved(true);
     };
 
@@ -70,10 +108,9 @@ export function AuthProvider({ children }) {
           return;
         }
         setCurrentUser(session?.user ?? null);
-        // End "stuck app" watchdog ASAP — do not wait for Postgres
         setAuthReady(true);
         if (session?.user) {
-          await applyOnboardingForUser(session.user.id);
+          await loadWeddingsForUser(session.user.id);
         } else {
           finishNoUser();
         }
@@ -98,7 +135,7 @@ export function AuthProvider({ children }) {
           finishNoUser();
           return;
         }
-        await applyOnboardingForUser(session.user.id);
+        await loadWeddingsForUser(session.user.id);
       });
       subscription = sub;
     })();
@@ -117,14 +154,31 @@ export function AuthProvider({ children }) {
       window.clearTimeout(failsafe);
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [setActiveWeddingId]);
+
+  // Refresh weddings list (e.g., after creating or deleting a wedding)
+  const refreshWeddings = useCallback(async () => {
+    if (!currentUser) return;
+    const list = await fetchUserWeddings(currentUser.id);
+    setWeddings(list);
+
+    // Re-validate active wedding ID
+    if (activeWeddingId && !list.some(w => w.id === activeWeddingId)) {
+      // Active wedding was deleted — pick next one or clear
+      if (list.length > 0) {
+        setActiveWeddingId(list[0].id);
+      } else {
+        setActiveWeddingId(null);
+      }
+    }
+  }, [currentUser, activeWeddingId, setActiveWeddingId]);
 
   async function refreshSessionAndOnboarding() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
       console.error('Session refresh error:', error);
       setCurrentUser(null);
-      setIsOnboarded(false);
+      setWeddings([]);
       setOnboardingResolved(true);
       setAuthReady(true);
       return;
@@ -133,10 +187,11 @@ export function AuthProvider({ children }) {
     setAuthReady(true);
     if (session?.user) {
       setOnboardingResolved(false);
-      setIsOnboarded(await fetchIsOnboarded(session.user.id));
+      const list = await fetchUserWeddings(session.user.id);
+      setWeddings(list);
       setOnboardingResolved(true);
     } else {
-      setIsOnboarded(false);
+      setWeddings([]);
       setOnboardingResolved(true);
     }
   }
@@ -163,11 +218,13 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
+    setActiveWeddingId(null);
     await supabase.auth.signOut();
   }
 
   function markOnboarded() {
-    setIsOnboarded(true);
+    // After creating a wedding, refresh the list so isOnboarded flips to true
+    refreshWeddings();
   }
 
   return (
@@ -180,9 +237,17 @@ export function AuthProvider({ children }) {
       logout,
       markOnboarded,
       refreshSessionAndOnboarding,
+      refreshWeddings,
       isAuthenticated: !!currentUser,
       isOnboarded,
-      isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin'
+      isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin',
+      // Multi-plan
+      weddings,
+      activeWeddingId,
+      setActiveWeddingId,
+      canCreateWedding,
+      maxWeddings,
+      isPro,
     }}>
       {children}
     </AuthContext.Provider>

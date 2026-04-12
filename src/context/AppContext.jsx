@@ -121,29 +121,30 @@ function reducer(state, action) {
   }
 }
 
-export function AppProvider({ children, userId }) {
+export function AppProvider({ children, userId, weddingId }) {
   const [state, localDispatch] = useReducer(reducer, emptyState);
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Fetch initial data from Supabase
   useEffect(() => {
     async function loadSupabaseData() {
-      if (!userId) {
+      if (!userId || !weddingId) {
         localDispatch({ type: 'INIT_WEDDING', payload: emptyState });
         setIsInitializing(false);
         return;
       }
 
       try {
-        // Fetch wedding profile
+        // Fetch the specific wedding by its ID (not by user_id)
         const { data: weddingData, error: weddingError } = await supabase
           .from('weddings')
           .select('*')
+          .eq('id', weddingId)
           .eq('user_id', userId)
           .single();
 
         if (weddingError || !weddingData) {
-          // No wedding created yet for this user
+          // Wedding not found or doesn't belong to this user
           localDispatch({ type: 'INIT_WEDDING', payload: emptyState });
           setIsInitializing(false);
           return;
@@ -249,7 +250,7 @@ export function AppProvider({ children, userId }) {
     }
 
     loadSupabaseData();
-  }, [userId]);
+  }, [userId, weddingId]);
 
   // The async dispatcher handles syncing changes to the DB
   const dispatch = useCallback(async (action) => {
