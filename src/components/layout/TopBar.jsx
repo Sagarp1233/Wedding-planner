@@ -1,4 +1,4 @@
-import { Menu, Bell, AlertTriangle, AlertCircle, CalendarClock, ChevronRight, Crown } from 'lucide-react';
+import { Menu, Bell, AlertTriangle, AlertCircle, CalendarClock, ChevronRight, Crown, ArrowLeftRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -34,6 +34,14 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Switch Plan button */}
+        <button
+          onClick={() => navigate('/weddings')}
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:text-rose-gold hover:border-rose-gold/30 hover:bg-rose-gold/5 transition-all shadow-sm group"
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-rose-gold transition-colors" /> Switch Plan
+        </button>
+
         {/* Upgrade to Pro CTA — only shown to free users */}
         {!isPro && (
           <a

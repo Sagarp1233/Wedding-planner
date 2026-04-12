@@ -19,10 +19,20 @@ export default function WeddingPickerPage() {
     if (!window.confirm(`Delete "${wedding.partner1} & ${wedding.partner2}" and ALL its data? This cannot be undone.`)) return;
     setDeleting(wedding.id);
     try {
-      await supabase.from('weddings').delete().eq('id', wedding.id);
+      // Perform manual cascading delete to bypass missing ON DELETE CASCADE constraints
+      await Promise.all([
+        supabase.from('budget_categories').delete().eq('wedding_id', wedding.id),
+        supabase.from('tasks').delete().eq('wedding_id', wedding.id),
+        supabase.from('guests').delete().eq('wedding_id', wedding.id),
+        supabase.from('timeline_events').delete().eq('wedding_id', wedding.id),
+        supabase.from('vendors').delete().eq('wedding_id', wedding.id)
+      ]);
+      const { error } = await supabase.from('weddings').delete().eq('id', wedding.id);
+      if (error) throw error;
       await refreshSessionAndOnboarding();
     } catch (e) {
       console.error('Failed to delete wedding:', e);
+      alert('Unable to delete this plan: ' + e.message);
     } finally {
       setDeleting(null);
     }
