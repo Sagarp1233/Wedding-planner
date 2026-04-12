@@ -9,6 +9,7 @@ export default function WeddingPickerPage() {
   const navigate = useNavigate();
   const { weddings, activeWeddingId, setActiveWeddingId, refreshSessionAndOnboarding, canCreateWedding, maxWeddings, isPro, currentUser } = useAuth();
   const [deleting, setDeleting] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   function handleSelect(weddingId) {
     setActiveWeddingId(weddingId);
@@ -18,6 +19,7 @@ export default function WeddingPickerPage() {
   async function handleDelete(wedding) {
     if (!window.confirm(`Delete "${wedding.partner1} & ${wedding.partner2}" and ALL its data? This cannot be undone.`)) return;
     setDeleting(wedding.id);
+    setDeleteError(null);
     try {
       // 1. Delete deeply nested tables first (expenses depend on budget_categories)
       const { error: expErr } = await supabase.from('expenses').delete().eq('wedding_id', wedding.id);
@@ -37,7 +39,7 @@ export default function WeddingPickerPage() {
       await refreshSessionAndOnboarding();
     } catch (e) {
       console.error('Failed to delete wedding:', e);
-      alert('Unable to delete this plan: ' + e.message);
+      setDeleteError('Unable to delete this plan: ' + e.message);
     } finally {
       setDeleting(null);
     }
@@ -80,6 +82,12 @@ export default function WeddingPickerPage() {
               ? 'Create your first wedding plan to get started!'
               : `Select a plan to continue, or create a new one.`}
           </p>
+          {deleteError && (
+            <div className="mt-4 mx-auto max-w-sm bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl shadow-sm text-sm text-left animate-fade-in-up">
+              <strong className="font-bold block mb-1 tracking-tight text-red-800">Problem Deleting Plan</strong>
+              <span>{deleteError}</span>
+            </div>
+          )}
           {/* Plan badge */}
           <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-600">
             {isPro ? (
