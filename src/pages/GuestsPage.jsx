@@ -296,7 +296,7 @@ export default function GuestsPage() {
                       <button onClick={() => openEdit(g)} title="Edit Guest" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => dispatch({ type: 'DELETE_GUEST', payload: g.id })} title="Delete Guest" className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
+                      <button onClick={() => { if (window.confirm(`Delete guest "${g.name}"?`)) dispatch({ type: 'DELETE_GUEST', payload: g.id }); }} title="Delete Guest" className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

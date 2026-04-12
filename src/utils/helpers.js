@@ -18,7 +18,16 @@ export function formatTime(timeStr) {
 }
 
 export function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  // Use crypto.randomUUID() to generate proper UUIDs that match Supabase's format.
+  // This prevents optimistic ID mismatches during DB sync.
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback for older environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }
 
 export function getDaysUntil(dateStr) {

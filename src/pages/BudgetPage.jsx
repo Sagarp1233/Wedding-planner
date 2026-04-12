@@ -263,7 +263,7 @@ export default function BudgetPage() {
                     className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); dispatch({ type: 'DELETE_CATEGORY', payload: cat.id }); }}
+                  <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete category "${cat.name}" and all its expenses?`)) dispatch({ type: 'DELETE_CATEGORY', payload: cat.id }); }}
                     className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -296,7 +296,7 @@ export default function BudgetPage() {
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => dispatch({ type: 'DELETE_EXPENSE', payload: exp.id })}
+                            <button onClick={() => { if (window.confirm(`Delete expense "${exp.name}"?`)) dispatch({ type: 'DELETE_EXPENSE', payload: exp.id }); }}
                               className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

@@ -106,7 +106,7 @@ export default function InspirationPage() {
                     className={`p-1.5 rounded-lg transition-colors ${ins.liked ? 'text-rose-500' : 'text-gray-300 hover:text-rose-400'}`}>
                     <Heart className="w-4 h-4" fill={ins.liked ? 'currentColor' : 'none'} />
                   </button>
-                  <button onClick={() => dispatch({ type: 'DELETE_INSPIRATION', payload: ins.id })}
+                  <button onClick={() => { if (window.confirm('Delete this inspiration?')) dispatch({ type: 'DELETE_INSPIRATION', payload: ins.id }); }}
                     className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>

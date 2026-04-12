@@ -155,7 +155,7 @@ export default function VendorsPage() {
                   <button onClick={() => openEdit(v)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => dispatch({ type: 'DELETE_VENDOR', payload: v.id })} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
+                  <button onClick={() => { if (window.confirm(`Delete vendor "${v.name}"?`)) dispatch({ type: 'DELETE_VENDOR', payload: v.id }); }} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>

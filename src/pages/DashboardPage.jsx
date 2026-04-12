@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
   const summaryCards = [
     { title: 'Total Budget', value: formatINR(totalBudget), sub: `${formatINR(Math.abs(remaining))} ${remaining >= 0 ? 'remaining' : 'over'}`, icon: Wallet, color: 'from-emerald-500 to-teal-600' },
-    { title: 'Total Spent', value: formatINR(totalSpent), sub: `${Math.round((totalSpent / totalBudget) * 100)}% of budget`, icon: TrendingDown, color: 'from-rose-gold to-rose-gold-light' },
+    { title: 'Total Spent', value: formatINR(totalSpent), sub: `${totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0}% of budget`, icon: TrendingDown, color: 'from-rose-gold to-rose-gold-light' },
     { title: 'Guests', value: totalGuests, sub: `${acceptedGuests} accepted, ${pendingGuests} pending`, icon: Users, color: 'from-blue-500 to-indigo-600' },
     { title: 'Tasks Done', value: `${taskProgress}%`, sub: `${completedTasks}/${totalTasks} completed`, icon: CheckSquare, color: 'from-purple-500 to-violet-600' },
   ];

@@ -60,6 +60,8 @@ function reducer(state, action) {
       return { ...state, tasks: [...state.tasks, { id: generateId(), ...action.payload }] };
     case 'UPDATE_TASK':
       return { ...state, tasks: state.tasks.map(t => t.id === action.payload.id ? { ...t, ...action.payload } : t) };
+    case 'TOGGLE_TASK':
+      return { ...state, tasks: state.tasks.map(t => t.id === action.payload ? { ...t, status: t.status === 'completed' ? 'pending' : 'completed' } : t) };
     case 'DELETE_TASK':
       return { ...state, tasks: state.tasks.filter(t => t.id !== action.payload) };
 
@@ -347,6 +349,14 @@ export function AppProvider({ children, userId }) {
         case 'UPDATE_TASK':
           if(String(action.payload.id).includes('-')) await supabase.from('tasks').update({ title: action.payload.title, notes: action.payload.description, due_date: action.payload.deadline, status: action.payload.status }).eq('id', action.payload.id);
           break;
+        case 'TOGGLE_TASK': {
+          const toggledTask = state.tasks.find(t => t.id === action.payload);
+          if (toggledTask && String(action.payload).includes('-')) {
+            const newStatus = toggledTask.status === 'completed' ? 'pending' : 'completed';
+            await supabase.from('tasks').update({ status: newStatus }).eq('id', action.payload);
+          }
+          break;
+        }
         case 'DELETE_TASK':
           if(String(action.payload).includes('-')) await supabase.from('tasks').delete().eq('id', action.payload);
           break;

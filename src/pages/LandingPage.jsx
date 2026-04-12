@@ -49,6 +49,7 @@ export default function LandingPage() {
       keywords: SEO_KEYWORDS,
       canonicalUrl: `${origin}/`,
       ogType: 'website',
+      ogImage: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200&h=630&fit=crop&q=80',
     });
     setHomepageJsonLd({
       siteUrl: origin,
