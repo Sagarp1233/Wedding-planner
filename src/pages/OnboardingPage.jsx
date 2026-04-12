@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
@@ -10,18 +10,12 @@ const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { markOnboarded, currentUser, setActiveWeddingId, addWeddingToList, canCreateWedding, isOnboarded, weddings } = useAuth();
+  const { markOnboarded, currentUser, setActiveWeddingId, addWeddingToList, canCreateWedding, isOnboarded } = useAuth();
   const { dispatch } = useApp();
 
+  // ALL hooks must be declared before any conditional returns (React Rules of Hooks)
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
-
-  // Plan limit guard: if user already has max weddings, redirect to picker
-  // Allow through if user has NO weddings (first-time onboarding)
-  if (!canCreateWedding && isOnboarded) {
-    navigate('/weddings', { replace: true });
-    return null;
-  }
   const [form, setForm] = useState({
     partner1: '',
     partner2: '',
@@ -31,6 +25,13 @@ export default function OnboardingPage() {
     totalBudget: '',
     guestEstimate: '',
   });
+
+  // Plan limit guard: if user already has max weddings, redirect to picker
+  useEffect(() => {
+    if (!canCreateWedding && isOnboarded) {
+      navigate('/weddings', { replace: true });
+    }
+  }, [canCreateWedding, isOnboarded, navigate]);
 
   function next() {
     if (step < TOTAL_STEPS) setStep(step + 1);

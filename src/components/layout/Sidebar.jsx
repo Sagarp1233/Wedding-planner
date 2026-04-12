@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const { state } = useApp();
-  const { currentUser, logout, isAdmin } = useAuth();
+  const { currentUser, logout, isAdmin, isPro } = useAuth();
   const navigate = useNavigate();
   const daysLeft = getDaysUntil(state.wedding.weddingDate);
 
@@ -80,6 +80,22 @@ export default function Sidebar({ isOpen, onClose }) {
               </p>
             )}
           </div>
+        )}
+
+        {/* Upgrade Banner — shown only to free-tier users */}
+        {!isPro && (
+          <a
+            href="mailto:support@wedora.in?subject=Upgrade%20to%20Wedora%20Pro&body=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Wedora%20account%20to%20Pro."
+            className="mx-4 mb-4 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 flex items-center gap-3 hover:shadow-md transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+              <Crown className="w-4 h-4 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-gray-900">Go Pro</p>
+              <p className="text-[10px] text-gray-500 truncate">Up to 5 plans & more</p>
+            </div>
+          </a>
         )}
 
         {/* Navigation */}
