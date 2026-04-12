@@ -332,7 +332,7 @@ export function LowBudgetPremiumWeddingArticle({ post, readTime, copied, onShare
             <p className="text-gray-700 leading-relaxed mb-4 text-lg">
               You've seen those wedding photos — the ones with warm golden light, fresh flowers
               everywhere, and a bride who looks like she stepped off a magazine cover. You assume it
-              cost ₹30 lakhs. More often than not, it cost ₹8.
+              cost ₹30 lakhs. More often than not, it cost ₹8 lakhs.
             </p>
             <p className="text-gray-700 leading-relaxed mb-4 text-lg">
               The secret to a premium-looking wedding isn't money. It's <strong>restraint, consistency,
