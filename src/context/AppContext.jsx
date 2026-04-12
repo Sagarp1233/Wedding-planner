@@ -135,12 +135,11 @@ export function AppProvider({ children, userId, weddingId }) {
       }
 
       try {
-        // Fetch the specific wedding by its ID (not by user_id)
+        // Fetch the specific wedding by its ID. RLS will seamlessly restrict unauthorized requests without hardcoding owner filters at the app layer.
         const { data: weddingData, error: weddingError } = await supabase
           .from('weddings')
           .select('*')
           .eq('id', weddingId)
-          .eq('user_id', userId)
           .single();
 
         if (weddingError || !weddingData) {
@@ -249,11 +248,12 @@ export function AppProvider({ children, userId, weddingId }) {
       }
     }
 
-    // Connect to Supabase exclusively for Realtime Collaborative changes 
+    // Call load explicitly to handle initialization checks whether ID is present or not
     let channel;
-    if (userId && weddingId) {
-      loadSupabaseData().then(() => {
-        // Set up Realtime Subscription
+    
+    loadSupabaseData().then(() => {
+      // Connect to Supabase exclusively for Realtime Collaborative changes if ids are available
+      if (userId && weddingId) {
         channel = supabase.channel(`wedding-room-${weddingId}`)
           .on(
             'postgres_changes', 
@@ -264,14 +264,11 @@ export function AppProvider({ children, userId, weddingId }) {
             }
           )
           .subscribe();
-      });
-    }
+      }
+    });
 
     return () => {
-      // Clean up WebSockets connection when component unmounts or changes contexts
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      if (channel) supabase.removeChannel(channel);
     };
   }, [userId, weddingId]);
 
