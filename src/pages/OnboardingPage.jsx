@@ -118,10 +118,8 @@ export default function OnboardingPage() {
       await Promise.all(insertPromises);
 
       // CRITICAL: Optimistically add the wedding to the local list BEFORE navigating.
-      // This ensures isOnboarded (weddings.length > 0) is true when the route guard checks it.
       addWeddingToList(newWedding);
-      setActiveWeddingId(newWeddingId);
-      markOnboarded();
+      await markOnboarded(newWeddingId);
       navigate('/dashboard');
     } catch (err) {
       console.error('Onboarding error:', err);

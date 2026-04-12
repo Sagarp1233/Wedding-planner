@@ -4,102 +4,131 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext(null);
 
 const ONBOARDING_FETCH_MS = 8000;
-const ACTIVE_WEDDING_KEY = 'wedora_active_wedding';
-
-// Plan limits
-const FREE_PLAN_LIMIT = 1;
-const PRO_PLAN_LIMIT = 5;
-
-async function fetchUserWeddings(userId) {
-  try {
-    const query = supabase
-      .from('weddings')
-      .select('id, partner1, partner2, wedding_date, location, total_budget, updated_at, created_at')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false, nullsFirst: false });
-
-    const { data, error } = await Promise.race([
-      query,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('weddings-fetch-timeout')), ONBOARDING_FETCH_MS)
-      ),
-    ]);
-
-    if (error) {
-      console.error('[Wedora] Failed to fetch weddings:', error);
-      return [];
-    }
-    return data || [];
-  } catch (e) {
-    if (e?.message === 'weddings-fetch-timeout') {
-      console.warn('[Wedora] Wedding list fetch timed out.');
-    }
-    return [];
-  }
-}
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
 
-  // Multi-plan state
+  // DB-driven state
   const [weddings, setWeddings] = useState([]);
-  const [activeWeddingId, setActiveWeddingIdState] = useState(() => {
-    try { return localStorage.getItem(ACTIVE_WEDDING_KEY) || null; } catch { return null; }
-  });
+  const [appConfig, setAppConfig] = useState({ free_plan_limit: 1, pro_plan_limit: 5 });
+  const [profile, setProfile] = useState(null);
 
-  const isOnboarded = weddings.length > 0;
+  const activeWeddingId = profile?.active_wedding_id || null;
+  const isOnboarded = profile?.is_onboarded || false;
   const loading = !authReady || (!!currentUser && !onboardingResolved);
 
-  // Persist active wedding ID to localStorage
-  const setActiveWeddingId = useCallback((id) => {
-    setActiveWeddingIdState(id);
-    try {
-      if (id) localStorage.setItem(ACTIVE_WEDDING_KEY, id);
-      else localStorage.removeItem(ACTIVE_WEDDING_KEY);
-    } catch { /* storage unavailable */ }
-  }, []);
+  // Helper method: persist active wedding ID directly to DB via users table
+  const setActiveWeddingId = useCallback(async (id) => {
+    setProfile(prev => prev ? { ...prev, active_wedding_id: id } : null);
+    if (currentUser) {
+      // Async update in background
+      await supabase.from('users').update({ active_wedding_id: id }).eq('id', currentUser.id);
+    }
+  }, [currentUser]);
 
-  // Check if the user can create more weddings (plan limits)
-  const isPro = currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin' || currentUser?.user_metadata?.plan === 'pro';
-  const maxWeddings = isPro ? PRO_PLAN_LIMIT : FREE_PLAN_LIMIT;
+  const markOnboarded = useCallback(async (weddingId) => {
+    setProfile(prev => prev ? { ...prev, is_onboarded: true, active_wedding_id: weddingId } : null);
+    if (currentUser) {
+      await supabase.from('users').update({ is_onboarded: true, active_wedding_id: weddingId }).eq('id', currentUser.id);
+    }
+  }, [currentUser]);
+
+  const isPro = profile?.plan === 'pro' || currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
+  const isAdmin = currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
+  const maxWeddings = isPro ? appConfig.pro_plan_limit : appConfig.free_plan_limit;
   const canCreateWedding = weddings.length < maxWeddings;
 
+  // Add wedding optimistically
+  const addWeddingToList = useCallback((weddingRow) => {
+    setWeddings(prev => [weddingRow, ...prev]);
+  }, []);
+
+  async function fetchUserWeddings(userId) {
+    try {
+      const query = supabase
+        .from('weddings')
+        .select('id, partner1, partner2, wedding_date, location, total_budget, updated_at, created_at')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false, nullsFirst: false });
+
+      const { data, error } = await Promise.race([
+        query,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('weddings-fetch-timeout')), ONBOARDING_FETCH_MS)
+        ),
+      ]);
+
+      if (error) {
+        console.error('[Wedora] Failed to fetch weddings:', error);
+        return [];
+      }
+      return data || [];
+    } catch (e) {
+      if (e?.message === 'weddings-fetch-timeout') {
+        console.warn('[Wedora] Wedding list fetch timed out.');
+      }
+      return [];
+    }
+  }
+
+  // Reloads all user data: config, profile, weddings
+  const loadUserData = async (userId, aliveTracker) => {
+    if (!aliveTracker.alive) return;
+    setOnboardingResolved(false);
+
+    try {
+      // Execute fetches in parallel
+      const [configRes, profileRes, weddingsRes] = await Promise.all([
+        supabase.from('app_config').select('*').eq('id', 1).single(),
+        supabase.from('users').select('*').eq('id', userId).single(),
+        fetchUserWeddings(userId)
+      ]);
+
+      if (!aliveTracker.alive) return;
+
+      if (configRes.data) {
+        setAppConfig({
+          free_plan_limit: configRes.data.free_plan_limit,
+          pro_plan_limit: configRes.data.pro_plan_limit
+        });
+      }
+
+      const userProfile = profileRes.data || { is_onboarded: false, active_wedding_id: null, plan: 'free' };
+      setProfile(userProfile);
+      setWeddings(weddingsRes);
+
+      // Auto-fix active wedding ID if it's missing but we have weddings
+      if (!userProfile.active_wedding_id && weddingsRes.length > 0) {
+        const firstId = weddingsRes[0].id;
+        setProfile(prev => ({ ...prev, active_wedding_id: firstId }));
+        supabase.from('users').update({ active_wedding_id: firstId }).eq('id', userId);
+      }
+
+    } catch (err) {
+      console.error('[Wedora] Load user data error:', err);
+    }
+
+    setOnboardingResolved(true);
+  };
+
   useEffect(() => {
-    let alive = true;
+    const aliveTracker = { alive: true };
     let subscription = null;
 
     const finishNoUser = () => {
-      if (!alive) return;
+      if (!aliveTracker.alive) return;
       setWeddings([]);
-      setOnboardingResolved(true);
-    };
-
-    const loadWeddingsForUser = async (userId) => {
-      if (!alive) return;
-      setOnboardingResolved(false);
-      const list = await fetchUserWeddings(userId);
-      if (!alive) return;
-      setWeddings(list);
-
-      // Auto-select: if stored active ID is still valid, keep it; otherwise pick first
-      const storedId = (() => { try { return localStorage.getItem(ACTIVE_WEDDING_KEY); } catch { return null; } })();
-      if (storedId && list.some(w => w.id === storedId)) {
-        setActiveWeddingIdState(storedId);
-      } else if (list.length > 0) {
-        setActiveWeddingId(list[0].id);
-      } else {
-        setActiveWeddingId(null);
-      }
-
+      setProfile(null);
       setOnboardingResolved(true);
     };
 
     (async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (!alive) return;
+        if (!aliveTracker.alive) return;
+        
         if (error) {
           console.error('Auth Session Error:', error);
           setCurrentUser(null);
@@ -107,16 +136,18 @@ export function AuthProvider({ children }) {
           finishNoUser();
           return;
         }
+
         setCurrentUser(session?.user ?? null);
         setAuthReady(true);
+        
         if (session?.user) {
-          await loadWeddingsForUser(session.user.id);
+          await loadUserData(session.user.id, aliveTracker);
         } else {
           finishNoUser();
         }
       } catch (err) {
         console.error('Critical Auth Crash:', err);
-        if (!alive) return;
+        if (!aliveTracker.alive) return;
         setCurrentUser(null);
         setAuthReady(true);
         finishNoUser();
@@ -135,13 +166,13 @@ export function AuthProvider({ children }) {
           finishNoUser();
           return;
         }
-        await loadWeddingsForUser(session.user.id);
+        await loadUserData(session.user.id, aliveTracker);
       });
       subscription = sub;
     })();
 
     const failsafe = window.setTimeout(() => {
-      if (!alive) return;
+      if (!aliveTracker.alive) return;
       setAuthReady((ready) => {
         if (ready) return ready;
         console.warn('[Wedora] Auth bootstrap timed out; continuing without session.');
@@ -150,41 +181,18 @@ export function AuthProvider({ children }) {
     }, 12000);
 
     return () => {
-      alive = false;
-      window.clearTimeout(failsafe);
-      subscription?.unsubscribe();
+      aliveTracker.alive = false;
+      if (subscription) subscription.unsubscribe();
+      clearTimeout(failsafe);
     };
-  }, [setActiveWeddingId]);
-
-  // Refresh weddings list (e.g., after deleting a wedding)
-  const refreshWeddings = useCallback(async () => {
-    if (!currentUser) return;
-    const list = await fetchUserWeddings(currentUser.id);
-    setWeddings(list);
-
-    // Re-validate active wedding ID
-    if (activeWeddingId && !list.some(w => w.id === activeWeddingId)) {
-      // Active wedding was deleted — pick next one or clear
-      if (list.length > 0) {
-        setActiveWeddingId(list[0].id);
-      } else {
-        setActiveWeddingId(null);
-      }
-    }
-  }, [currentUser, activeWeddingId, setActiveWeddingId]);
-
-  // Optimistically add a wedding to the local list (no async fetch needed)
-  // This avoids the race condition where navigate() fires before setWeddings() commits.
-  const addWeddingToList = useCallback((weddingRow) => {
-    setWeddings(prev => [weddingRow, ...prev]);
   }, []);
 
   async function refreshSessionAndOnboarding() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
-      console.error('Session refresh error:', error);
       setCurrentUser(null);
       setWeddings([]);
+      setProfile(null);
       setOnboardingResolved(true);
       setAuthReady(true);
       return;
@@ -192,12 +200,10 @@ export function AuthProvider({ children }) {
     setCurrentUser(session?.user ?? null);
     setAuthReady(true);
     if (session?.user) {
-      setOnboardingResolved(false);
-      const list = await fetchUserWeddings(session.user.id);
-      setWeddings(list);
-      setOnboardingResolved(true);
+      await loadUserData(session.user.id, { alive: true });
     } else {
       setWeddings([]);
+      setProfile(null);
       setOnboardingResolved(true);
     }
   }
@@ -206,31 +212,21 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: name }
-      }
+      options: { data: { full_name: name } }
     });
     if (error) return { success: false, error: error.message };
     return { success: true, user: data.user };
   }
 
   async function login(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { success: false, error: error.message };
     return { success: true, user: data.user };
   }
 
   async function logout() {
-    setActiveWeddingId(null);
+    setProfile(null);
     await supabase.auth.signOut();
-  }
-
-  function markOnboarded() {
-    // No-op now — addWeddingToList handles optimistic state update
-    // Kept for backward compatibility with any callers
   }
 
   return (

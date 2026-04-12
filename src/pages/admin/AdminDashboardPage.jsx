@@ -130,6 +130,99 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-900">App Configuration</h2>
+        </div>
+        <div className="p-5">
+           <AppConfigSection />
+        </div>
+      </div>
     </div>
+  );
+}
+
+function AppConfigSection() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [config, setConfig] = useState({ free_plan_limit: 1, pro_plan_limit: 5 });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
+
+  async function fetchConfig() {
+    try {
+      const { data, error } = await supabase.from('app_config').select('*').eq('id', 1).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data) setConfig({ free_plan_limit: data.free_plan_limit, pro_plan_limit: data.pro_plan_limit });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setSuccess(false);
+    setError(null);
+    try {
+      const { error } = await supabase.from('app_config').upsert({
+        id: 1,
+        free_plan_limit: config.free_plan_limit,
+        pro_plan_limit: config.pro_plan_limit
+      });
+      if (error) throw error;
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) return <div className="animate-pulse h-8 bg-gray-100 rounded w-1/3" />;
+
+  return (
+    <form onSubmit={handleSave} className="space-y-4 max-w-sm">
+      {error && <p className="text-xs text-red-500 bg-red-50 p-2 rounded">{error}</p>}
+      {success && <p className="text-xs text-emerald-500 bg-emerald-50 p-2 rounded">Limits updated successfully.</p>}
+
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Free Plan Limit (Max Weddings)</label>
+        <input 
+          type="number" 
+          min="1" max="100"
+          value={config.free_plan_limit}
+          onChange={(e) => setConfig(c => ({...c, free_plan_limit: parseInt(e.target.value) || 1}))}
+          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Pro Plan Limit (Max Weddings)</label>
+        <input 
+          type="number" 
+          min="1" max="100"
+          value={config.pro_plan_limit}
+          onChange={(e) => setConfig(c => ({...c, pro_plan_limit: parseInt(e.target.value) || 5}))}
+          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-black transition-colors disabled:opacity-50"
+      >
+        {saving ? 'Saving...' : 'Save Limits'}
+      </button>
+    </form>
   );
 }

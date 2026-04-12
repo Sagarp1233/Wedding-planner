@@ -7,7 +7,7 @@ import { Heart, Plus, Trash2, MapPin, Calendar, Wallet, ChevronRight, Crown, Spa
 
 export default function WeddingPickerPage() {
   const navigate = useNavigate();
-  const { weddings, activeWeddingId, setActiveWeddingId, refreshWeddings, canCreateWedding, maxWeddings, isPro, currentUser } = useAuth();
+  const { weddings, activeWeddingId, setActiveWeddingId, refreshSessionAndOnboarding, canCreateWedding, maxWeddings, isPro, currentUser } = useAuth();
   const [deleting, setDeleting] = useState(null);
 
   function handleSelect(weddingId) {
@@ -20,7 +20,7 @@ export default function WeddingPickerPage() {
     setDeleting(wedding.id);
     try {
       await supabase.from('weddings').delete().eq('id', wedding.id);
-      await refreshWeddings();
+      await refreshSessionAndOnboarding();
     } catch (e) {
       console.error('Failed to delete wedding:', e);
     } finally {
