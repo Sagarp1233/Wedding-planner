@@ -37,9 +37,9 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
         {/* Switch Plan button */}
         <button
           onClick={() => navigate('/weddings')}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:text-rose-gold hover:border-rose-gold/30 hover:bg-rose-gold/5 transition-all shadow-sm group"
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-md shadow-amber-200/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
         >
-          <ArrowLeftRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-rose-gold transition-colors" /> Switch Plan
+          <ArrowLeftRight className="w-3.5 h-3.5" /> Switch Wedding Plan
         </button>
 
         {/* Upgrade to Pro CTA — only shown to free users */}

@@ -25,7 +25,9 @@ export default function WeddingPickerPage() {
         supabase.from('tasks').delete().eq('wedding_id', wedding.id),
         supabase.from('guests').delete().eq('wedding_id', wedding.id),
         supabase.from('timeline_events').delete().eq('wedding_id', wedding.id),
-        supabase.from('vendors').delete().eq('wedding_id', wedding.id)
+        supabase.from('vendors').delete().eq('wedding_id', wedding.id),
+        supabase.from('expenses').delete().eq('wedding_id', wedding.id),
+        supabase.from('inspirations').delete().eq('wedding_id', wedding.id)
       ]);
       const { error } = await supabase.from('weddings').delete().eq('id', wedding.id);
       if (error) throw error;
@@ -51,6 +53,14 @@ export default function WeddingPickerPage() {
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-br from-gold/10 to-amber-200/10 blur-3xl" />
 
       <div className="relative w-full max-w-2xl animate-fade-in-up">
+        {activeWeddingId && (
+          <button 
+             onClick={() => navigate('/dashboard')}
+             className="absolute top-0 left-0 sm:-left-4 md:-left-12 lg:-left-20 text-xs font-semibold text-gray-500 hover:text-rose-gold flex items-center gap-1.5 transition-colors bg-white/60 backdrop-blur-sm px-3 py-2 rounded-xl border border-gray-200 shadow-sm hover:shadow-md z-10"
+          >
+             &larr; Back
+          </button>
+        )}
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
