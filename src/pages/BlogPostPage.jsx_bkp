@@ -16,15 +16,10 @@ import {
   getStaticWedding5LPost,
   WeddingUnder5LakhsArticle,
 } from './blog/weddingUnder5Lakhs';
-import {
-  LOW_BUDGET_PREMIUM_SLUG,
-  getStaticLowBudgetPremiumPost,
-  LowBudgetPremiumWeddingArticle,
-} from './blog/lowBudgetPremiumWedding';
 
 // ─── All static / enhanced article slugs ────────────────────────────────────
 // Add new static blog slugs here as they are created.
-const STATIC_SLUGS = new Set([BUDGET_GUIDE_SLUG, WEDDING_5L_SLUG, LOW_BUDGET_PREMIUM_SLUG]);
+const STATIC_SLUGS = new Set([BUDGET_GUIDE_SLUG, WEDDING_5L_SLUG]);
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -86,13 +81,6 @@ export default function BlogPostPage() {
 
       if (slug === WEDDING_5L_SLUG) {
         const resolved = await fetchStaticPost(getStaticWedding5LPost);
-        setPost(resolved);
-        applyPostSEO(resolved);
-        return;
-      }
-
-      if (slug === LOW_BUDGET_PREMIUM_SLUG) {
-        const resolved = await fetchStaticPost(getStaticLowBudgetPremiumPost);
         setPost(resolved);
         applyPostSEO(resolved);
         return;
@@ -200,20 +188,6 @@ export default function BlogPostPage() {
       <WeddingUnder5LakhsArticle
         post={post}
         readTime={12}
-        copied={copied}
-        onShare={handleShareURL}
-        affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
-      />
-    );
-  }
-
-  // ── Enhanced article: Low Budget Premium Wedding Ideas ───────────────────
-  if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
-    return (
-      <LowBudgetPremiumWeddingArticle
-        post={post}
-        readTime={13}
         copied={copied}
         onShare={handleShareURL}
         affiliateHref={affiliateHref}
