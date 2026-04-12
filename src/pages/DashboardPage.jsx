@@ -65,39 +65,69 @@ export default function DashboardPage() {
       )}
 
       {/* Wedding Countdown Hero */}
-      <div className="mb-8 p-6 glass-card-hover bg-gradient-to-r from-rose-gold/5 via-white/80 to-plum/5 animate-fade-in-up">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-serif font-bold text-gray-900 mb-1">
-              {wedding.partner1} <span className="text-rose-gold">&</span> {wedding.partner2}
-            </h2>
-            <div className="flex items-center gap-3 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <CalendarHeart className="w-4 h-4 text-rose-gold" />
-                {formatDate(wedding.weddingDate)}
+      <div className="mb-8 relative overflow-hidden rounded-3xl animate-fade-in-up">
+        {/* Rich gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-gold via-[#c77d8a] to-plum" />
+        {/* Decorative circles */}
+        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 blur-sm" />
+        <div className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full bg-white/5 blur-sm" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-white/5" />
+
+        <div className="relative z-10 px-5 py-8 sm:px-8 sm:py-10 text-center">
+          {/* Couple Names */}
+          <div className="mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-3">The Wedding of</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-white leading-tight">
+              {wedding.partner1}
+              <span className="inline-block mx-2 sm:mx-3">
+                <CalendarHeart className="w-5 h-5 sm:w-6 sm:h-6 inline-block text-white/70 -mt-1" />
               </span>
-              {wedding.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-rose-gold" />
-                  {wedding.location}
-                </span>
-              )}
-            </div>
+              {wedding.partner2}
+            </h2>
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Date & Location badges */}
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mt-4 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs font-medium">
+              <CalendarHeart className="w-3.5 h-3.5 text-white/80" />
+              {formatDate(wedding.weddingDate)}
+            </span>
+            {wedding.location && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs font-medium">
+                <MapPin className="w-3.5 h-3.5 text-white/80" />
+                {wedding.location}
+              </span>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center justify-center gap-3 my-6">
+            <div className="h-px w-12 bg-white/20" />
+            <div className="w-2 h-2 rounded-full bg-white/40" />
+            <div className="h-px w-12 bg-white/20" />
+          </div>
+
+          {/* Countdown Timer */}
+          <div className="flex items-center justify-center gap-3 sm:gap-5">
             {daysLeft > 30 && (
-              <div className="text-center px-4">
-                <p className="text-3xl font-serif font-bold text-rose-gold">{months}</p>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Months</p>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
+                  <span className="text-2xl sm:text-3xl font-serif font-bold text-white">{months}</span>
+                </div>
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/60 mt-2">Months</span>
               </div>
             )}
-            <div className="text-center px-4">
-              <p className="text-3xl font-serif font-bold text-rose-gold">{daysLeft > 30 ? weeks : Math.floor(daysLeft / 7)}</p>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Weeks</p>
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
+                <span className="text-2xl sm:text-3xl font-serif font-bold text-white">{daysLeft > 30 ? weeks : Math.floor(daysLeft / 7)}</span>
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/60 mt-2">Weeks</span>
             </div>
-            <div className="text-center px-4">
-              <p className="text-3xl font-serif font-bold text-rose-gold">{daysLeft > 30 ? days : daysLeft % 7}</p>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Days</p>
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
+                <span className="text-2xl sm:text-3xl font-serif font-bold text-white">{daysLeft > 30 ? days : daysLeft % 7}</span>
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/60 mt-2">Days</span>
             </div>
           </div>
         </div>
