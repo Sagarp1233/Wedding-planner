@@ -11,12 +11,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
-  Download,
   Users,
   Flower2,
   Sun,
   Moon,
-  Music,
   Image,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -27,9 +25,10 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const PHOTOGRAPHY_CHECKLIST_SLUG = 'wedding-photography-checklist-must-have-shots';
 
-// Unsplash: wedding photographer in action at an Indian ceremony
+// Unsplash: Indian bridal close-up with mehndi and jewellery details
+// photo by Shardayyy Photography — verified Indian wedding content
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticPhotographyChecklistPost() {
   const now = new Date().toISOString();
@@ -65,21 +64,20 @@ const SHOT_CATEGORIES = [
     icon: Sun,
     color: 'from-amber-400 to-orange-500',
     bgLight: 'bg-amber-50',
-    borderLight: 'border-amber-200/60',
     textAccent: 'text-amber-700',
     label: 'Getting Ready',
     subtitle: 'Bridal & groom prep — before the ceremony begins',
     shots: [
-      { n: 1,  shot: 'Bride\'s outfit laid out flat — lehenga, jewellery, and accessories arranged on a bed or table', priority: 'essential' },
+      { n: 1,  shot: "Bride's outfit flat-lay — lehenga, jewellery, and accessories arranged on a bed or table", priority: 'essential' },
       { n: 2,  shot: 'Close-up of bridal jewellery — maang tikka, choker, bangles, and nath individually', priority: 'essential' },
-      { n: 3,  shot: 'Bride getting her makeup done — natural candid of the MUA at work', priority: 'essential' },
-      { n: 4,  shot: 'Bride looking at herself in the mirror — first full-look reveal', priority: 'essential' },
-      { n: 5,  shot: 'Bride with mother / sister — an intimate moment before leaving', priority: 'essential' },
-      { n: 6,  shot: 'Bride\'s hands — hennaed palms, bangles, and ring close-up', priority: 'essential' },
-      { n: 7,  shot: 'Bride putting on her dupatta — motion shot', priority: 'nice-to-have' },
+      { n: 3,  shot: 'Bride getting makeup done — candid of the MUA at work', priority: 'essential' },
+      { n: 4,  shot: "Bride's first full-look reveal — looking at herself in the mirror", priority: 'essential' },
+      { n: 5,  shot: 'Bride with mother or sister — an intimate moment before leaving', priority: 'essential' },
+      { n: 6,  shot: "Bride's hands — hennaed palms, bangles, and ring close-up", priority: 'essential' },
+      { n: 7,  shot: "Bride putting on her dupatta — motion shot", priority: 'nice-to-have' },
       { n: 8,  shot: 'Groom getting dressed — tying pagri or sherwani buttons', priority: 'essential' },
-      { n: 9,  shot: 'Groom\'s details — shoes, watch, accessories, sehra flat lay', priority: 'nice-to-have' },
-      { n: 10, shot: 'Groom with father / best friend — candid laugh or handshake moment', priority: 'essential' },
+      { n: 9,  shot: "Groom's detail flat-lay — shoes, watch, accessories, sehra", priority: 'nice-to-have' },
+      { n: 10, shot: 'Groom with father or best friend — candid laugh or handshake', priority: 'essential' },
     ],
   },
   {
@@ -87,16 +85,15 @@ const SHOT_CATEGORIES = [
     icon: Flower2,
     color: 'from-emerald-500 to-teal-600',
     bgLight: 'bg-emerald-50',
-    borderLight: 'border-emerald-200/60',
     textAccent: 'text-emerald-700',
     label: 'Mehendi',
     subtitle: 'The most colourful and candid function of any Indian wedding',
     shots: [
-      { n: 11, shot: 'Bride\'s hands being drawn on — close-up of the mehendi artist\'s needle', priority: 'essential' },
-      { n: 12, shot: 'Bride\'s full mehendi reveal — both arms extended, top-down shot', priority: 'essential' },
-      { n: 13, shot: 'Groom\'s name hidden in the mehendi design — can you find it?', priority: 'essential' },
-      { n: 14, shot: 'Bride surrounded by bridesmaids / cousins — group laughter shot', priority: 'essential' },
-      { n: 15, shot: 'The mehendi artist at work — wide shot showing bride + artist + setting', priority: 'nice-to-have' },
+      { n: 11, shot: "Mehendi being drawn — close-up of the artist's needle and bride's hand", priority: 'essential' },
+      { n: 12, shot: "Bride's full mehendi reveal — both arms extended, top-down shot", priority: 'essential' },
+      { n: 13, shot: "Groom's name hidden in the mehendi design — can you find it?", priority: 'essential' },
+      { n: 14, shot: 'Bride surrounded by cousins or bridesmaids — group laughter shot', priority: 'essential' },
+      { n: 15, shot: 'The mehendi artist at work — wide shot of bride, artist, and setting', priority: 'nice-to-have' },
       { n: 16, shot: 'Guests getting mehendi — candid smiles and reactions', priority: 'nice-to-have' },
     ],
   },
@@ -105,41 +102,39 @@ const SHOT_CATEGORIES = [
     icon: Sun,
     color: 'from-yellow-400 to-amber-500',
     bgLight: 'bg-yellow-50',
-    borderLight: 'border-yellow-200/60',
     textAccent: 'text-yellow-700',
     label: 'Haldi',
     subtitle: 'Pure joy — the most photogenic chaos of the day',
     shots: [
-      { n: 17, shot: 'Bride seated on the peethi/stool before the first haldi application', priority: 'essential' },
-      { n: 18, shot: 'Mother applying haldi to bride\'s face — pure emotion shot', priority: 'essential' },
-      { n: 19, shot: 'Family members crowding in with haldi — everyone smiling and laughing', priority: 'essential' },
-      { n: 20, shot: 'Bride\'s face mid-haldi — yellow on cheeks, joy in the eyes', priority: 'essential' },
-      { n: 21, shot: 'Bride lifting hands above head, haldi dripping — motion / fun shot', priority: 'nice-to-have' },
-      { n: 22, shot: 'Groom\'s haldi — equivalent shots at his location', priority: 'essential' },
+      { n: 17, shot: 'Bride seated before the first haldi application — anticipation on her face', priority: 'essential' },
+      { n: 18, shot: "Mother applying haldi to bride's face — pure emotion, close-up", priority: 'essential' },
+      { n: 19, shot: 'Family crowding in with haldi — everyone laughing and smiling', priority: 'essential' },
+      { n: 20, shot: "Bride mid-haldi — turmeric on cheeks, joy in the eyes", priority: 'essential' },
+      { n: 21, shot: 'Bride lifting hands above head, haldi dripping — fun motion shot', priority: 'nice-to-have' },
+      { n: 22, shot: "Groom's haldi ceremony — equivalent shots at his location", priority: 'essential' },
     ],
   },
   {
     id: 'ceremony',
     icon: Sparkles,
-    color: 'from-rose-gold to-plum',
+    color: 'from-rose-500 to-pink-600',
     bgLight: 'bg-rose-50',
-    borderLight: 'border-rose-200/60',
     textAccent: 'text-rose-700',
     label: 'The Ceremony',
     subtitle: 'The heart of the wedding — every ritual deserves a frame',
     shots: [
-      { n: 23, shot: 'Bride\'s processional entry — wide shot capturing the walk and the crowd\'s reaction', priority: 'essential' },
-      { n: 24, shot: 'Bride\'s face during the entry — emotion, anticipation, joy', priority: 'essential' },
-      { n: 25, shot: 'Groom\'s first look at the bride — that exact moment of awe', priority: 'essential' },
+      { n: 23, shot: "Bride's processional entry — wide shot of the walk and crowd's reaction", priority: 'essential' },
+      { n: 24, shot: "Bride's face during the entry — emotion, anticipation, joy", priority: 'essential' },
+      { n: 25, shot: "Groom's first look at the bride — that exact moment of awe", priority: 'essential' },
       { n: 26, shot: 'Mandap wide shot — full setup with all participants seated', priority: 'essential' },
       { n: 27, shot: 'Jaimala / varmala — garland exchange, catching both expressions', priority: 'essential' },
       { n: 28, shot: 'Saat pheras — each of the seven rounds around the sacred fire', priority: 'essential' },
       { n: 29, shot: 'Sindoor ceremony — close-up of the sindoor being applied', priority: 'essential' },
-      { n: 30, shot: 'Mangalsutra — groom tying it, close-up of bride\'s face', priority: 'essential' },
-      { n: 31, shot: 'Bride\'s parents at the kanyadaan — faces showing joy and emotion', priority: 'essential' },
+      { n: 30, shot: "Mangalsutra — groom tying it, close-up of bride's face", priority: 'essential' },
+      { n: 31, shot: "Bride's parents at the kanyadaan — faces showing joy and emotion", priority: 'essential' },
       { n: 32, shot: 'Sacred fire (agni) — atmospheric shot of the ceremony flames', priority: 'nice-to-have' },
-      { n: 33, shot: 'Pandit ji in action — wide shot placing him in context of the ceremony', priority: 'nice-to-have' },
-      { n: 34, shot: 'Couple\'s joined hands during pheras — top-down close-up', priority: 'essential' },
+      { n: 33, shot: 'Pandit ji in context — wide shot placing him within the ceremony', priority: 'nice-to-have' },
+      { n: 34, shot: "Couple's joined hands during pheras — top-down close-up", priority: 'essential' },
     ],
   },
   {
@@ -147,17 +142,16 @@ const SHOT_CATEGORIES = [
     icon: Image,
     color: 'from-violet-500 to-purple-700',
     bgLight: 'bg-violet-50',
-    borderLight: 'border-violet-200/60',
     textAccent: 'text-violet-700',
     label: 'Couple Portraits',
     subtitle: 'Just the two of you — captured forever',
     shots: [
       { n: 35, shot: 'Couple portrait at the mandap — posed, full-length, both in focus', priority: 'essential' },
       { n: 36, shot: 'Candid couple moment — a whisper, a laugh, a hand squeeze', priority: 'essential' },
-      { n: 37, shot: 'Golden-hour portrait — backlit, silhouette or warm-glow', priority: 'essential' },
+      { n: 37, shot: 'Golden-hour portrait — backlit, warm-glow or silhouette', priority: 'essential' },
       { n: 38, shot: 'Looking at each other — not at the camera, natural emotion', priority: 'essential' },
-      { n: 39, shot: 'Walking together shot — movement, motion blur optional', priority: 'nice-to-have' },
-      { n: 40, shot: 'Aerial drone shot of the couple at the mandap or venue', priority: 'nice-to-have' },
+      { n: 39, shot: 'Walking together — movement, optional gentle motion blur', priority: 'nice-to-have' },
+      { n: 40, shot: 'Aerial drone shot of the couple at the mandap or venue garden', priority: 'nice-to-have' },
     ],
   },
   {
@@ -165,17 +159,16 @@ const SHOT_CATEGORIES = [
     icon: Users,
     color: 'from-sky-500 to-blue-600',
     bgLight: 'bg-sky-50',
-    borderLight: 'border-sky-200/60',
     textAccent: 'text-sky-700',
     label: 'Family & Groups',
     subtitle: 'The people who made this day possible',
     shots: [
-      { n: 41, shot: 'Full family group photo — both sides together, everyone present', priority: 'essential' },
-      { n: 42, shot: 'Bride\'s family photo — parents, siblings, and close relatives', priority: 'essential' },
-      { n: 43, shot: 'Groom\'s family photo — same treatment', priority: 'essential' },
-      { n: 44, shot: 'Bride with bridesmaids / girl gang — fun, candid, and posed', priority: 'essential' },
-      { n: 45, shot: 'Groom with groomsmen / best friends — same energy', priority: 'essential' },
-      { n: 46, shot: 'Grandparents with the couple — if present, never miss this one', priority: 'essential' },
+      { n: 41, shot: "Full family group photo — both sides together, everyone present", priority: 'essential' },
+      { n: 42, shot: "Bride's family — parents, siblings, and close relatives", priority: 'essential' },
+      { n: 43, shot: "Groom's family — same treatment, same care", priority: 'essential' },
+      { n: 44, shot: 'Bride with bridesmaids or girl gang — fun, candid, and posed', priority: 'essential' },
+      { n: 45, shot: 'Groom with groomsmen or best friends — same energy', priority: 'essential' },
+      { n: 46, shot: "Grandparents with the couple — if present, never miss this one", priority: 'essential' },
     ],
   },
   {
@@ -183,65 +176,64 @@ const SHOT_CATEGORIES = [
     icon: Moon,
     color: 'from-indigo-500 to-violet-600',
     bgLight: 'bg-indigo-50',
-    borderLight: 'border-indigo-200/60',
     textAccent: 'text-indigo-700',
     label: 'Reception & Celebration',
     subtitle: 'The evening, the dancing, the last memories',
     shots: [
-      { n: 47, shot: 'Reception entry — couple walking in, guests cheering, confetti or petals', priority: 'essential' },
-      { n: 48, shot: 'First dance — wide shot capturing the floor, crowd, and couple', priority: 'essential' },
-      { n: 49, shot: 'Cake cutting (if applicable) — classic close-up + candid laugh', priority: 'nice-to-have' },
+      { n: 47, shot: "Reception entry — couple walking in, guests cheering, petals or confetti", priority: 'essential' },
+      { n: 48, shot: 'First dance — wide shot capturing the floor, crowd, and couple together', priority: 'essential' },
+      { n: 49, shot: "Cake cutting (if applicable) — close-up and candid laugh", priority: 'nice-to-have' },
       { n: 50, shot: 'The last slow dance or quiet moment together at the end of the night', priority: 'essential' },
     ],
   },
 ];
 
-// All shots flattened
-const ALL_SHOTS = SHOT_CATEGORIES.flatMap((c) => c.shots.map((s) => ({ ...s, category: c.label })));
+const ALL_SHOTS      = SHOT_CATEGORIES.flatMap((c) => c.shots);
 const ESSENTIAL_COUNT = ALL_SHOTS.filter((s) => s.priority === 'essential').length;
+const TOTAL_SHOTS    = ALL_SHOTS.length; // 50
 
 const PHOTOGRAPHER_TIPS = [
-  { tip: 'Share this checklist 2 weeks before the wedding', detail: 'Don\'t hand it to them on the day. A good photographer needs time to understand your priorities, scout the venue, and plan their positioning.' },
-  { tip: 'Mark your top 10 non-negotiables', detail: 'Circle the shots you absolutely cannot miss — first look, sindoor, parents at kanyadaan. Make these clear in your brief. Everything else is bonus.' },
-  { tip: 'Assign a "shot coordinator" from family', detail: 'Designate one trusted person (not a parent — they\'ll be emotional) to help round up people for group shots. Your photographer will thank you.' },
-  { tip: 'Schedule a 15-min portrait session intentionally', detail: 'Block 15 minutes for just the couple portraits — between the ceremony and reception. Don\'t leave this to chance between rituals.' },
-  { tip: 'Brief your guests on the candid preference', detail: 'If you want candid shots, ask guests NOT to crowd the photographer or point phones at the exact same moments. One phone raised = 10 more follow.' },
-  { tip: 'Share the day\'s timeline, not just the shot list', detail: 'Your photographer needs to know when each function starts, how long it runs, and where the light will be. A timeline + checklist = the perfect brief.' },
+  { tip: 'Share this checklist 2 weeks before the wedding', detail: "Don't hand it over on the day. A good photographer needs time to understand your priorities, scout the venue, and plan their positioning for each ritual." },
+  { tip: 'Mark your top 10 non-negotiables clearly', detail: 'Highlight the shots you absolutely cannot miss — first look, sindoor moment, parents at kanyadaan. Make these explicit. Everything else is bonus.' },
+  { tip: 'Assign a "shot wrangler" from the family', detail: 'Designate one calm, organised cousin or sibling (not a parent — they will be emotional) to round up people for group shots. Your photographer will love you for it.' },
+  { tip: 'Block 15 minutes for couple portraits', detail: 'Schedule this between the ceremony and reception. Do not leave it to chance. Write it into the day\'s timeline and share that timeline with your photographer.' },
+  { tip: 'Brief your guests about phone etiquette', detail: 'Ask the officiant to request a phone-free ceremony. One phone raised becomes ten. Your photographer loses the angle and the couple loses the moment.' },
+  { tip: 'Share the full day timeline, not just the shot list', detail: 'Your photographer needs to know when each function starts, where the light falls at each time, and how long each ritual runs. A timeline + checklist = a perfect brief.' },
 ];
 
 const MISTAKES = [
-  { m: 'No shot list shared in advance', reason: 'Photographers cannot read minds. Without a list, key moments get missed and cannot be recreated.' },
-  { m: 'Skipping couple portrait time', reason: 'When you leave portraits to "whenever there\'s a gap", there\'s never a gap. Schedule it explicitly.' },
-  { m: 'Bad lighting for key rituals', reason: 'Many mandaps are indoors under harsh tubelights. Ask your venue about warm lighting or discuss this with your photographer beforehand.' },
-  { m: 'Too many phone cameras at key moments', reason: 'A sea of phones blocks your photographer\'s angles and distracts the subjects. Ask the officiant to request a phone-free ceremony.' },
-  { m: 'Booking without reviewing indoor work', reason: 'Any photographer can look great outdoors. Ask specifically for indoor, low-light ceremony shots from their portfolio.' },
-  { m: 'Forgetting the small detail shots', reason: 'The flat-lay of jewellery, the mehndi artist at work, the grandmother\'s expression — these tell the full story. Remind your photographer explicitly.' },
+  { m: 'No shot list shared in advance', reason: 'Photographers cannot read minds. Without a list, key moments get missed and can never be recreated.' },
+  { m: 'Skipping couple portrait time', reason: "When you leave portraits to 'whenever there's a gap', there is never a gap. Schedule it explicitly in the timeline." },
+  { m: 'Poor ceremony lighting', reason: 'Many mandaps sit under harsh tubelights. Ask your venue about warm ambient lighting or request your photographer to bring a rim light for the ceremony.' },
+  { m: 'Too many phone cameras at key moments', reason: 'A wall of phones blocks angles and distracts subjects. An officiant announcement goes a long way.' },
+  { m: 'Booking without reviewing indoor work', reason: 'Any photographer looks good outdoors. Ask specifically for indoor, low-light ceremony shots from their portfolio before booking.' },
+  { m: 'Forgetting detail and emotion shots', reason: 'The jewellery flat-lay, the mehendi artist at work, the grandmother\'s expression — these tell the full story. Remind your photographer of these explicitly.' },
 ];
 
 const FAQS = [
   {
     q: 'How many photos should I expect from a full Indian wedding?',
-    a: 'A professional photographer covering a full 1-day wedding (mehendi through reception) typically delivers 400–800 edited photos. For multi-day events (3 functions), expect 800–1,500 images. Always ask for the delivery count upfront — and clarify whether they\'re fully edited or just colour-corrected.',
+    a: "A professional covering a full 1-day wedding (mehendi through reception) typically delivers 400–800 edited photos. For multi-day events (3 functions), expect 800–1,500 images. Always clarify the delivery count in writing before signing a contract — and confirm whether 'edited' means fully retouched or just colour-corrected.",
   },
   {
     q: 'Should I share this checklist directly with my photographer?',
-    a: 'Yes — but frame it as a guide, not a rigid demand. Share the checklist 2 weeks before the wedding with your top 10 non-negotiables highlighted. A good photographer will use it to plan, not feel micromanaged by it.',
+    a: "Yes — but frame it as a guide, not a rigid demand. Share it 2 weeks before the wedding with your top 10 non-negotiables highlighted. A good photographer uses it to plan, not feel micromanaged.",
   },
   {
-    q: 'How do I make sure the group family photos get done without chaos?',
-    a: 'Assign a "shot wrangler" — a calm, organised family member (cousin or sibling, not a parent) to gather people for group shots. Give them a printed list of the groups you need. Schedule family photos immediately after the ceremony while everyone is still dressed and present.',
+    q: 'How do I organise group family photos without chaos?',
+    a: "Assign a 'shot wrangler' — a calm family member (cousin or sibling) to gather people for group shots using a printed list. Schedule family photos immediately after the ceremony while everyone is dressed, present, and still in a good mood.",
   },
   {
-    q: 'What is the best time of day for outdoor couple portraits at an Indian wedding?',
-    a: '4–6 PM is golden hour — the light is warm, soft, and forgiving. Schedule your couple portrait session to coincide with this window if at all possible. If the ceremony runs late, dusk (blue hour) at 6:30–7 PM creates equally beautiful moody shots.',
+    q: 'What is the best time for outdoor couple portraits at an Indian wedding?',
+    a: '4–6 PM is golden hour — warm, soft, and forgiving light. Schedule your couple portrait session to coincide with this window wherever possible. If the ceremony runs late, dusk blue-hour at 6:30–7 PM creates equally beautiful moody portraits.',
   },
   {
-    q: 'Do I need a second photographer?',
-    a: 'For large weddings (300+ guests) or events at multiple venues simultaneously, a second shooter is valuable. They cover the groom\'s prep while the main photographer is with the bride, or capture wide crowd shots while the primary shooter focuses on the couple. For intimate weddings under 150 guests, one skilled photographer is sufficient.',
+    q: 'Do I need a second photographer at my wedding?',
+    a: 'For large weddings (300+ guests) or simultaneous events at different locations, a second shooter adds real value. For intimate weddings under 150 guests at a single venue, one skilled photographer is sufficient. Do not add a second shooter just for the sake of it — budget that money into a better primary photographer instead.',
   },
   {
-    q: 'How soon after the wedding should I receive my edited photos?',
-    a: 'Industry standard in India is 4–6 weeks for a full edited gallery delivery. Clarify the delivery timeline in your contract. For sneak peeks (5–10 preview photos), most photographers deliver within 48–72 hours. Never accept a photographer who cannot give you a clear written timeline.',
+    q: 'How soon after the wedding should my edited photos arrive?',
+    a: 'Industry standard in India is 4–6 weeks for a full edited gallery. Clarify the delivery timeline in your contract before the wedding. For sneak peeks (5–10 preview photos), most photographers deliver within 48–72 hours. Never accept a photographer who cannot give you a clear written timeline.',
   },
 ];
 
@@ -268,7 +260,6 @@ function FaqItem({ item, open, onToggle }) {
   );
 }
 
-// Interactive shot category with per-shot checkboxes
 function ShotCategory({ cat, checked, onToggle }) {
   const catChecked = cat.shots.filter((s) => checked.has(s.n)).length;
   const isComplete = catChecked === cat.shots.length;
@@ -276,23 +267,23 @@ function ShotCategory({ cat, checked, onToggle }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
       {/* Category header */}
-      <div className={`px-5 py-4 flex items-center gap-4 border-b border-gray-100`}>
+      <div className="px-5 py-4 flex items-center gap-4 border-b border-gray-100">
         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center shrink-0 shadow-md`}>
           <cat.icon className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-serif font-bold text-gray-900 leading-snug">{cat.label}</p>
-          <p className="text-gray-400 text-xs mt-0.5">{cat.subtitle}</p>
+          <p className="text-gray-400 text-xs mt-0.5 leading-snug">{cat.subtitle}</p>
         </div>
-        <div className="shrink-0 text-right">
+        <div className="shrink-0 text-right flex items-center gap-1.5">
           <span className={`text-sm font-bold ${isComplete ? 'text-emerald-600' : 'text-gray-400'}`}>
             {catChecked}/{cat.shots.length}
           </span>
-          {isComplete && <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-1 inline" />}
+          {isComplete && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
         </div>
       </div>
 
-      {/* Shots list */}
+      {/* Shot rows */}
       <ul className="divide-y divide-gray-50">
         {cat.shots.map((s) => {
           const isDone = checked.has(s.n);
@@ -313,18 +304,15 @@ function ShotCategory({ cat, checked, onToggle }) {
                     </svg>
                   )}
                 </span>
-
-                {/* Shot number badge */}
-                <span className={`shrink-0 text-xs font-bold w-6 text-right mt-0.5 ${isDone ? 'text-emerald-500' : 'text-gray-300'}`}>
+                {/* Shot number */}
+                <span className={`shrink-0 text-xs font-bold w-6 text-right mt-0.5 ${isDone ? 'text-emerald-400' : 'text-gray-300'}`}>
                   {s.n}
                 </span>
-
-                {/* Shot description */}
+                {/* Shot text */}
                 <span className={`flex-1 text-sm leading-relaxed transition-colors ${isDone ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
                   {s.shot}
                 </span>
-
-                {/* Priority badge */}
+                {/* Must badge */}
                 {s.priority === 'essential' && (
                   <span className="shrink-0 self-start mt-0.5 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-rose-gold/10 text-rose-gold border border-rose-gold/20">
                     Must
@@ -341,13 +329,20 @@ function ShotCategory({ cat, checked, onToggle }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function PhotographyChecklistArticle({ post, readTime, copied, onShare, affiliateHref, affiliateCtaLabel }) {
+export function PhotographyChecklistArticle({
+  post,
+  readTime,
+  copied,
+  onShare,
+  affiliateHref,
+  affiliateCtaLabel,
+}) {
   const [openFaq, setOpenFaq]     = useState(0);
   const [checked, setChecked]     = useState(new Set());
-  const [activeFilter, setFilter] = useState('all'); // 'all' | 'essential' | 'nice-to-have'
+  const [activeFilter, setFilter] = useState('all');
 
   const totalChecked = checked.size;
-  const progressPct  = Math.round((totalChecked / 50) * 100);
+  const progressPct  = Math.round((totalChecked / TOTAL_SHOTS) * 100);
 
   function toggleShot(n) {
     setChecked((prev) => {
@@ -357,11 +352,8 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
     });
   }
 
-  function resetAll() {
-    setChecked(new Set());
-  }
+  function resetAll() { setChecked(new Set()); }
 
-  // Filter shots within categories
   const filteredCategories = SHOT_CATEGORIES.map((cat) => ({
     ...cat,
     shots: activeFilter === 'all'
@@ -376,6 +368,7 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
 
   return (
     <div className="min-h-screen bg-[#faf7f8]">
+
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-sky-400/15 to-blue-500/10 blur-3xl" />
@@ -398,11 +391,10 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
       {/* Hero */}
       <header className="relative pt-24 pb-16 md:pb-24 px-4 overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
+
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border border-sky-400/30 shadow-sm mb-6 animate-fade-in-up">
             <Camera className="w-4 h-4 text-sky-600" />
-            <span className="text-xs font-bold uppercase tracking-widest text-sky-700">
-              2026 Guide · Photography
-            </span>
+            <span className="text-xs font-bold uppercase tracking-widest text-sky-700">2026 Guide · Photography</span>
             <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
           </div>
 
@@ -413,7 +405,7 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
             </span>
           </h1>
 
-          {/* Shot count pills */}
+          {/* Stats pills */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-sky-600 text-white text-sm font-bold shadow-lg">
               <Camera className="w-4 h-4" /> 50 Must-Have Shots
@@ -427,8 +419,8 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
           </div>
 
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-            Share this with your photographer before the wedding — and tick off each shot as you
-            go. Every moment is irreplaceable.
+            Share this with your photographer before the wedding — then tick off each shot as the
+            day unfolds. Every moment is irreplaceable.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-gray-500">
@@ -448,15 +440,15 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
           <div className="max-w-5xl mx-auto mt-12 rounded-3xl overflow-hidden shadow-2xl shadow-sky-400/15 border-4 border-white ring-1 ring-sky-100">
             <img
               src={ensureHttps(post.featured_image)}
-              alt="Wedding photographer capturing an Indian ceremony"
-              className="w-full aspect-[21/9] object-cover"
+              alt="Indian bride with mehndi and jewellery details"
+              className="w-full aspect-[21/9] object-cover object-top"
               loading="eager"
             />
           </div>
         )}
       </header>
 
-      {/* Article body */}
+      {/* ── Article body ───────────────────────────────────────────────────── */}
       <main className="max-w-4xl mx-auto px-4 lg:px-8 pb-24 space-y-16 md:space-y-24">
 
         {/* Intro */}
@@ -468,16 +460,15 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
               Don't leave your wedding memories to chance
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4 text-lg">
-              You've spent months planning the perfect wedding. Every detail — the lehenga, the
-              flowers, the food — is exactly right. And then, a week after the wedding, you open
+              You've spent months planning the perfect wedding. The lehenga, the flowers, the
+              food — every detail is exactly right. And then, a week after the wedding, you open
               your photo gallery and realise: the sindoor moment is blurry. Your grandmother's
-              face during kanyadaan was never captured. The first look got missed.
+              face during kanyadaan was never captured. The first look was missed entirely.
             </p>
             <p className="text-gray-700 leading-relaxed text-lg">
               A photography checklist prevents that. Share this list with your photographer
-              2 weeks before the wedding. Mark your non-negotiables. Assign a family member
-              to help with group shots. And use the interactive checklist below to track
-              progress on the day itself.
+              2 weeks before the wedding, mark your non-negotiables, and use the interactive
+              checklist below to track progress on the day itself.
             </p>
           </div>
         </section>
@@ -485,22 +476,19 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
         {/* ── INTERACTIVE CHECKLIST ─────────────────────────────────────────── */}
         <section id="checklist">
 
-          {/* Sticky progress bar + controls */}
+          {/* Sticky progress header */}
           <div className="sticky top-16 z-30 -mx-4 px-4 py-4 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm mb-8">
             <div className="max-w-4xl mx-auto">
-              {/* Progress row */}
-              <div className="flex items-center justify-between mb-3">
+
+              {/* Progress label row */}
+              <div className="flex items-center justify-between mb-2">
                 <div>
-                  <span className="text-sm font-bold text-gray-900">{totalChecked} of 50 shots</span>
+                  <span className="text-sm font-bold text-gray-900">{totalChecked} of {TOTAL_SHOTS} shots</span>
                   <span className="text-gray-400 text-sm ml-2">ticked off</span>
                 </div>
                 <div className="flex items-center gap-3">
                   {totalChecked > 0 && (
-                    <button
-                      type="button"
-                      onClick={resetAll}
-                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
-                    >
+                    <button type="button" onClick={resetAll} className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2">
                       Reset
                     </button>
                   )}
@@ -509,7 +497,7 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
               </div>
 
               {/* Progress bar */}
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
                 <div
                   className="h-full bg-gradient-to-r from-sky-500 to-rose-gold rounded-full transition-all duration-500"
                   style={{ width: `${progressPct}%` }}
@@ -517,11 +505,11 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
               </div>
 
               {/* Filter pills */}
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 flex-wrap">
                 {[
-                  { key: 'all',          label: 'All 50 shots' },
+                  { key: 'all',          label: `All ${TOTAL_SHOTS} shots` },
                   { key: 'essential',    label: `★ ${ESSENTIAL_COUNT} Essential only` },
-                  { key: 'nice-to-have', label: `${50 - ESSENTIAL_COUNT} Nice-to-have` },
+                  { key: 'nice-to-have', label: `${TOTAL_SHOTS - ESSENTIAL_COUNT} Nice-to-have` },
                 ].map((f) => (
                   <button
                     key={f.key}
@@ -540,16 +528,16 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
             </div>
           </div>
 
-          {/* Category sections */}
+          {/* Category cards */}
           <div className="space-y-4">
             {filteredCategories.map((cat) => (
               <ShotCategory key={cat.id} cat={cat} checked={checked} onToggle={toggleShot} />
             ))}
           </div>
 
-          {/* Completion celebration */}
-          {totalChecked === 50 && (
-            <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-center shadow-xl">
+          {/* Completion message */}
+          {totalChecked === TOTAL_SHOTS && (
+            <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-center shadow-xl animate-fade-in-up">
               <p className="text-2xl font-serif font-bold mb-1">🎉 All 50 shots captured!</p>
               <p className="text-white/90 text-sm">Your wedding album is going to be incredible.</p>
             </div>
@@ -567,7 +555,6 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
               <p className="text-gray-500 text-sm mt-1">6 things every couple should do before the wedding day.</p>
             </div>
           </div>
-
           <div className="space-y-4">
             {PHOTOGRAPHER_TIPS.map((item, i) => (
               <div key={item.tip} className="flex gap-4 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:border-sky-300/40 hover:shadow-md transition-all">
@@ -605,7 +592,7 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
           </div>
         </section>
 
-        {/* Pro tip */}
+        {/* Pro tip callout */}
         <section>
           <div className="flex gap-4 p-6 md:p-8 rounded-2xl bg-sky-50 border border-sky-200/60">
             <Lightbulb className="w-7 h-7 text-sky-600 shrink-0 mt-0.5" />
@@ -614,7 +601,7 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
               <p className="text-sky-800 leading-relaxed">
                 Schedule your couple portrait session for <strong>golden hour (4–6 PM)</strong>.
                 Natural backlight turns any venue into a dream backdrop. Even a community hall
-                parking lot looks editorial with warm evening sun. This single scheduling decision
+                courtyard looks editorial with warm evening sun. This single scheduling decision
                 is worth more than ₹50,000 of extra photography equipment.
               </p>
             </div>
@@ -667,8 +654,8 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
           <p className="text-gray-600 leading-relaxed mb-8">
             Venues close. Flowers wilt. Food is eaten. But a photograph of your grandmother's
             face during the kanyadaan, or the exact moment the groom first saw the bride —
-            those live forever. Brief your photographer well, share this checklist,
-            and let the day unfold beautifully.
+            those live forever. Brief your photographer well, share this checklist, and let
+            the day unfold beautifully.
           </p>
           <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-500">
             <span className="px-3 py-1 rounded-full bg-white border border-gray-100">Free wedding checklist</span>
@@ -677,7 +664,6 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
           </div>
         </section>
 
-        {/* Affiliate */}
         {affiliateHref && (
           <aside className="rounded-2xl border border-rose-gold/25 bg-white p-8 text-center shadow-lg">
             <p className="text-xs font-semibold uppercase tracking-wider text-rose-gold/80 mb-3">Partner pick</p>
@@ -693,17 +679,10 @@ export function PhotographyChecklistArticle({ post, readTime, copied, onShare, a
         <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Share:</span>
-            <button
-              type="button"
-              onClick={onShare}
-              className="p-2 rounded-full hover:bg-rose-gold/10 text-gray-500 transition-colors relative"
-              title="Copy link"
-            >
+            <button type="button" onClick={onShare} className="p-2 rounded-full hover:bg-rose-gold/10 text-gray-500 transition-colors relative" title="Copy link">
               <Copy className="w-4 h-4" />
               {copied && (
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">
-                  Copied!
-                </span>
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">Copied!</span>
               )}
             </button>
           </div>
