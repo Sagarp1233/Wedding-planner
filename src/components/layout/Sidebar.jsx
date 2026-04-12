@@ -54,13 +54,15 @@ export default function Sidebar({ isOpen, onClose }) {
               </p>
             </div>
           </div>
-          {/* Switch Plan button */}
-          <button
-            onClick={() => navigate('/weddings')}
-            className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-rose-gold bg-gray-50 hover:bg-rose-gold/5 border border-gray-100 hover:border-rose-gold/20 transition-all"
-          >
-            <ArrowLeftRight className="w-3 h-3" /> Switch Plan
-          </button>
+          {/* Switch Plan button — only show if they have multiple plans */}
+          {weddings && weddings.length > 1 && (
+            <button
+              onClick={() => navigate('/weddings')}
+              className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-rose-gold bg-gray-50 hover:bg-rose-gold/5 border border-gray-100 hover:border-rose-gold/20 transition-all"
+            >
+              <ArrowLeftRight className="w-3 h-3" /> Switch Plan
+            </button>
+          )}
         </div>
 
         {/* Countdown */}
@@ -80,22 +82,6 @@ export default function Sidebar({ isOpen, onClose }) {
               </p>
             )}
           </div>
-        )}
-
-        {/* Upgrade Banner — shown only to free-tier users */}
-        {!isPro && (
-          <a
-            href="mailto:support@wedora.in?subject=Upgrade%20to%20Wedora%20Pro&body=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Wedora%20account%20to%20Pro."
-            className="mx-4 mb-4 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 flex items-center gap-3 hover:shadow-md transition-all group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform">
-              <Crown className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-gray-900">Go Pro</p>
-              <p className="text-[10px] text-gray-500 truncate">Up to 5 plans & more</p>
-            </div>
-          </a>
         )}
 
         {/* Navigation */}
