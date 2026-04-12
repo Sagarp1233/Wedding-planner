@@ -10,11 +10,18 @@ const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { markOnboarded, currentUser, setActiveWeddingId, addWeddingToList, canCreateWedding } = useAuth();
+  const { markOnboarded, currentUser, setActiveWeddingId, addWeddingToList, canCreateWedding, isOnboarded, weddings } = useAuth();
   const { dispatch } = useApp();
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+
+  // Plan limit guard: if user already has max weddings, redirect to picker
+  // Allow through if user has NO weddings (first-time onboarding)
+  if (!canCreateWedding && isOnboarded) {
+    navigate('/weddings', { replace: true });
+    return null;
+  }
   const [form, setForm] = useState({
     partner1: '',
     partner2: '',
@@ -44,6 +51,14 @@ export default function OnboardingPage() {
 
   async function handleComplete() {
     if (submitting) return;
+
+    // Double-check plan limit before inserting
+    if (!canCreateWedding && isOnboarded) {
+      alert('You have reached your plan limit. Please upgrade to Pro for more plans.');
+      navigate('/weddings');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
