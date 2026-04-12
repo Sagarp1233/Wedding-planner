@@ -1,11 +1,13 @@
-import { Menu, Bell, AlertTriangle, AlertCircle, CalendarClock, ChevronRight, Crown, ArrowLeftRight } from 'lucide-react';
+import { Menu, Bell, AlertTriangle, AlertCircle, CalendarClock, ChevronRight, Crown, ArrowLeftRight, Users } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useAuth } from '../../context/AuthContext';
+import InviteModal from '../ui/InviteModal';
 
 export default function TopBar({ title, subtitle, onMenuClick }) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const { notifications, count } = useNotifications();
   const { isPro } = useAuth();
   const dropdownRef = useRef(null);
@@ -22,6 +24,7 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
   }, []);
 
   return (
+    <>
     <header className="flex items-center justify-between mb-6 lg:mb-8 relative z-30">
       <div className="flex items-center gap-3">
         <button onClick={onMenuClick} className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
@@ -34,6 +37,14 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Share / Invite Partner button */}
+        <button
+          onClick={() => setShowInviteModal(true)}
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-semibold hover:text-plum hover:border-plum/30 hover:bg-plum/5 transition-all shadow-sm group"
+        >
+          <Users className="w-3.5 h-3.5 text-gray-400 group-hover:text-plum transition-colors" /> Share Invite
+        </button>
+
         {/* Switch Plan button */}
         <button
           onClick={() => navigate('/weddings')}
@@ -94,5 +105,7 @@ export default function TopBar({ title, subtitle, onMenuClick }) {
         </div>
       </div>
     </header>
+    <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
+    </>
   );
 }

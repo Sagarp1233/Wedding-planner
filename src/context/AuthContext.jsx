@@ -50,7 +50,6 @@ export function AuthProvider({ children }) {
       const query = supabase
         .from('weddings')
         .select('id, partner1, partner2, wedding_date, location, total_budget, created_at')
-        .eq('user_id', userId)
         .order('created_at', { ascending: false, nullsFirst: false });
 
       const { data, error } = await Promise.race([

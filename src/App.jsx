@@ -17,6 +17,7 @@ import VendorsPage from './pages/VendorsPage';
 import InspirationPage from './pages/InspirationPage';
 import SettingsPage from './pages/SettingsPage';
 import WeddingPickerPage from './pages/WeddingPickerPage';
+import InviteAcceptPage from './pages/InviteAcceptPage';
 
 // Blog Pages
 import BlogListingPage from './pages/BlogListingPage';
@@ -91,6 +92,9 @@ function AppWithContext() {
     <LoadingWatchdog isLoading={!authReady}>
       <AppProvider userId={currentUser?.id} weddingId={activeWeddingId}>
         <Routes>
+          {/* Invite route must be above the rest to intercept securely */}
+          <Route path="/invite/:token" element={<InviteAcceptPage />} />
+          
           {/* Public Auth/Landing */}
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />

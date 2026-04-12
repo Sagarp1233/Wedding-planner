@@ -249,7 +249,30 @@ export function AppProvider({ children, userId, weddingId }) {
       }
     }
 
-    loadSupabaseData();
+    // Connect to Supabase exclusively for Realtime Collaborative changes 
+    let channel;
+    if (userId && weddingId) {
+      loadSupabaseData().then(() => {
+        // Set up Realtime Subscription
+        channel = supabase.channel(`wedding-room-${weddingId}`)
+          .on(
+            'postgres_changes', 
+            { event: '*', schema: 'public', filter: `wedding_id=eq.${weddingId}` }, 
+            (payload) => {
+              // Whenever a partner updates a task/guest/budget on the network, quietly fetch the fresh data globally to sync the UI instantaneously.
+              loadSupabaseData();
+            }
+          )
+          .subscribe();
+      });
+    }
+
+    return () => {
+      // Clean up WebSockets connection when component unmounts or changes contexts
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [userId, weddingId]);
 
   // The async dispatcher handles syncing changes to the DB
