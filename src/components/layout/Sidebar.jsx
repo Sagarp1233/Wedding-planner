@@ -58,21 +58,21 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Countdown */}
         {state.wedding.weddingDate && (
-          <div className="mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-rose-gold via-[#c77d8a] to-plum relative overflow-hidden">
-            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/10" />
-            <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-white/5" />
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mb-2">Wedding Day</p>
+          <div className="mx-4 mb-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
+            {/* Left accent stripe */}
+            <div className="absolute left-0 top-3 bottom-3 w-1 rounded-full bg-gradient-to-b from-amber-400 to-orange-500" />
+            <div className="pl-3">
+              <p className="text-[10px] font-bold text-amber-600/70 uppercase tracking-[0.2em] mb-1.5">Wedding Day</p>
               <div className="flex items-baseline gap-1.5">
-                <p className="text-3xl font-serif font-bold text-white">{daysLeft > 0 ? daysLeft : 0}</p>
-                <span className="text-sm font-medium text-white/70">days to go</span>
+                <p className="text-3xl font-serif font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 0}</p>
+                <span className="text-sm font-medium text-gray-400">days to go</span>
               </div>
-              <div className="h-px bg-white/15 my-2.5" />
-              <p className="text-xs text-white/80 font-medium">
+              <div className="h-px bg-gray-100 my-2.5" />
+              <p className="text-xs text-gray-500 font-medium">
                 {new Date(state.wedding.weddingDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
               {state.wedding.location && (
-                <p className="text-xs text-white/60 mt-0.5 flex items-center gap-1">
+                <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                   📍 {state.wedding.location}
                 </p>
               )}
