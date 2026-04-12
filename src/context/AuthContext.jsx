@@ -239,7 +239,6 @@ export function AuthProvider({ children }) {
       logout,
       markOnboarded,
       refreshSessionAndOnboarding,
-      refreshWeddings,
       isAuthenticated: !!currentUser,
       isOnboarded,
       isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin',
@@ -251,6 +250,7 @@ export function AuthProvider({ children }) {
       canCreateWedding,
       maxWeddings,
       isPro,
+      appConfig,
     }}>
       {children}
     </AuthContext.Provider>
