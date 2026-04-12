@@ -156,7 +156,7 @@ export function AuthProvider({ children }) {
     };
   }, [setActiveWeddingId]);
 
-  // Refresh weddings list (e.g., after creating or deleting a wedding)
+  // Refresh weddings list (e.g., after deleting a wedding)
   const refreshWeddings = useCallback(async () => {
     if (!currentUser) return;
     const list = await fetchUserWeddings(currentUser.id);
@@ -172,6 +172,12 @@ export function AuthProvider({ children }) {
       }
     }
   }, [currentUser, activeWeddingId, setActiveWeddingId]);
+
+  // Optimistically add a wedding to the local list (no async fetch needed)
+  // This avoids the race condition where navigate() fires before setWeddings() commits.
+  const addWeddingToList = useCallback((weddingRow) => {
+    setWeddings(prev => [weddingRow, ...prev]);
+  }, []);
 
   async function refreshSessionAndOnboarding() {
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -223,8 +229,8 @@ export function AuthProvider({ children }) {
   }
 
   function markOnboarded() {
-    // After creating a wedding, refresh the list so isOnboarded flips to true
-    refreshWeddings();
+    // No-op now — addWeddingToList handles optimistic state update
+    // Kept for backward compatibility with any callers
   }
 
   return (
@@ -245,6 +251,7 @@ export function AuthProvider({ children }) {
       weddings,
       activeWeddingId,
       setActiveWeddingId,
+      addWeddingToList,
       canCreateWedding,
       maxWeddings,
       isPro,

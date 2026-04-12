@@ -10,10 +10,11 @@ const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { markOnboarded, currentUser, setActiveWeddingId, refreshWeddings } = useAuth();
+  const { markOnboarded, currentUser, setActiveWeddingId, addWeddingToList, canCreateWedding } = useAuth();
   const { dispatch } = useApp();
 
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     partner1: '',
     partner2: '',
@@ -42,61 +43,75 @@ export default function OnboardingPage() {
   }
 
   async function handleComplete() {
-    const budget = Number(form.totalBudget) || 500000;
-    const weddingData = {
-      partner1: form.partner1.trim(),
-      partner2: form.partner2.trim(),
-      weddingDate: form.weddingDate,
-      location: form.location.trim(),
-      totalBudget: budget,
-      weddingType: form.weddingType,
-      guestEstimate: Number(form.guestEstimate) || 0,
-    };
+    if (submitting) return;
+    setSubmitting(true);
 
-    const budgetCategories = generateBudgetCategories(budget);
-    const tasks = generateTasks(form.weddingDate);
-    const events = generateEvents(form.weddingDate, form.weddingType);
+    try {
+      const budget = Number(form.totalBudget) || 500000;
+      const weddingData = {
+        partner1: form.partner1.trim(),
+        partner2: form.partner2.trim(),
+        weddingDate: form.weddingDate,
+        location: form.location.trim(),
+        totalBudget: budget,
+        weddingType: form.weddingType,
+        guestEstimate: Number(form.guestEstimate) || 0,
+      };
 
-    // Create the wedding directly in Supabase so we can get the real ID back
-    const { data: newWedding, error } = await supabase.from('weddings').insert({
-      user_id: currentUser.id,
-      partner1: weddingData.partner1 || 'Partner 1',
-      partner2: weddingData.partner2 || 'Partner 2',
-      wedding_date: weddingData.weddingDate || '',
-      location: weddingData.location || '',
-      wedding_style: weddingData.weddingType || '',
-      total_budget: weddingData.totalBudget || 0,
-    }).select('id').single();
+      const budgetCategories = generateBudgetCategories(budget);
+      const tasks = generateTasks(form.weddingDate);
+      const events = generateEvents(form.weddingDate, form.weddingType);
 
-    if (error || !newWedding) {
-      console.error('Failed to create wedding:', error);
-      return;
+      // Create the wedding directly in Supabase so we can get the real ID back
+      const { data: newWedding, error } = await supabase.from('weddings').insert({
+        user_id: currentUser.id,
+        partner1: weddingData.partner1 || 'Partner 1',
+        partner2: weddingData.partner2 || 'Partner 2',
+        wedding_date: weddingData.weddingDate || '',
+        location: weddingData.location || '',
+        wedding_style: weddingData.weddingType || '',
+        total_budget: weddingData.totalBudget || 0,
+      }).select('*').single();
+
+      if (error || !newWedding) {
+        console.error('Failed to create wedding:', error);
+        alert('Failed to create wedding plan. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      const newWeddingId = newWedding.id;
+
+      // Insert generated data (fire-and-forget, non-blocking)
+      const insertPromises = [];
+      if (budgetCategories.length > 0) {
+        insertPromises.push(supabase.from('budget_categories').insert(
+          budgetCategories.map(c => ({ wedding_id: newWeddingId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated }))
+        ));
+      }
+      if (tasks.length > 0) {
+        insertPromises.push(supabase.from('tasks').insert(
+          tasks.map(t => ({ wedding_id: newWeddingId, title: t.title, notes: t.description || '', due_date: t.deadline || '', status: t.status }))
+        ));
+      }
+      if (events.length > 0) {
+        insertPromises.push(supabase.from('timeline_events').insert(
+          events.map(e => ({ wedding_id: newWeddingId, start_time: e.time || '', name: e.name || 'Event', notes: e.description || '', venue: e.location || '', date: e.date || new Date().toISOString().split('T')[0] }))
+        ));
+      }
+      await Promise.all(insertPromises);
+
+      // CRITICAL: Optimistically add the wedding to the local list BEFORE navigating.
+      // This ensures isOnboarded (weddings.length > 0) is true when the route guard checks it.
+      addWeddingToList(newWedding);
+      setActiveWeddingId(newWeddingId);
+      markOnboarded();
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Onboarding error:', err);
+      alert('Something went wrong. Please try again.');
+      setSubmitting(false);
     }
-
-    const newWeddingId = newWedding.id;
-
-    // Insert generated data
-    if (budgetCategories.length > 0) {
-      await supabase.from('budget_categories').insert(
-        budgetCategories.map(c => ({ wedding_id: newWeddingId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated }))
-      );
-    }
-    if (tasks.length > 0) {
-      await supabase.from('tasks').insert(
-        tasks.map(t => ({ wedding_id: newWeddingId, title: t.title, notes: t.description || '', due_date: t.deadline || '', status: t.status }))
-      );
-    }
-    if (events.length > 0) {
-      await supabase.from('timeline_events').insert(
-        events.map(e => ({ wedding_id: newWeddingId, start_time: e.time || '', name: e.name || 'Event', notes: e.description || '', venue: e.location || '', date: e.date || new Date().toISOString().split('T')[0] }))
-      );
-    }
-
-    // Set this new wedding as the active plan & refresh the wedding list
-    setActiveWeddingId(newWeddingId);
-    await refreshWeddings();
-    markOnboarded();
-    navigate('/dashboard');
   }
 
   return (

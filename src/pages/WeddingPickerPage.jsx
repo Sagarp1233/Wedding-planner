@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { formatINR, getDaysUntil } from '../utils/helpers';
-import { Heart, Plus, Trash2, MapPin, Calendar, Wallet, ChevronRight, Crown, Sparkles, Lock } from 'lucide-react';
+import { Heart, Plus, Trash2, MapPin, Calendar, Wallet, ChevronRight, Crown, Sparkles } from 'lucide-react';
 
 export default function WeddingPickerPage() {
   const navigate = useNavigate();
@@ -149,12 +149,21 @@ export default function WeddingPickerPage() {
             Plan a New Wedding
           </button>
         ) : (
-          <div className="w-full glass-card p-5 flex items-center justify-center gap-3 text-sm font-medium text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
-            <Lock className="w-4 h-4" />
-            <div>
-              <p>Plan limit reached ({maxWeddings}/{maxWeddings})</p>
-              <p className="text-xs text-gray-300 mt-0.5">Upgrade to Pro for up to 5 wedding plans</p>
+          <div className="w-full glass-card p-6 border-2 border-dashed border-amber-200 rounded-2xl text-center bg-gradient-to-r from-amber-50/50 to-orange-50/30">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-200/50">
+              <Crown className="w-6 h-6 text-white" />
             </div>
+            <p className="text-sm font-semibold text-gray-900 mb-1">Upgrade to Wedora Pro</p>
+            <p className="text-xs text-gray-500 mb-4">
+              Free plan allows {maxWeddings} wedding plan. Upgrade to Pro for up to 5 plans, priority support, and more!
+            </p>
+            <a
+              href="mailto:support@wedora.in?subject=Upgrade%20to%20Pro&body=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Wedora%20account%20to%20Pro."
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold shadow-lg shadow-amber-200/50 hover:shadow-xl transition-all hover:-translate-y-0.5"
+            >
+              <Crown className="w-4 h-4" /> Contact Us to Upgrade
+            </a>
+            <p className="text-[10px] text-gray-400 mt-2">Or email support@wedora.in</p>
           </div>
         )}
 
