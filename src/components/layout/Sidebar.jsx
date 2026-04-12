@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const { state } = useApp();
-  const { currentUser, logout, isAdmin, isPro } = useAuth();
+  const { currentUser, logout, isAdmin, isPro, weddings } = useAuth();
   const navigate = useNavigate();
   const daysLeft = getDaysUntil(state.wedding.weddingDate);
 
