@@ -19,18 +19,21 @@ export default function WeddingPickerPage() {
     if (!window.confirm(`Delete "${wedding.partner1} & ${wedding.partner2}" and ALL its data? This cannot be undone.`)) return;
     setDeleting(wedding.id);
     try {
-      // Perform manual cascading delete to bypass missing ON DELETE CASCADE constraints
-      await Promise.all([
-        supabase.from('budget_categories').delete().eq('wedding_id', wedding.id),
-        supabase.from('tasks').delete().eq('wedding_id', wedding.id),
-        supabase.from('guests').delete().eq('wedding_id', wedding.id),
-        supabase.from('timeline_events').delete().eq('wedding_id', wedding.id),
-        supabase.from('vendors').delete().eq('wedding_id', wedding.id),
-        supabase.from('expenses').delete().eq('wedding_id', wedding.id),
-        supabase.from('inspirations').delete().eq('wedding_id', wedding.id)
-      ]);
-      const { error } = await supabase.from('weddings').delete().eq('id', wedding.id);
-      if (error) throw error;
+      // 1. Delete deeply nested tables first (expenses depend on budget_categories)
+      const { error: expErr } = await supabase.from('expenses').delete().eq('wedding_id', wedding.id);
+      if (expErr) throw new Error('Expenses: ' + expErr.message);
+
+      // 2. Delete level-1 dependent tables
+      const deps = ['budget_categories', 'tasks', 'guests', 'timeline_events', 'vendors', 'inspirations'];
+      for (const table of deps) {
+         const { error } = await supabase.from(table).delete().eq('wedding_id', wedding.id);
+         if (error) throw new Error(`${table}: ` + error.message);
+      }
+
+      // 3. Delete the parent wedding
+      const { error: wedErr } = await supabase.from('weddings').delete().eq('id', wedding.id);
+      if (wedErr) throw new Error('Wedding: ' + wedErr.message);
+
       await refreshSessionAndOnboarding();
     } catch (e) {
       console.error('Failed to delete wedding:', e);
