@@ -21,20 +21,10 @@ import {
   getStaticLowBudgetPremiumPost,
   LowBudgetPremiumWeddingArticle,
 } from './blog/lowBudgetPremiumWedding';
-import {
-  PHOTOGRAPHY_CHECKLIST_SLUG,
-  getStaticPhotographyChecklistPost,
-  PhotographyChecklistArticle,
-} from './blog/weddingPhotographyChecklist';
 
 // ─── All static / enhanced article slugs ────────────────────────────────────
 // Add new static blog slugs here as they are created.
-const STATIC_SLUGS = new Set([
-  BUDGET_GUIDE_SLUG,
-  WEDDING_5L_SLUG,
-  LOW_BUDGET_PREMIUM_SLUG,
-  PHOTOGRAPHY_CHECKLIST_SLUG,
-]);
+const STATIC_SLUGS = new Set([BUDGET_GUIDE_SLUG, WEDDING_5L_SLUG, LOW_BUDGET_PREMIUM_SLUG]);
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -103,13 +93,6 @@ export default function BlogPostPage() {
 
       if (slug === LOW_BUDGET_PREMIUM_SLUG) {
         const resolved = await fetchStaticPost(getStaticLowBudgetPremiumPost);
-        setPost(resolved);
-        applyPostSEO(resolved);
-        return;
-      }
-
-      if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
-        const resolved = await fetchStaticPost(getStaticPhotographyChecklistPost);
         setPost(resolved);
         applyPostSEO(resolved);
         return;
@@ -231,20 +214,6 @@ export default function BlogPostPage() {
       <LowBudgetPremiumWeddingArticle
         post={post}
         readTime={13}
-        copied={copied}
-        onShare={handleShareURL}
-        affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
-      />
-    );
-  }
-
-  // ── Enhanced article: Wedding Photography Checklist ──────────────────────
-  if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
-    return (
-      <PhotographyChecklistArticle
-        post={post}
-        readTime={10}
         copied={copied}
         onShare={handleShareURL}
         affiliateHref={affiliateHref}
