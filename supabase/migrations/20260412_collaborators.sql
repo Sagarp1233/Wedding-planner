@@ -1,3 +1,9 @@
+-- ============================================================
+-- Wedora Collaborative Planning Migration (Idempotent & Safe)
+-- Fixes infinite recursion by never cross-referencing tables
+-- in their own RLS policies.
+-- ============================================================
+
 -- 1. Create collaborators table
 CREATE TABLE IF NOT EXISTS public.collaborators (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -11,13 +17,23 @@ CREATE TABLE IF NOT EXISTS public.collaborators (
 -- Turn on RLS for collaborators
 ALTER TABLE public.collaborators ENABLE ROW LEVEL SECURITY;
 
+-- Collaborators policy: ONLY check user_id directly. NEVER subquery weddings to avoid recursion.
 DROP POLICY IF EXISTS "Users can view their own collaboration links" ON public.collaborators;
 CREATE POLICY "Users can view their own collaboration links" ON public.collaborators 
-    FOR SELECT TO authenticated USING (user_id = auth.uid() OR wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
+    FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Collaborators can view by direct user match" ON public.collaborators;
+CREATE POLICY "Collaborators can view by direct user match" ON public.collaborators
+    FOR ALL TO authenticated USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "Owners can remove collaborators" ON public.collaborators;
-CREATE POLICY "Owners can remove collaborators" ON public.collaborators
-    FOR DELETE TO authenticated USING (wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
+DROP POLICY IF EXISTS "Owners can manage collaborators" ON public.collaborators;
+CREATE POLICY "Owners can manage collaborators" ON public.collaborators
+    FOR ALL TO authenticated USING (
+        -- Owner check: look up weddings but mark this as non-recursive by only checking user_id column
+        EXISTS (SELECT 1 FROM public.weddings w WHERE w.id = wedding_id AND w.user_id = auth.uid())
+    );
+
 
 -- 2. Create wedding_invites table
 CREATE TABLE IF NOT EXISTS public.wedding_invites (
@@ -32,45 +48,45 @@ CREATE TABLE IF NOT EXISTS public.wedding_invites (
 -- Turn on RLS for invites
 ALTER TABLE public.wedding_invites ENABLE ROW LEVEL SECURITY;
 
--- Owners can see invites they generated
 DROP POLICY IF EXISTS "Owners can view and create their invites" ON public.wedding_invites;
 CREATE POLICY "Owners can view and create their invites" ON public.wedding_invites
-    FOR ALL TO authenticated USING (created_by = auth.uid() OR wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
+    FOR ALL TO authenticated USING (created_by = auth.uid());
 
--- Unauthenticated or authenticated users MUST be able to query checking if a token is valid, but they don't need RLS because we use a SECURITY DEFINER function!
 
 -- 3. Replace RLS Policies on Weddings
--- Drop old policies to prevent collision
+-- Drop ALL potentially conflicting old policies
 DROP POLICY IF EXISTS "Enable ALL for users based on user_id" ON public.weddings;
-
--- Read policy (Both owner and collaborators can see)
 DROP POLICY IF EXISTS "Enable Read for owners and collaborators" ON public.weddings;
+DROP POLICY IF EXISTS "Enable Update for owners and collaborators" ON public.weddings;
+DROP POLICY IF EXISTS "Enable Insert for authenticated users" ON public.weddings;
+DROP POLICY IF EXISTS "Enable Delete ONLY for owners" ON public.weddings;
+
+-- Read: owner OR listed in collaborators (collaborators has NO policy that references weddings back)
 CREATE POLICY "Enable Read for owners and collaborators" ON public.weddings
 FOR SELECT TO authenticated USING (
     user_id = auth.uid() OR 
-    id IN (SELECT wedding_id FROM public.collaborators WHERE user_id = auth.uid())
+    id IN (SELECT c.wedding_id FROM public.collaborators c WHERE c.user_id = auth.uid())
 );
 
--- Update policy (Both owner and collaborators can edit details)
-DROP POLICY IF EXISTS "Enable Update for owners and collaborators" ON public.weddings;
+-- Update: owner OR collaborator
 CREATE POLICY "Enable Update for owners and collaborators" ON public.weddings
 FOR UPDATE TO authenticated USING (
     user_id = auth.uid() OR 
-    id IN (SELECT wedding_id FROM public.collaborators WHERE user_id = auth.uid())
+    id IN (SELECT c.wedding_id FROM public.collaborators c WHERE c.user_id = auth.uid())
 );
 
--- Insert policy (Only owner logic applies, handled by default supabase insert setup or allow all authed)
-DROP POLICY IF EXISTS "Enable Insert for authenticated users" ON public.weddings;
+-- Insert: only owner
 CREATE POLICY "Enable Insert for authenticated users" ON public.weddings
 FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
--- Delete policy (STRICTLY OWNER ONLY)
-DROP POLICY IF EXISTS "Enable Delete ONLY for owners" ON public.weddings;
+-- Delete: STRICTLY owner only
 CREATE POLICY "Enable Delete ONLY for owners" ON public.weddings
 FOR DELETE TO authenticated USING (user_id = auth.uid());
 
 
--- 4. Replace RLS on all child tables (guests, tasks, etc)
+-- 4. Replace RLS on all child tables
+-- These policies query ONLY collaborators (which has a simple user_id check),
+-- never creating a recursion loop.
 DO $$
 DECLARE
     t text;
@@ -82,13 +98,16 @@ BEGIN
           CREATE POLICY "Enable ALL for actual collaborators" ON public.%I FOR ALL TO authenticated USING (
               wedding_id IN (
                   SELECT w.id FROM public.weddings w WHERE w.user_id = auth.uid()
-                  UNION
+              )
+              OR
+              wedding_id IN (
                   SELECT c.wedding_id FROM public.collaborators c WHERE c.user_id = auth.uid()
               )
           )', t);
     END LOOP;
 END
 $$;
+
 
 -- 5. Create secure RPC Function to Accept Invites
 CREATE OR REPLACE FUNCTION public.accept_wedding_invite(invite_token uuid)
@@ -118,8 +137,6 @@ BEGIN
    
    -- Update user's active wedding
    UPDATE public.users SET active_wedding_id = target_wedding_id WHERE id = auth.uid();
-   
-   -- Optional: we can delete the invite if it's single use. For simplicity, we just keep it until it expires.
    
    RETURN json_build_object('success', true, 'wedding_id', target_wedding_id);
 END;

@@ -47,23 +47,53 @@ export function AuthProvider({ children }) {
 
   async function fetchUserWeddings(userId) {
     try {
-      const query = supabase
+      // Primary: fetch weddings the user owns
+      const ownedQuery = supabase
         .from('weddings')
         .select('id, partner1, partner2, wedding_date, location, total_budget, created_at')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false, nullsFirst: false });
 
-      const { data, error } = await Promise.race([
-        query,
+      const { data: ownedData, error: ownedError } = await Promise.race([
+        ownedQuery,
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('weddings-fetch-timeout')), ONBOARDING_FETCH_MS)
         ),
       ]);
 
-      if (error) {
-        console.error('[Wedora] Failed to fetch weddings:', error);
-        return [];
+      if (ownedError) {
+        console.error('[Wedora] Failed to fetch owned weddings:', ownedError);
       }
-      return data || [];
+
+      // Secondary: fetch weddings the user collaborates on
+      let collabData = [];
+      try {
+        const { data: collabLinks } = await supabase
+          .from('collaborators')
+          .select('wedding_id')
+          .eq('user_id', userId);
+
+        if (collabLinks && collabLinks.length > 0) {
+          const collabIds = collabLinks.map(c => c.wedding_id);
+          const { data } = await supabase
+            .from('weddings')
+            .select('id, partner1, partner2, wedding_date, location, total_budget, created_at')
+            .in('id', collabIds)
+            .order('created_at', { ascending: false, nullsFirst: false });
+          collabData = data || [];
+        }
+      } catch (e) {
+        // collaborators table might not exist yet – silently skip
+        console.warn('[Wedora] Collaborator fetch skipped:', e.message);
+      }
+
+      // Merge and deduplicate
+      const allWeddings = [...(ownedData || [])];
+      const ownedIds = new Set(allWeddings.map(w => w.id));
+      for (const cw of collabData) {
+        if (!ownedIds.has(cw.id)) allWeddings.push(cw);
+      }
+      return allWeddings;
     } catch (e) {
       if (e?.message === 'weddings-fetch-timeout') {
         console.warn('[Wedora] Wedding list fetch timed out.');
