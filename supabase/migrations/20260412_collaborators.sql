@@ -11,9 +11,11 @@ CREATE TABLE IF NOT EXISTS public.collaborators (
 -- Turn on RLS for collaborators
 ALTER TABLE public.collaborators ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own collaboration links" ON public.collaborators;
 CREATE POLICY "Users can view their own collaboration links" ON public.collaborators 
     FOR SELECT TO authenticated USING (user_id = auth.uid() OR wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "Owners can remove collaborators" ON public.collaborators;
 CREATE POLICY "Owners can remove collaborators" ON public.collaborators
     FOR DELETE TO authenticated USING (wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
 
@@ -31,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.wedding_invites (
 ALTER TABLE public.wedding_invites ENABLE ROW LEVEL SECURITY;
 
 -- Owners can see invites they generated
+DROP POLICY IF EXISTS "Owners can view and create their invites" ON public.wedding_invites;
 CREATE POLICY "Owners can view and create their invites" ON public.wedding_invites
     FOR ALL TO authenticated USING (created_by = auth.uid() OR wedding_id IN (SELECT id FROM public.weddings WHERE user_id = auth.uid()));
 
@@ -41,6 +44,7 @@ CREATE POLICY "Owners can view and create their invites" ON public.wedding_invit
 DROP POLICY IF EXISTS "Enable ALL for users based on user_id" ON public.weddings;
 
 -- Read policy (Both owner and collaborators can see)
+DROP POLICY IF EXISTS "Enable Read for owners and collaborators" ON public.weddings;
 CREATE POLICY "Enable Read for owners and collaborators" ON public.weddings
 FOR SELECT TO authenticated USING (
     user_id = auth.uid() OR 
@@ -48,6 +52,7 @@ FOR SELECT TO authenticated USING (
 );
 
 -- Update policy (Both owner and collaborators can edit details)
+DROP POLICY IF EXISTS "Enable Update for owners and collaborators" ON public.weddings;
 CREATE POLICY "Enable Update for owners and collaborators" ON public.weddings
 FOR UPDATE TO authenticated USING (
     user_id = auth.uid() OR 
@@ -55,10 +60,12 @@ FOR UPDATE TO authenticated USING (
 );
 
 -- Insert policy (Only owner logic applies, handled by default supabase insert setup or allow all authed)
+DROP POLICY IF EXISTS "Enable Insert for authenticated users" ON public.weddings;
 CREATE POLICY "Enable Insert for authenticated users" ON public.weddings
 FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
 -- Delete policy (STRICTLY OWNER ONLY)
+DROP POLICY IF EXISTS "Enable Delete ONLY for owners" ON public.weddings;
 CREATE POLICY "Enable Delete ONLY for owners" ON public.weddings
 FOR DELETE TO authenticated USING (user_id = auth.uid());
 
@@ -70,10 +77,7 @@ DECLARE
     tables text[] := ARRAY['budget_categories', 'tasks', 'guests', 'timeline_events', 'vendors', 'expenses', 'inspirations'];
 BEGIN
     FOR t IN SELECT unnest(tables) LOOP
-       -- Drop common old policies if they exist. We don't know the exact names previously created natively via Supabase UI, 
-       -- but usually default UI policies are named "Enable ALL for users based on user_id" or similar.
-       -- To ensure zero disruption, we can just CREATE additive policies, or if we must guarantee it, we simply create a new broad policy.
-       
+       EXECUTE format('DROP POLICY IF EXISTS "Enable ALL for actual collaborators" ON public.%I', t);
        EXECUTE format('
           CREATE POLICY "Enable ALL for actual collaborators" ON public.%I FOR ALL TO authenticated USING (
               wedding_id IN (
