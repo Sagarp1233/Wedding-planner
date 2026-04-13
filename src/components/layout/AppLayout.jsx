@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { Analytics } from "@vercel/analytics/next"
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
