@@ -11,13 +11,41 @@ import {
   getStaticBudgetGuidePost,
   IndianWeddingBudgetGuide2026Article,
 } from './blog/indianWeddingBudgetGuide2026';
-import { WEDDING_5L_SLUG, getStaticWedding5LPost, WeddingUnder5LakhsArticle } from './blog/weddingUnder5Lakhs';
-import { LOW_BUDGET_PREMIUM_SLUG, getStaticLowBudgetPremiumPost, LowBudgetPremiumWeddingArticle } from './blog/lowBudgetPremiumWedding';
-import { PHOTOGRAPHY_CHECKLIST_SLUG, getStaticPhotographyChecklistPost, PhotographyChecklistArticle } from './blog/weddingPhotographyChecklist';
-import { BUDGET_CALCULATOR_SLUG, getStaticBudgetCalculatorPost, BudgetCalculatorArticle } from './blog/weddingBudgetCalculator';
-import { LAST_MINUTE_CHECKLIST_SLUG, getStaticLastMinuteChecklistPost, LastMinuteChecklistArticle } from './blog/lastMinuteWeddingChecklist';
-import { WHATSAPP_INVITE_SLUG, getStaticWhatsAppInvitePost, WhatsAppInviteArticle } from './blog/whatsappWeddingInvitations';
-import { ARYA_SAMAJ_MARRIAGE_SLUG, getStaticAryaSamajPost, AryaSamajMarriageArticle } from './blog/aryaSamajMarriage';
+import {
+  WEDDING_5L_SLUG,
+  getStaticWedding5LPost,
+  WeddingUnder5LakhsArticle,
+} from './blog/weddingUnder5Lakhs';
+import {
+  LOW_BUDGET_PREMIUM_SLUG,
+  getStaticLowBudgetPremiumPost,
+  LowBudgetPremiumWeddingArticle,
+} from './blog/lowBudgetPremiumWedding';
+import {
+  PHOTOGRAPHY_CHECKLIST_SLUG,
+  getStaticPhotographyChecklistPost,
+  PhotographyChecklistArticle,
+} from './blog/weddingPhotographyChecklist';
+import {
+  BUDGET_CALCULATOR_SLUG,
+  getStaticBudgetCalculatorPost,
+  BudgetCalculatorArticle,
+} from './blog/weddingBudgetCalculator';
+import {
+  LAST_MINUTE_CHECKLIST_SLUG,
+  getStaticLastMinuteChecklistPost,
+  LastMinuteChecklistArticle,
+} from './blog/lastMinuteWeddingChecklist';
+import {
+  WHATSAPP_INVITE_SLUG,
+  getStaticWhatsAppInvitePost,
+  WhatsAppInviteArticle,
+} from './blog/whatsappWeddingInvitations';
+import {
+  ARYA_SAMAJ_MARRIAGE_SLUG,
+  getStaticAryaSamajPost,
+  AryaSamajMarriageArticle,
+} from './blog/aryaSamajMarriage';
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -55,6 +83,14 @@ export default function BlogPostPage() {
     try {
       setLoading(true);
 
+      // shared helper: try DB first, fall back to static getter
+      async function tryDB(staticGetter) {
+        const { data, error } = await supabase
+          .from('blogs').select('*').eq('slug', slug)
+          .eq('status', 'published').maybeSingle();
+        return (!error && data) ? data : staticGetter();
+      }
+
       if (slug === BUDGET_GUIDE_SLUG) {
         const { data, error } = await supabase
           .from('blogs')
@@ -62,27 +98,38 @@ export default function BlogPostPage() {
           .eq('slug', slug)
           .eq('status', 'published')
           .maybeSingle();
-
         const resolved = !error && data ? data : getStaticBudgetGuidePost();
-        setPost(resolved);
-        applyPostSEO(resolved);
-        return;
+        setPost(resolved); applyPostSEO(resolved); return;
       }
 
-      // DB-first helper with static fallback
-      async function tryDB(getter) {
-        const { data: d, error: e } = await supabase
-          .from('blogs').select('*').eq('slug', slug)
-          .eq('status', 'published').maybeSingle();
-        return (!e && d) ? d : getter();
+      if (slug === WEDDING_5L_SLUG) {
+        const r = await tryDB(getStaticWedding5LPost);
+        setPost(r); applyPostSEO(r); return;
       }
-      if (slug === WEDDING_5L_SLUG) { const r = await tryDB(getStaticWedding5LPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === LOW_BUDGET_PREMIUM_SLUG) { const r = await tryDB(getStaticLowBudgetPremiumPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) { const r = await tryDB(getStaticPhotographyChecklistPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === BUDGET_CALCULATOR_SLUG) { const r = await tryDB(getStaticBudgetCalculatorPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === LAST_MINUTE_CHECKLIST_SLUG) { const r = await tryDB(getStaticLastMinuteChecklistPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === WHATSAPP_INVITE_SLUG) { const r = await tryDB(getStaticWhatsAppInvitePost); setPost(r); applyPostSEO(r); return; }
-      if (slug === ARYA_SAMAJ_MARRIAGE_SLUG) { const r = await tryDB(getStaticAryaSamajPost); setPost(r); applyPostSEO(r); return; }
+      if (slug === LOW_BUDGET_PREMIUM_SLUG) {
+        const r = await tryDB(getStaticLowBudgetPremiumPost);
+        setPost(r); applyPostSEO(r); return;
+      }
+      if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
+        const r = await tryDB(getStaticPhotographyChecklistPost);
+        setPost(r); applyPostSEO(r); return;
+      }
+      if (slug === BUDGET_CALCULATOR_SLUG) {
+        const r = await tryDB(getStaticBudgetCalculatorPost);
+        setPost(r); applyPostSEO(r); return;
+      }
+      if (slug === LAST_MINUTE_CHECKLIST_SLUG) {
+        const r = await tryDB(getStaticLastMinuteChecklistPost);
+        setPost(r); applyPostSEO(r); return;
+      }
+      if (slug === WHATSAPP_INVITE_SLUG) {
+        const r = await tryDB(getStaticWhatsAppInvitePost);
+        setPost(r); applyPostSEO(r); return;
+      }
+      if (slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
+        const r = await tryDB(getStaticAryaSamajPost);
+        setPost(r); applyPostSEO(r); return;
+      }
 
       const { data, error } = await supabase
         .from('blogs')
@@ -155,38 +202,68 @@ export default function BlogPostPage() {
   const affiliateCtaLabel = (post.affiliate_label && String(post.affiliate_label).trim()) || 'Learn more';
 
   if (post.slug === BUDGET_GUIDE_SLUG) {
-    const readTime = 14;
     return (
       <IndianWeddingBudgetGuide2026Article
-        post={post}
-        readTime={readTime}
-        copied={copied}
-        onShare={handleShareURL}
-        affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        post={post} readTime={14} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
   if (post.slug === WEDDING_5L_SLUG) {
-    return <WeddingUnder5LakhsArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <WeddingUnder5LakhsArticle
+        post={post} readTime={12} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
-    return <LowBudgetPremiumWeddingArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <LowBudgetPremiumWeddingArticle
+        post={post} readTime={13} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
-    return <PhotographyChecklistArticle post={post} readTime={10} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <PhotographyChecklistArticle
+        post={post} readTime={10} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === BUDGET_CALCULATOR_SLUG) {
-    return <BudgetCalculatorArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <BudgetCalculatorArticle
+        post={post} readTime={11} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
-    return <LastMinuteChecklistArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <LastMinuteChecklistArticle
+        post={post} readTime={12} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === WHATSAPP_INVITE_SLUG) {
-    return <WhatsAppInviteArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <WhatsAppInviteArticle
+        post={post} readTime={11} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
   if (post.slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
-    return <AryaSamajMarriageArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <AryaSamajMarriageArticle
+        post={post} readTime={16} copied={copied}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
   }
 
   // Calculate read time based on word count
