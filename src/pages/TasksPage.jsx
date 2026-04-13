@@ -91,20 +91,20 @@ export default function TasksPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-        <div className="flex gap-1.5">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 scrollbar-hide">
           {(['all', 'pending', 'in-progress', 'completed']).map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${filter === f ? 'bg-rose-gold/10 text-rose-gold' : 'text-gray-500 hover:bg-gray-100'}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shrink-0 ${filter === f ? 'bg-rose-gold/10 text-rose-gold' : 'text-gray-500 hover:bg-gray-100'}`}>
               {f === 'all' ? 'All' : f === 'in-progress' ? 'In Progress' : f.charAt(0).toUpperCase() + f.slice(1)}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${filter === f ? 'bg-rose-gold/20 text-rose-gold' : 'bg-gray-100 text-gray-400'}`}>
+              <span className={`text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded-full ${filter === f ? 'bg-rose-gold/20 text-rose-gold' : 'bg-gray-100 text-gray-400'}`}>
                 {filterCounts[f]}
               </span>
             </button>
           ))}
         </div>
         <button onClick={() => { setEditTask(null); setForm({ title: '', description: '', deadline: '', priority: 'medium', status: 'pending' }); setShowAdd(true); }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 w-full sm:w-auto shrink-0">
           <Plus className="w-4 h-4" /> Add Task
         </button>
       </div>
@@ -117,44 +117,48 @@ export default function TasksPage() {
 
           return (
             <div key={task.id}
-              className={`glass-card flex items-center gap-4 p-4 transition-all ${isCompleted ? 'opacity-60' : ''}`}
+              className={`glass-card p-4 transition-all ${isCompleted ? 'opacity-60' : ''}`}
               style={{ animationDelay: `${idx * 40}ms` }}>
-              <button onClick={() => dispatch({ type: 'TOGGLE_TASK', payload: task.id })}
-                className="flex-shrink-0 group">
-                {isCompleted
-                  ? <CheckCircle2 className="w-6 h-6 text-emerald-500 group-hover:text-emerald-600 transition-colors" />
-                  : <Circle className="w-6 h-6 text-gray-300 group-hover:text-rose-gold transition-colors" />
-                }
-              </button>
+              <div className="flex items-start gap-3">
+                <button onClick={() => dispatch({ type: 'TOGGLE_TASK', payload: task.id })}
+                  className="flex-shrink-0 group mt-0.5">
+                  {isCompleted
+                    ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 group-hover:text-emerald-600 transition-colors" />
+                    : <Circle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300 group-hover:text-rose-gold transition-colors" />
+                  }
+                </button>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className={`text-sm font-medium ${isCompleted ? 'line-through text-gray-400' : 'text-gray-900'}`}>{task.title}</p>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${priorityLabels[task.priority].variant}`}>
-                    {priorityLabels[task.priority].text}
-                  </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <p className={`text-sm font-medium break-words ${isCompleted ? 'line-through text-gray-400' : 'text-gray-900'}`}>{task.title}</p>
+                    <span className={`text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full shrink-0 ${priorityLabels[task.priority].variant}`}>
+                      {priorityLabels[task.priority].text}
+                    </span>
+                  </div>
+                  {task.description && <p className="text-xs text-gray-500 line-clamp-2 mb-1.5">{task.description}</p>}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {task.deadline && (
+                      <span className={`text-[10px] sm:text-xs font-medium flex items-center gap-1 ${days <= 0 && !isCompleted ? 'text-red-500' : days <= 7 && !isCompleted ? 'text-amber-500' : 'text-gray-500'}`}>
+                        <Clock className="w-3 h-3" />
+                        {formatDate(task.deadline)}
+                      </span>
+                    )}
+                    {task.status === 'in-progress' && (
+                      <span className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">In Progress</span>
+                    )}
+                  </div>
                 </div>
-                {task.description && <p className="text-xs text-gray-500 truncate">{task.description}</p>}
-              </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {task.deadline && (
-                  <span className={`text-xs font-medium flex items-center gap-1 ${days <= 0 && !isCompleted ? 'text-red-500' : days <= 7 && !isCompleted ? 'text-amber-500' : 'text-gray-500'}`}>
-                    <Clock className="w-3 h-3" />
-                    {formatDate(task.deadline)}
-                  </span>
-                )}
-                {task.status === 'in-progress' && (
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">In Progress</span>
-                )}
-                <button onClick={() => openEdit(task)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                  <Edit3 className="w-4 h-4" />
-                </button>
-                <button onClick={() => { if (window.confirm(`Delete task "${task.title}"?`)) dispatch({ type: 'DELETE_TASK', payload: task.id }); }}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0 ml-1">
+                  <button onClick={() => openEdit(task)}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                    <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
+                  <button onClick={() => { if (window.confirm(`Delete task "${task.title}"?`)) dispatch({ type: 'DELETE_TASK', payload: task.id }); }}
+                    className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           );

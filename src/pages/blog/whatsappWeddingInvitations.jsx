@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlogInternalLinks from '../../components/landing/BlogInternalLinks';
 import {
   ArrowLeft,
   Clock,
@@ -1182,6 +1183,7 @@ export function WhatsAppInviteArticle({
             </a>
           </aside>
         )}
+        <BlogInternalLinks currentSlug="best-whatsapp-wedding-invitation-messages" />
       </main>
 
       {/* Footer bar */}

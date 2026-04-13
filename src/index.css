@@ -138,6 +138,22 @@ h1, h2, h3, h4 {
   50% { transform: scale(1.03); }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Utility classes for animations */
 @utility animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out both;
@@ -167,6 +183,23 @@ h1, h2, h3, h4 {
 
 @utility animate-count-pulse {
   animation: countPulse 3s ease-in-out infinite;
+}
+
+@utility animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@utility animate-slide-up {
+  animation: slideUp 0.3s ease-out both;
+}
+
+/* Hide scrollbar but allow scrolling */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Staggered children animation helper */

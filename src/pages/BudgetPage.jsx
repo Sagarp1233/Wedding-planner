@@ -4,7 +4,7 @@ import TopBar from '../components/layout/TopBar';
 import Modal from '../components/ui/Modal';
 import { useApp } from '../context/AppContext';
 import { formatINR } from '../utils/helpers';
-import { Plus, Trash2, Edit3, ChevronDown, ChevronUp, AlertTriangle, Download, RefreshCcw, Wallet } from 'lucide-react';
+import { Plus, Trash2, Edit3, ChevronDown, ChevronUp, AlertTriangle, Download, RefreshCcw, Wallet, Target, CreditCard, PiggyBank } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 export default function BudgetPage() {
@@ -164,16 +164,19 @@ export default function BudgetPage() {
       )}
 
       {/* Summary Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8 stagger-children">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 stagger-children">
         {[
-          { label: 'Total Budget', value: formatINR(totalBudget), color: 'text-gray-900' },
-          { label: 'Allocated', value: formatINR(totalAllocated), color: isOverAllocated ? 'text-red-600' : 'text-amber-600' },
-          { label: 'Spent', value: formatINR(totalSpent), color: 'text-rose-gold' },
-          { label: 'Remaining', value: formatINR(remaining), color: remaining >= 0 ? 'text-emerald-600' : 'text-red-600' },
+          { label: 'Total Budget', value: formatINR(totalBudget), color: 'text-gray-900', gradient: 'from-gray-500 to-gray-600', Icon: Wallet },
+          { label: 'Allocated', value: formatINR(totalAllocated), color: isOverAllocated ? 'text-red-600' : 'text-amber-600', gradient: 'from-amber-500 to-orange-500', Icon: Target },
+          { label: 'Spent', value: formatINR(totalSpent), color: 'text-rose-gold', gradient: 'from-rose-gold to-plum', Icon: CreditCard },
+          { label: 'Remaining', value: formatINR(remaining), color: remaining >= 0 ? 'text-emerald-600' : 'text-red-600', gradient: remaining >= 0 ? 'from-emerald-500 to-teal-600' : 'from-red-400 to-red-500', Icon: PiggyBank },
         ].map((item, i) => (
-          <div key={i} className="glass-card p-5 text-center">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{item.label}</p>
-            <p className={`text-xl font-serif font-bold ${item.color}`}>{item.value}</p>
+          <div key={i} className="glass-card-hover p-4 text-center">
+            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center mx-auto mb-2 shadow`}>
+              <item.Icon className="w-4 h-4 text-white" />
+            </div>
+            <p className={`text-xl sm:text-2xl font-serif font-bold ${item.color}`}>{item.value}</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mt-0.5">{item.label}</p>
           </div>
         ))}
       </div>

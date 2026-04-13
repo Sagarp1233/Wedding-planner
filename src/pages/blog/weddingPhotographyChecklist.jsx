@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlogInternalLinks from '../../components/landing/BlogInternalLinks';
 import {
   ArrowLeft,
   Clock,
@@ -672,6 +673,7 @@ export function PhotographyChecklistArticle({
             </a>
           </aside>
         )}
+        <BlogInternalLinks currentSlug="wedding-photography-checklist" />
       </main>
 
       {/* Footer bar */}

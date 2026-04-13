@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlogInternalLinks from '../../components/landing/BlogInternalLinks';
 import {
   ArrowLeft,
   Clock,
@@ -515,6 +516,7 @@ export function WeddingUnder5LakhsArticle({ post, readTime, copied, onShare, aff
             <a href={affiliateHref} target="_blank" rel="sponsored noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg">{affiliateCtaLabel}</a>
           </aside>
         )}
+        <BlogInternalLinks currentSlug="how-to-plan-wedding-under-5-lakhs" />
       </main>
 
       {/* Footer bar */}

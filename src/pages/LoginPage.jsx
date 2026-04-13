@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Heart, Mail, Lock, ArrowRight, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import PublicNav from '../components/layout/PublicNav';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -60,23 +61,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-white">
+      <PublicNav />
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-white via-blush to-ivory" />
       <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-br from-rose-gold/10 to-plum/5 blur-3xl" />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-br from-gold/10 to-amber-200/10 blur-3xl" />
 
-      <div className="relative w-full max-w-md animate-fade-in-up">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center shadow-lg shadow-rose-gold/20">
-              <Heart className="w-5.5 h-5.5 text-white" fill="white" />
-            </div>
-            <span className="text-2xl font-serif font-bold text-gray-900">Wedora</span>
-          </Link>
-        </div>
-
+      <div className="relative w-full max-w-md animate-fade-in-up mt-16">
         {/* Card */}
         <div className="glass-card p-8">
           <div className="text-center mb-6">

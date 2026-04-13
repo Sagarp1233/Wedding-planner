@@ -6,7 +6,7 @@ import Badge from '../components/ui/Badge';
 import { useApp } from '../context/AppContext';
 import { formatINR } from '../utils/helpers';
 import { VENDOR_CATEGORIES } from '../data/templates';
-import { Plus, Trash2, Edit3, Phone, Mail, MapPin, Store, Search, Download, Filter } from 'lucide-react';
+import { Plus, Trash2, Edit3, Phone, Mail, MapPin, Store, Search, Download, Filter, Wallet, CreditCard, BarChart } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { value: 'shortlisted', label: 'Shortlisted', variant: 'info' },
@@ -89,16 +89,19 @@ export default function VendorsPage() {
       <TopBar title="Vendor Tracker" subtitle={`${vendors.length} vendors · ${booked} booked`} onMenuClick={onMenuClick} />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 stagger-children">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 stagger-children">
         {[
-          { label: 'Total Vendors', value: vendors.length, color: 'text-gray-900' },
-          { label: 'Total Quoted', value: formatINR(totalQuoted), color: 'text-amber-600' },
-          { label: 'Advance Paid', value: formatINR(totalPaid), color: 'text-rose-gold' },
-          { label: 'Balance Due', value: formatINR(totalBalance), color: totalBalance > 0 ? 'text-red-500' : 'text-emerald-600' },
+          { label: 'Total Vendors', value: vendors.length, color: 'text-gray-900', gradient: 'from-gray-500 to-gray-600', Icon: Store },
+          { label: 'Total Quoted', value: formatINR(totalQuoted), color: 'text-amber-600', gradient: 'from-amber-500 to-orange-500', Icon: Wallet },
+          { label: 'Advance Paid', value: formatINR(totalPaid), color: 'text-rose-gold', gradient: 'from-rose-gold to-plum', Icon: CreditCard },
+          { label: 'Balance Due', value: formatINR(totalBalance), color: totalBalance > 0 ? 'text-red-500' : 'text-emerald-600', gradient: totalBalance > 0 ? 'from-red-400 to-red-500' : 'from-emerald-500 to-teal-600', Icon: BarChart },
         ].map((s, i) => (
-          <div key={i} className="glass-card p-4 text-center">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-xl font-serif font-bold ${s.color}`}>{s.value}</p>
+          <div key={i} className="glass-card-hover p-4 text-center">
+            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center mx-auto mb-2 shadow`}>
+              <s.Icon className="w-4 h-4 text-white" />
+            </div>
+            <p className={`text-xl sm:text-2xl font-serif font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>

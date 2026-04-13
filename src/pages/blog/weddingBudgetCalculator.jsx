@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlogInternalLinks from '../../components/landing/BlogInternalLinks';
 import {
   ArrowLeft,
   Clock,
@@ -643,29 +644,29 @@ export function BudgetCalculatorArticle({
           </p>
 
           {/* Feature pills */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-600 text-white text-xs font-bold shadow">
-              <Calculator className="w-3.5 h-3.5" /> Free Interactive Calculator
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 px-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-sky-600 text-white text-[10px] sm:text-xs font-bold shadow">
+              <Calculator className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Free Interactive Calculator
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-gold text-white text-xs font-bold shadow">
-              <BarChart3 className="w-3.5 h-3.5" /> 12 Budget Categories
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-rose-gold text-white text-[10px] sm:text-xs font-bold shadow">
+              <BarChart3 className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> 12 Budget Categories
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-600 text-xs font-semibold shadow-sm">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-600 text-[10px] sm:text-xs font-semibold shadow-sm">
               10 Indian Cities
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-600 text-xs font-semibold shadow-sm">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-600 text-[10px] sm:text-xs font-semibold shadow-sm">
               3 Budget Profiles
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-gray-500">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm">
-              <Clock className="w-4 h-4 text-rose-gold" />{readTime} min read
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm text-gray-500 px-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm text-xs">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-gold" />{readTime} min read
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm">
-              <Heart className="w-4 h-4 text-rose-gold" fill="currentColor" />{post.author || 'Wedora Team'}
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm text-xs">
+              <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-gold" fill="currentColor" />{post.author || 'Wedora Team'}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm text-xs">
               Updated {new Date(post.published_at || post.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
             </span>
           </div>
@@ -989,6 +990,7 @@ export function BudgetCalculatorArticle({
             </a>
           </aside>
         )}
+        <BlogInternalLinks currentSlug="wedding-budget-calculator-india" />
       </main>
 
       {/* Footer bar */}

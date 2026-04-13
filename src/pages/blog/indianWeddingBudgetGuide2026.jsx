@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlogInternalLinks from '../../components/landing/BlogInternalLinks';
 import {
   ArrowLeft,
   Clock,
@@ -572,6 +573,7 @@ export function IndianWeddingBudgetGuide2026Article({ post, readTime, copied, on
             </a>
           </aside>
         )}
+        <BlogInternalLinks currentSlug="indian-wedding-budget-guide-2026" />
       </main>
 
       {/* Footer bar */}

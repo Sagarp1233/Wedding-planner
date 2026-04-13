@@ -18,6 +18,7 @@ import InspirationPage from './pages/InspirationPage';
 import SettingsPage from './pages/SettingsPage';
 import WeddingPickerPage from './pages/WeddingPickerPage';
 import InviteAcceptPage from './pages/InviteAcceptPage';
+import CreateInvitationPage from './pages/CreateInvitationPage';
 
 // Blog Pages
 import BlogListingPage from './pages/BlogListingPage';
@@ -103,6 +104,7 @@ function AppWithContext() {
           {/* Truly Public Pages (accessible whether logged in or not) */}
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/create-invitation" element={<CreateInvitationPage />} />
           <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
 
           {/* Wedding Picker */}
