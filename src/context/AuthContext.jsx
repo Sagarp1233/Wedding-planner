@@ -9,7 +9,10 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
-  const [isRecoveringPassword, setIsRecoveringPassword] = useState(false);
+  // Check hash synchronously to avoid race conditions with route guards
+  const [isRecoveringPassword, setIsRecoveringPassword] = useState(
+    typeof window !== 'undefined' && window.location.hash.includes('type=recovery')
+  );
 
   // DB-driven state
   const [weddings, setWeddings] = useState([]);
