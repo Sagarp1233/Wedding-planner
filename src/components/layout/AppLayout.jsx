@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,6 +14,7 @@ export default function AppLayout() {
           <Outlet context={{ onMenuClick: () => setSidebarOpen(true) }} />
         </div>
       </main>
+<Analytics />
     </div>
   );
 }
