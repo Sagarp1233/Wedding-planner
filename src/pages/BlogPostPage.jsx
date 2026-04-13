@@ -26,6 +26,21 @@ import {
   getStaticPhotographyChecklistPost,
   PhotographyChecklistArticle,
 } from './blog/weddingPhotographyChecklist';
+import {
+  BUDGET_CALCULATOR_SLUG,
+  getStaticBudgetCalculatorPost,
+  BudgetCalculatorArticle,
+} from './blog/weddingBudgetCalculator';
+import {
+  LAST_MINUTE_CHECKLIST_SLUG,
+  getStaticLastMinuteChecklistPost,
+  LastMinuteChecklistArticle,
+} from './blog/lastMinuteWeddingChecklist';
+import {
+  WHATSAPP_INVITE_SLUG,
+  getStaticWhatsAppInvitePost,
+  WhatsAppInviteArticle,
+} from './blog/whatsappWeddingInvitations';
 
 // ─── All static / enhanced article slugs ────────────────────────────────────
 // Add new static blog slugs here as they are created.
@@ -34,6 +49,9 @@ const STATIC_SLUGS = new Set([
   WEDDING_5L_SLUG,
   LOW_BUDGET_PREMIUM_SLUG,
   PHOTOGRAPHY_CHECKLIST_SLUG,
+  BUDGET_CALCULATOR_SLUG,
+  LAST_MINUTE_CHECKLIST_SLUG,
+  WHATSAPP_INVITE_SLUG,
 ]);
 
 export default function BlogPostPage() {
@@ -110,6 +128,27 @@ export default function BlogPostPage() {
 
       if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
         const resolved = await fetchStaticPost(getStaticPhotographyChecklistPost);
+        setPost(resolved);
+        applyPostSEO(resolved);
+        return;
+      }
+
+      if (slug === BUDGET_CALCULATOR_SLUG) {
+        const resolved = await fetchStaticPost(getStaticBudgetCalculatorPost);
+        setPost(resolved);
+        applyPostSEO(resolved);
+        return;
+      }
+
+      if (slug === LAST_MINUTE_CHECKLIST_SLUG) {
+        const resolved = await fetchStaticPost(getStaticLastMinuteChecklistPost);
+        setPost(resolved);
+        applyPostSEO(resolved);
+        return;
+      }
+
+      if (slug === WHATSAPP_INVITE_SLUG) {
+        const resolved = await fetchStaticPost(getStaticWhatsAppInvitePost);
         setPost(resolved);
         applyPostSEO(resolved);
         return;
@@ -245,6 +284,48 @@ export default function BlogPostPage() {
       <PhotographyChecklistArticle
         post={post}
         readTime={10}
+        copied={copied}
+        onShare={handleShareURL}
+        affiliateHref={affiliateHref}
+        affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
+  }
+
+  // ── Enhanced article: Wedding Budget Calculator ──────────────────────────
+  if (post.slug === BUDGET_CALCULATOR_SLUG) {
+    return (
+      <BudgetCalculatorArticle
+        post={post}
+        readTime={11}
+        copied={copied}
+        onShare={handleShareURL}
+        affiliateHref={affiliateHref}
+        affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
+  }
+
+  // ── Enhanced article: Last-Minute Wedding Checklist ───────────────────────
+  if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
+    return (
+      <LastMinuteChecklistArticle
+        post={post}
+        readTime={12}
+        copied={copied}
+        onShare={handleShareURL}
+        affiliateHref={affiliateHref}
+        affiliateCtaLabel={affiliateCtaLabel}
+      />
+    );
+  }
+
+  // ── Enhanced article: WhatsApp Wedding Invitations ────────────────────────
+  if (post.slug === WHATSAPP_INVITE_SLUG) {
+    return (
+      <WhatsAppInviteArticle
+        post={post}
+        readTime={11}
         copied={copied}
         onShare={handleShareURL}
         affiliateHref={affiliateHref}
