@@ -244,6 +244,15 @@ export function AuthProvider({ children }) {
       options: { data: { full_name: name } }
     });
     if (error) return { success: false, error: error.message };
+
+    // Trigger onboarding email in the background
+    // (We don't await this so it doesn't block the user flow)
+    fetch('/api/send-welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email })
+    }).catch(err => console.error('[Wedora] Failed to trigger welcome email', err));
+
     return { success: true, user: data.user };
   }
 
