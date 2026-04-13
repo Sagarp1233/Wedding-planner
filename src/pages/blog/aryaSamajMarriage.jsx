@@ -33,9 +33,10 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const ARYA_SAMAJ_MARRIAGE_SLUG = 'arya-samaj-marriage-complete-guide-india';
 
-// Unsplash: Indian wedding marigold mandap / ceremony decor — verified Indian content
+// Unsplash: Indian wedding marigold mandap ceremony — verified Indian wedding editorial
+// Unsplash: Indian wedding marigold mandap — verified Indian wedding editorial
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1586952518485-11b180e92764?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1622495966027-e0173192c728?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticAryaSamajPost() {
   const now = new Date().toISOString();

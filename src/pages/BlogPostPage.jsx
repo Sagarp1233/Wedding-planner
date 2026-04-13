@@ -83,15 +83,12 @@ export default function BlogPostPage() {
     try {
       setLoading(true);
 
-      // ── Helper: DB-first with static fallback ─────────────────────────────
-      async function fetchStaticPost(staticGetter) {
+      // shared helper: try DB first, fall back to static getter
+      async function tryDB(staticGetter) {
         const { data, error } = await supabase
-          .from('blogs')
-          .select('*')
-          .eq('slug', slug)
-          .eq('status', 'published')
-          .maybeSingle();
-        return !error && data ? data : staticGetter();
+          .from('blogs').select('*').eq('slug', slug)
+          .eq('status', 'published').maybeSingle();
+        return (!error && data) ? data : staticGetter();
       }
 
       if (slug === BUDGET_GUIDE_SLUG) {
@@ -101,46 +98,37 @@ export default function BlogPostPage() {
           .eq('slug', slug)
           .eq('status', 'published')
           .maybeSingle();
-
         const resolved = !error && data ? data : getStaticBudgetGuidePost();
-        setPost(resolved);
-        applyPostSEO(resolved);
-        return;
+        setPost(resolved); applyPostSEO(resolved); return;
       }
 
       if (slug === WEDDING_5L_SLUG) {
-        const resolved = await fetchStaticPost(getStaticWedding5LPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticWedding5LPost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === LOW_BUDGET_PREMIUM_SLUG) {
-        const resolved = await fetchStaticPost(getStaticLowBudgetPremiumPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticLowBudgetPremiumPost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
-        const resolved = await fetchStaticPost(getStaticPhotographyChecklistPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticPhotographyChecklistPost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === BUDGET_CALCULATOR_SLUG) {
-        const resolved = await fetchStaticPost(getStaticBudgetCalculatorPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticBudgetCalculatorPost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === LAST_MINUTE_CHECKLIST_SLUG) {
-        const resolved = await fetchStaticPost(getStaticLastMinuteChecklistPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticLastMinuteChecklistPost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === WHATSAPP_INVITE_SLUG) {
-        const resolved = await fetchStaticPost(getStaticWhatsAppInvitePost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticWhatsAppInvitePost);
+        setPost(r); applyPostSEO(r); return;
       }
-
       if (slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
-        const resolved = await fetchStaticPost(getStaticAryaSamajPost);
-        setPost(resolved); applyPostSEO(resolved); return;
+        const r = await tryDB(getStaticAryaSamajPost);
+        setPost(r); applyPostSEO(r); return;
       }
 
       const { data, error } = await supabase
@@ -217,78 +205,63 @@ export default function BlogPostPage() {
     return (
       <IndianWeddingBudgetGuide2026Article
         post={post} readTime={14} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === WEDDING_5L_SLUG) {
     return (
       <WeddingUnder5LakhsArticle
         post={post} readTime={12} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
     return (
       <LowBudgetPremiumWeddingArticle
         post={post} readTime={13} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
     return (
       <PhotographyChecklistArticle
         post={post} readTime={10} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === BUDGET_CALCULATOR_SLUG) {
     return (
       <BudgetCalculatorArticle
         post={post} readTime={11} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
     return (
       <LastMinuteChecklistArticle
         post={post} readTime={12} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === WHATSAPP_INVITE_SLUG) {
     return (
       <WhatsAppInviteArticle
         post={post} readTime={11} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
-
   if (post.slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
     return (
       <AryaSamajMarriageArticle
         post={post} readTime={16} copied={copied}
-        onShare={handleShareURL} affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
+        onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel}
       />
     );
   }
