@@ -1109,7 +1109,7 @@ export function AryaSamajMarriageArticle({
           <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
               <Shield className="w-5 h-5 text-amber-600" />
-              <p className="font-serif font-bold text-gray-900">Marriage Registration Guide — More Articles</p>
+              <p className="font-serif font-bold text-gray-900">More Articles</p>
             </div>
             <div className="p-5 grid sm:grid-cols-2 gap-3">
               {[
