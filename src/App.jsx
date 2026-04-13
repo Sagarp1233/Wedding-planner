@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import AppLayout from './components/layout/AppLayout';
@@ -21,6 +22,7 @@ import InviteAcceptPage from './pages/InviteAcceptPage';
 import CreateInvitationPage from './pages/CreateInvitationPage';
 import InvitationsPage from './pages/InvitationsPage';
 import WhatsappPage from './pages/WhatsappPage';
+import UpdatePasswordPage from './pages/UpdatePasswordPage';
 
 // Blog Pages
 import BlogListingPage from './pages/BlogListingPage';
@@ -90,13 +92,22 @@ function LoadingScreen() {
 
 // Wrapper that provides AppContext with userId + Loading Watchdog
 function AppWithContext() {
-  const { currentUser, authReady, activeWeddingId } = useAuth();
+  const { currentUser, authReady, activeWeddingId, isRecoveringPassword } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isRecoveringPassword) {
+      navigate('/update-password', { replace: true });
+    }
+  }, [isRecoveringPassword, navigate]);
+
   return (
-    <LoadingWatchdog isLoading={!authReady}>
+    <LoadingWatchdog isLoading={!authReady && !isRecoveringPassword}>
       <AppProvider userId={currentUser?.id} weddingId={activeWeddingId}>
         <Routes>
           {/* Invite route must be above the rest to intercept securely */}
           <Route path="/invite/:token" element={<InviteAcceptPage />} />
+          <Route path="/update-password" element={<UpdatePasswordPage />} />
           
           {/* Public Auth/Landing */}
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />

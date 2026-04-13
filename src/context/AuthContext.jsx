@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
+  const [isRecoveringPassword, setIsRecoveringPassword] = useState(false);
 
   // DB-driven state
   const [weddings, setWeddings] = useState([]);
@@ -17,7 +18,8 @@ export function AuthProvider({ children }) {
 
   const activeWeddingId = profile?.active_wedding_id || null;
   const isOnboarded = profile?.is_onboarded || false;
-  const loading = !authReady || (!!currentUser && !onboardingResolved);
+  // If we are recovering password, we bypass the normal loading holdup and force routing 
+  const loading = !authReady || (!!currentUser && !onboardingResolved && !isRecoveringPassword);
 
   // Helper method: persist active wedding ID directly to DB via users table
   const setActiveWeddingId = useCallback(async (id) => {
@@ -185,6 +187,10 @@ export function AuthProvider({ children }) {
       const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'INITIAL_SESSION') return;
 
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsRecoveringPassword(true);
+        }
+
         if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           setCurrentUser(session?.user ?? null);
           return;
@@ -280,6 +286,8 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!currentUser,
       isOnboarded,
       isAdmin: currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin',
+      isRecoveringPassword,
+      setIsRecoveringPassword,
       // Multi-plan
       weddings,
       activeWeddingId,
