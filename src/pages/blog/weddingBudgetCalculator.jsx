@@ -29,9 +29,9 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const BUDGET_CALCULATOR_SLUG = 'wedding-budget-calculator-how-to-allocate-money';
 
-// Unsplash: Indian couple reviewing documents / planning together
+// Unsplash: Indian rupee coins and currency — money planning context
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticBudgetCalculatorPost() {
   const now = new Date().toISOString();

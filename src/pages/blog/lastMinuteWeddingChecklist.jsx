@@ -29,9 +29,9 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const LAST_MINUTE_CHECKLIST_SLUG = 'last-minute-wedding-checklist-30-days-before';
 
-// Unsplash: Indian bridal preparation — mehndi / getting ready
+// Unsplash: Indian wedding celebration — rings and festive details
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1594464994880-b4e4db21b63c?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticLastMinuteChecklistPost() {
   const now = new Date().toISOString();
@@ -513,7 +513,7 @@ export function LastMinuteChecklistArticle({
           <div className="max-w-5xl mx-auto mt-12 rounded-3xl overflow-hidden shadow-2xl shadow-rose-gold/15 border-4 border-white ring-1 ring-rose-100">
             <img
               src={ensureHttps(post.featured_image)}
-              alt="Indian bridal preparation — last-minute wedding checklist"
+              alt="Indian wedding celebration — last-minute planning guide"
               className="w-full aspect-[21/9] object-cover object-center"
               loading="eager"
             />
