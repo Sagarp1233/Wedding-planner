@@ -30,6 +30,7 @@ export default function UpdatePasswordPage() {
       
       // Reset the recovery flag so route guards allow the user to proceed
       setIsRecoveringPassword(false);
+      sessionStorage.removeItem('wedora_recovering_password');
       
       setTimeout(() => {
         navigate('/dashboard', { replace: true });

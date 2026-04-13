@@ -9,10 +9,11 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
-  // Check hash synchronously to avoid race conditions with route guards
-  const [isRecoveringPassword, setIsRecoveringPassword] = useState(
-    typeof window !== 'undefined' && window.location.hash.includes('type=recovery')
-  );
+  // Check hash and sessionStorage synchronously to avoid race conditions with route guards
+  const [isRecoveringPassword, setIsRecoveringPassword] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.location.href.includes('type=recovery') || sessionStorage.getItem('wedora_recovering_password') === 'true';
+  });
 
   // DB-driven state
   const [weddings, setWeddings] = useState([]);

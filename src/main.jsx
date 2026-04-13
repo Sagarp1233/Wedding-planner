@@ -9,6 +9,11 @@ import './index.css'
 // If a new deployment is detected, this clears stale state and reloads.
 // The reload happens synchronously, so React never renders stale code.
 performVersionCheck();
+// ─── Recovery Interceptor ───
+// Supabase aggressively removes hash fragments upon client init. We catch it here.
+if (typeof window !== 'undefined' && window.location.href.includes('type=recovery')) {
+  sessionStorage.setItem('wedora_recovering_password', 'true');
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

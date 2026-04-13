@@ -1076,7 +1076,7 @@ export function AryaSamajMarriageArticle({
           <CtaInfoBox
             icon={Phone}
             title="How to verify a mandir is officially registered"
-            body='Before booking, ask the mandir directly: "Are you registered with the Arya Pradeshik Pratinidhi Sabha or Sarvadeshik Arya Pratinidhi Sabha?" A registered mandir will have a certificate of affiliation. You can also verify on the official Arya Samaj websites. An unregistered mandir\'s certificate may not be accepted at the SDM office.'
+            body={`Before booking, ask the mandir directly: "Are you registered with the Arya Pradeshik Pratinidhi Sabha or Sarvadeshik Arya Pratinidhi Sabha?" A registered mandir will have a certificate of affiliation. You can also verify on the official Arya Samaj websites. An unregistered mandir's certificate may not be accepted at the SDM office.`}
             color={{ bg: 'bg-violet-50', border: 'border-violet-200/60', icon: 'text-violet-600', title: 'text-violet-900', body: 'text-violet-800' }}
           />
         </section>
