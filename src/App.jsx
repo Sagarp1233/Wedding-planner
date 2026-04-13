@@ -34,16 +34,18 @@ import AdminBlogEditorPage from './pages/admin/AdminBlogEditorPage';
 
 // Route guard: redirect to login if not authenticated
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
+  if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }
 
 // Route guard: redirect to onboarding if not onboarded
 function OnboardedRoute({ children }) {
-  const { isAuthenticated, isOnboarded, activeWeddingId, loading } = useAuth();
+  const { isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
+  if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isOnboarded) return <Navigate to="/onboarding" replace />;
   if (!activeWeddingId) return <Navigate to="/weddings" replace />;
@@ -52,8 +54,9 @@ function OnboardedRoute({ children }) {
 
 // Public route: redirect to dashboard if already logged in
 function PublicRoute({ children }) {
-  const { isAuthenticated, isOnboarded, activeWeddingId, loading } = useAuth();
+  const { isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
+  if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (isAuthenticated && isOnboarded && activeWeddingId) return <Navigate to="/dashboard" replace />;
   if (isAuthenticated && isOnboarded && !activeWeddingId) return <Navigate to="/weddings" replace />;
   if (isAuthenticated && !isOnboarded) return <Navigate to="/onboarding" replace />;
@@ -62,16 +65,18 @@ function PublicRoute({ children }) {
 
 // Admin Route: restricts access to users with isAdmin
 function AdminRoute({ children }) {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
+  if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
   return children;
 }
 
 function AdminPublicRoute({ children }) {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
+  if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (isAuthenticated && isAdmin) return <Navigate to="/admin" replace />;
   if (isAuthenticated && !isAdmin) return <Navigate to="/dashboard" replace />;
   return children;

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import { Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function UpdatePasswordPage() {
   const navigate = useNavigate();
+  const { setIsRecoveringPassword } = useAuth();
+  
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -24,6 +27,10 @@ export default function UpdatePasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       setSuccess(true);
+      
+      // Reset the recovery flag so route guards allow the user to proceed
+      setIsRecoveringPassword(false);
+      
       setTimeout(() => {
         navigate('/dashboard', { replace: true });
       }, 3000);
