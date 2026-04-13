@@ -33,9 +33,9 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const ARYA_SAMAJ_MARRIAGE_SLUG = 'arya-samaj-marriage-complete-guide-india';
 
-// Unsplash: Hindu wedding ceremony — sacred fire / havan
+// Unsplash: Indian bride in red ceremonial attire — verified Indian wedding content
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1583939411023-14783179e581?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1609743522471-83c84ce23e32?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticAryaSamajPost() {
   const now = new Date().toISOString();
@@ -516,7 +516,7 @@ export function AryaSamajMarriageArticle({
           <div className="max-w-5xl mx-auto mt-10 rounded-3xl overflow-hidden shadow-2xl shadow-amber-400/15 border-4 border-white ring-1 ring-amber-100">
             <img
               src={ensureHttps(post.featured_image)}
-              alt="Arya Samaj marriage ceremony — Hindu Vedic wedding rituals"
+              alt="Indian bride at Hindu Vedic wedding ceremony — Arya Samaj Vivah Sanskar"
               className="w-full aspect-[21/9] object-cover object-center"
               loading="eager"
             />
