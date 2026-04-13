@@ -33,9 +33,9 @@ import { ensureHttps } from '../../utils/ensureHttps';
 
 export const ARYA_SAMAJ_MARRIAGE_SLUG = 'arya-samaj-marriage-complete-guide-india';
 
-// Unsplash: Indian bride in red ceremonial attire — verified Indian wedding content
+// Unsplash: Indian wedding marigold mandap / ceremony decor — verified Indian content
 const FEATURED_IMAGE =
-  'https://images.unsplash.com/photo-1609743522471-83c84ce23e32?w=1600&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1586952518485-11b180e92764?w=1600&q=85&auto=format&fit=crop';
 
 export function getStaticAryaSamajPost() {
   const now = new Date().toISOString();
