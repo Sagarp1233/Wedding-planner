@@ -19,6 +19,8 @@ import SettingsPage from './pages/SettingsPage';
 import WeddingPickerPage from './pages/WeddingPickerPage';
 import InviteAcceptPage from './pages/InviteAcceptPage';
 import CreateInvitationPage from './pages/CreateInvitationPage';
+import InvitationsPage from './pages/InvitationsPage';
+import WhatsappPage from './pages/WhatsappPage';
 
 // Blog Pages
 import BlogListingPage from './pages/BlogListingPage';
@@ -120,6 +122,8 @@ function AppWithContext() {
           {/* Protected App */}
           <Route element={<OnboardedRoute><AppLayout /></OnboardedRoute>}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/invitations" element={<InvitationsPage />} />
+            <Route path="/whatsapp" element={<WhatsappPage />} />
             <Route path="/budget" element={<BudgetPage />} />
             <Route path="/guests" element={<GuestsPage />} />
             <Route path="/tasks" element={<TasksPage />} />

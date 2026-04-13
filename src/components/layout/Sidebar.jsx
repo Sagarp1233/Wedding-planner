@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown, Mail, MessageCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/invitations', label: 'Invitations', icon: Mail },
+  { to: '/whatsapp', label: 'WhatsApp Tools', icon: MessageCircle },
   { to: '/budget', label: 'Budget', icon: Wallet },
   { to: '/guests', label: 'Guests', icon: Users },
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
