@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Copy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -6,18 +6,57 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { clearArticleJsonLd, clearFaqPageJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
-import {
-  BUDGET_GUIDE_SLUG,
-  getStaticBudgetGuidePost,
-  IndianWeddingBudgetGuide2026Article,
-} from './blog/indianWeddingBudgetGuide2026';
-import { WEDDING_5L_SLUG, getStaticWedding5LPost, WeddingUnder5LakhsArticle } from './blog/weddingUnder5Lakhs';
-import { LOW_BUDGET_PREMIUM_SLUG, getStaticLowBudgetPremiumPost, LowBudgetPremiumWeddingArticle } from './blog/lowBudgetPremiumWedding';
-import { PHOTOGRAPHY_CHECKLIST_SLUG, getStaticPhotographyChecklistPost, PhotographyChecklistArticle } from './blog/weddingPhotographyChecklist';
-import { BUDGET_CALCULATOR_SLUG, getStaticBudgetCalculatorPost, BudgetCalculatorArticle } from './blog/weddingBudgetCalculator';
-import { LAST_MINUTE_CHECKLIST_SLUG, getStaticLastMinuteChecklistPost, LastMinuteChecklistArticle } from './blog/lastMinuteWeddingChecklist';
-import { WHATSAPP_INVITE_SLUG, getStaticWhatsAppInvitePost, WhatsAppInviteArticle } from './blog/whatsappWeddingInvitations';
-import { ARYA_SAMAJ_MARRIAGE_SLUG, getStaticAryaSamajPost, AryaSamajMarriageArticle } from './blog/aryaSamajMarriage';
+
+// ── Static metadata + getter functions only — kept eager (tiny, needed immediately)
+import { BUDGET_GUIDE_SLUG, getStaticBudgetGuidePost } from './blog/indianWeddingBudgetGuide2026';
+import { WEDDING_5L_SLUG, getStaticWedding5LPost } from './blog/weddingUnder5Lakhs';
+import { LOW_BUDGET_PREMIUM_SLUG, getStaticLowBudgetPremiumPost } from './blog/lowBudgetPremiumWedding';
+import { PHOTOGRAPHY_CHECKLIST_SLUG, getStaticPhotographyChecklistPost } from './blog/weddingPhotographyChecklist';
+import { BUDGET_CALCULATOR_SLUG, getStaticBudgetCalculatorPost } from './blog/weddingBudgetCalculator';
+import { LAST_MINUTE_CHECKLIST_SLUG, getStaticLastMinuteChecklistPost } from './blog/lastMinuteWeddingChecklist';
+import { WHATSAPP_INVITE_SLUG, getStaticWhatsAppInvitePost } from './blog/whatsappWeddingInvitations';
+import { ARYA_SAMAJ_MARRIAGE_SLUG, getStaticAryaSamajPost } from './blog/aryaSamajMarriage';
+
+// ── Article components — lazy loaded
+// Each article only downloads when a user actually visits that specific blog post
+const IndianWeddingBudgetGuide2026Article = lazy(() =>
+  import('./blog/indianWeddingBudgetGuide2026').then(m => ({ default: m.IndianWeddingBudgetGuide2026Article }))
+);
+const WeddingUnder5LakhsArticle = lazy(() =>
+  import('./blog/weddingUnder5Lakhs').then(m => ({ default: m.WeddingUnder5LakhsArticle }))
+);
+const LowBudgetPremiumWeddingArticle = lazy(() =>
+  import('./blog/lowBudgetPremiumWedding').then(m => ({ default: m.LowBudgetPremiumWeddingArticle }))
+);
+const PhotographyChecklistArticle = lazy(() =>
+  import('./blog/weddingPhotographyChecklist').then(m => ({ default: m.PhotographyChecklistArticle }))
+);
+const BudgetCalculatorArticle = lazy(() =>
+  import('./blog/weddingBudgetCalculator').then(m => ({ default: m.BudgetCalculatorArticle }))
+);
+const LastMinuteChecklistArticle = lazy(() =>
+  import('./blog/lastMinuteWeddingChecklist').then(m => ({ default: m.LastMinuteChecklistArticle }))
+);
+const WhatsAppInviteArticle = lazy(() =>
+  import('./blog/whatsappWeddingInvitations').then(m => ({ default: m.WhatsAppInviteArticle }))
+);
+const AryaSamajMarriageArticle = lazy(() =>
+  import('./blog/aryaSamajMarriage').then(m => ({ default: m.AryaSamajMarriageArticle }))
+);
+
+// ── Skeleton shown while a lazy article chunk is downloading
+function ArticleSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4 py-8 max-w-4xl mx-auto px-4">
+      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+      <div className="h-5 bg-gray-200 rounded w-5/6"></div>
+      <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+      <div className="h-5 bg-gray-200 rounded w-4/5"></div>
+      <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+    </div>
+  );
+}
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -154,46 +193,75 @@ export default function BlogPostPage() {
   }
   const affiliateCtaLabel = (post.affiliate_label && String(post.affiliate_label).trim()) || 'Learn more';
 
+  // ── Static article renders — each wrapped in Suspense so they lazy load
   if (post.slug === BUDGET_GUIDE_SLUG) {
-    const readTime = 14;
     return (
-      <IndianWeddingBudgetGuide2026Article
-        post={post}
-        readTime={readTime}
-        copied={copied}
-        onShare={handleShareURL}
-        affiliateHref={affiliateHref}
-        affiliateCtaLabel={affiliateCtaLabel}
-      />
+      <Suspense fallback={<ArticleSkeleton />}>
+        <IndianWeddingBudgetGuide2026Article
+          post={post}
+          readTime={14}
+          copied={copied}
+          onShare={handleShareURL}
+          affiliateHref={affiliateHref}
+          affiliateCtaLabel={affiliateCtaLabel}
+        />
+      </Suspense>
     );
   }
   if (post.slug === WEDDING_5L_SLUG) {
-    return <WeddingUnder5LakhsArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <WeddingUnder5LakhsArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
-    return <LowBudgetPremiumWeddingArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <LowBudgetPremiumWeddingArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
-    return <PhotographyChecklistArticle post={post} readTime={10} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <PhotographyChecklistArticle post={post} readTime={10} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === BUDGET_CALCULATOR_SLUG) {
-    return <BudgetCalculatorArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <BudgetCalculatorArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
-    return <LastMinuteChecklistArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <LastMinuteChecklistArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === WHATSAPP_INVITE_SLUG) {
-    return <WhatsAppInviteArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <WhatsAppInviteArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
   if (post.slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
-    return <AryaSamajMarriageArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />;
+    return (
+      <Suspense fallback={<ArticleSkeleton />}>
+        <AryaSamajMarriageArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+      </Suspense>
+    );
   }
 
-  // Calculate read time based on word count
+  // ── Dynamic DB post render (ReactMarkdown) — unchanged
   const wordCount = (post.content || '').split(/\s+/).filter(Boolean).length;
   const readTime = Math.ceil(wordCount / 200) || 1;
 
-  // Custom components for ReactMarkdown to add Tailwind styling
   const MarkdownComponents = {
     h1: ({node, ...props}) => <h1 className="text-3xl lg:text-4xl font-serif font-bold text-gray-900 mt-12 mb-6" {...props} />,
     h2: ({node, ...props}) => <h2 className="text-2xl lg:text-3xl font-serif font-bold text-gray-900 mt-10 mb-5" {...props} />,
@@ -208,8 +276,8 @@ export default function BlogPostPage() {
     ol: ({node, ...props}) => <ol className="list-decimal pl-6 text-lg text-gray-700 mb-6 space-y-2" {...props} />,
     li: ({node, ...props}) => <li className="pl-2" {...props} />,
     blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-rose-gold pl-4 italic text-gray-600 my-8 bg-rose-gold/5 py-4 pr-4 rounded-r-lg" {...props} />,
-    code: ({node, inline, ...props}) => 
-      inline 
+    code: ({node, inline, ...props}) =>
+      inline
       ? <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
       : <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-6"><code {...props} /></pre>,
     img: ({node, src, alt, ...props}) => (
@@ -237,7 +305,7 @@ export default function BlogPostPage() {
       </nav>
 
       <main className="pt-24 pb-32 max-w-6xl mx-auto px-4 lg:px-8">
-        
+
         {/* Header */}
         <header className="mb-12 text-center animate-fade-in max-w-4xl mx-auto">
           {post.tags && (
@@ -249,7 +317,7 @@ export default function BlogPostPage() {
               ))}
             </div>
           )}
-          
+
           <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6 leading-tight">
             {post.title}
           </h1>
@@ -299,7 +367,6 @@ export default function BlogPostPage() {
 
         {/* Footer actions */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6 max-w-5xl mx-auto">
-          
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
             <span className="mr-2">Share this article:</span>
             <button onClick={handleShareURL} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors relative" title="Copy Link">
