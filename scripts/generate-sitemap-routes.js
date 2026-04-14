@@ -2,17 +2,19 @@ import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-// Manually read .env file — dotenv doesn't work inside vite.config.js context
 function loadEnv() {
   try {
     const envPath = resolve(process.cwd(), '.env')
     const envFile = readFileSync(envPath, 'utf-8')
     const env = {}
     envFile.split('\n').forEach(line => {
-      const [key, ...valueParts] = line.split('=')
-      if (key && valueParts.length) {
-        env[key.trim()] = valueParts.join('=').trim().replace(/^["']|["']$/g, '')
-      }
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) return
+      const eqIndex = trimmed.indexOf('=')
+      if (eqIndex === -1) return
+      const key = trimmed.substring(0, eqIndex).trim()
+      const val = trimmed.substring(eqIndex + 1).trim().replace(/^["']|["']$/g, '')
+      if (key) env[key] = val
     })
     return env
   } catch {
@@ -23,11 +25,9 @@ function loadEnv() {
 
 export async function getBlogRoutes() {
   const env = loadEnv()
-
   const supabaseUrl = env.VITE_SUPABASE_URL
   const supabaseKey = env.VITE_SUPABASE_ANON_KEY
 
-  // Safety check — if env vars missing, skip silently
   if (!supabaseUrl || !supabaseKey) {
     console.warn('⚠️ Supabase env vars not found — sitemap will use static routes only')
     return []
@@ -46,11 +46,34 @@ export async function getBlogRoutes() {
       return []
     }
 
-    console.log(`✅ Sitemap: found ${data.length} published blog posts`)
-    return data.map(post => `/blog/${post.slug}`)
+    // Log raw slugs so we can see exactly what Supabase returns
+    console.log('📋 Raw slugs from DB:', data.map(p => p.slug))
+
+    const routes = data
+      .map(post => (post.slug || '').trim())
+      .filter(slug => {
+        if (!slug) return false               // skip empty
+        if (slug === '/') return false        // skip root
+        if (slug.startsWith('http')) return false  // skip full URLs
+        return true
+      })
+      .map(slug => {
+        if (slug.startsWith('/blog/')) return slug       // already /blog/xxx
+        if (slug.startsWith('blog/')) return `/${slug}`  // blog/xxx → /blog/xxx
+        if (slug.startsWith('/')) return `/blog${slug}`  // /xxx → /blog/xxx
+        return `/blog/${slug}`                           // xxx → /blog/xxx
+      })
+
+    // Remove duplicates
+    const unique = [...new Set(routes)]
+
+    console.log(`✅ Sitemap: found ${unique.length} published blog posts`)
+    unique.forEach(r => console.log(`   → ${r}`))
+
+    return unique
 
   } catch (err) {
-    console.warn('⚠️ Sitemap fetch failed silently:', err.message)
+    console.warn('⚠️ Sitemap fetch failed:', err.message)
     return []
   }
 }
