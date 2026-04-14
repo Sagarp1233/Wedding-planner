@@ -1,4 +1,19 @@
-const STATIC_PATHS = ['/', '/blog', '/login', '/signup'];
+/**
+ * Dynamic sitemap generator — served by Vercel serverless function.
+ * Vercel rewrites /sitemap.xml → /api/sitemap.xml (see vercel.json).
+ *
+ * Includes:
+ *   - All public static pages with appropriate priorities
+ *   - All published blog posts fetched from Supabase at request time
+ */
+
+const STATIC_PAGES = [
+  { path: '/',                   changefreq: 'weekly',  priority: '1.0'  },
+  { path: '/blog',               changefreq: 'daily',   priority: '0.9'  },
+  { path: '/create-invitation',  changefreq: 'monthly', priority: '0.9'  },
+  { path: '/login',              changefreq: 'monthly', priority: '0.5'  },
+  { path: '/signup',             changefreq: 'monthly', priority: '0.5'  },
+];
 
 function escapeXml(value) {
   return String(value)
@@ -21,17 +36,17 @@ function getBaseUrl(req) {
   const envUrl = process.env.SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
   if (envUrl) {
     const normalized = envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
-    return forceHttps(normalized);
+    return forceHttps(normalized).replace(/\/$/, '');
   }
   const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
   const safeProto = proto === 'http' ? 'https' : proto;
   const host = req.headers.host;
-  return forceHttps(`${safeProto}://${host}`);
+  return forceHttps(`${safeProto}://${host}`).replace(/\/$/, '');
 }
 
 async function fetchPublishedPosts() {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseAnon = process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnon) return [];
 
   const apiBase = forceHttps(supabaseUrl.trim().replace(/\/$/, ''));
@@ -47,37 +62,42 @@ async function fetchPublishedPosts() {
   return response.json();
 }
 
+function buildUrlEntry(loc, lastmod, changefreq, priority) {
+  return `  <url>
+    <loc>${escapeXml(loc)}</loc>${lastmod ? `\n    <lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ''}
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
+}
+
 export default async function handler(req, res) {
   try {
     const baseUrl = getBaseUrl(req);
     const posts = await fetchPublishedPosts();
+    const now = new Date().toISOString();
 
-    const urls = [
-      ...STATIC_PATHS.map((path) => ({ loc: `${baseUrl}${path}`, lastmod: null, changefreq: path === '/' ? 'weekly' : 'monthly', priority: path === '/' ? '1.0' : '0.7' })),
-      ...posts.map((post) => ({
-        loc: `${baseUrl}/blog/${post.slug}`,
-        lastmod: post.updated_at || post.published_at || post.created_at || null,
-        changefreq: 'weekly',
-        priority: '0.8'
-      }))
-    ];
+    const entries = [];
+
+    // Static pages
+    for (const page of STATIC_PAGES) {
+      entries.push(buildUrlEntry(`${baseUrl}${page.path}`, now, page.changefreq, page.priority));
+    }
+
+    // Dynamic blog post pages
+    for (const post of posts) {
+      const slug = (post.slug || '').trim();
+      if (!slug) continue;
+      const lastmod = post.updated_at || post.published_at || post.created_at || now;
+      entries.push(buildUrlEntry(`${baseUrl}/blog/${slug}`, lastmod, 'weekly', '0.8'));
+    }
 
     const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `  <url>
-    <loc>${escapeXml(u.loc)}</loc>
-    ${u.lastmod ? `<lastmod>${new Date(u.lastmod).toISOString()}</lastmod>` : ''}
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`
-  )
-  .join('\n')}
+${entries.join('\n')}
 </urlset>`;
 
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     res.status(200).send(body);
   } catch {
     res.status(500).send('Failed to generate sitemap');
