@@ -24,6 +24,18 @@ function setCanonical(url) {
   el.setAttribute('href', url);
 }
 
+function setHreflang(url) {
+  if (!url) return;
+  let el = document.head.querySelector('link[hreflang="en-IN"]');
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', 'alternate');
+    el.setAttribute('hreflang', 'en-IN');
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', url);
+}
+
 export function setSEO({
   title,
   description,
@@ -52,6 +64,7 @@ export function setSEO({
   if (canonicalUrl) {
     const c = ensureHttps(canonicalUrl);
     setCanonical(c);
+    setHreflang(c);
     upsertMeta({ attr: 'property', key: 'og:url', value: c });
   }
   if (ogImage) {
@@ -68,24 +81,55 @@ export function setArticleJsonLd(article) {
   const script = document.createElement('script');
   script.id = 'article-jsonld';
   script.type = 'application/ld+json';
-  script.textContent = JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: article.title,
-    description: article.description,
-    image: article.image ? [ensureHttps(article.image)] : undefined,
-    datePublished: article.datePublished,
-    dateModified: article.dateModified || article.datePublished,
-    author: {
-      '@type': 'Person',
-      name: article.author || 'Wedora Team'
+  
+  const siteUrl = ensureHttps((window.location.origin).replace(/\\/$/, ''));
+
+  const jsonLdData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.title,
+      description: article.description,
+      image: article.image ? [ensureHttps(article.image)] : undefined,
+      datePublished: article.datePublished,
+      dateModified: article.dateModified || article.datePublished,
+      author: {
+        '@type': 'Person',
+        name: article.author || 'Wedora Team'
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: DEFAULT_SITE_NAME
+      },
+      mainEntityOfPage: article.url ? ensureHttps(article.url) : undefined
     },
-    publisher: {
-      '@type': 'Organization',
-      name: DEFAULT_SITE_NAME
-    },
-    mainEntityOfPage: article.url ? ensureHttps(article.url) : undefined
-  });
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": `${siteUrl}/`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": `${siteUrl}/blog`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": article.title,
+          "item": article.url ? ensureHttps(article.url) : undefined
+        }
+      ]
+    }
+  ];
+
+  script.textContent = JSON.stringify(jsonLdData);
   document.head.appendChild(script);
 }
 

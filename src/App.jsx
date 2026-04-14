@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import AppLayout from './components/layout/AppLayout';
 import LoadingWatchdog from './components/LoadingWatchdog';
+import { usePageTracking } from './hooks/usePageTracking';
 
 // ─── Lazy load all pages ───────────────────────────────────────────────────
 // Keep LandingPage, LoginPage, SignupPage eager (first paint pages)
@@ -108,6 +109,8 @@ function LoadingScreen() {
 function AppWithContext() {
   const { currentUser, authReady, activeWeddingId, isRecoveringPassword } = useAuth();
   const navigate = useNavigate();
+
+  usePageTracking();
 
   useEffect(() => {
     if (isRecoveringPassword) {

@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { clearArticleJsonLd, clearFaqPageJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
+import BlogAcquisitionWidgets from '../components/landing/BlogAcquisitionWidgets';
 
 // ── Static metadata + getter functions only — kept eager (tiny, needed immediately)
 import { BUDGET_GUIDE_SLUG, getStaticBudgetGuidePost } from './blog/indianWeddingBudgetGuide2026';
@@ -292,7 +293,8 @@ export default function BlogPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white relative pb-8">
+      <BlogAcquisitionWidgets />
       {/* Navbar Minimal */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">

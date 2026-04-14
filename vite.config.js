@@ -1,11 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg'],
+      manifest: {
+        name: 'Wedora Wedding Planner',
+        short_name: 'Wedora',
+        description: 'Free Wedding Invitation Creator & Planner for Indian Couples',
+        theme_color: '#fdf2f8',
+        background_color: '#ffffff',
+        display: 'standalone'
+      }
+    })
   ],
   define: {
     '__BUILD_TIMESTAMP__': JSON.stringify(new Date().toISOString()),
