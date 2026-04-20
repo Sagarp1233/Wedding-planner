@@ -22,8 +22,6 @@ import { COURT_MARRIAGE_SLUG, getStaticCourtMarriagePost, CourtMarriageGuideArti
 import { MUHURAT_DATES_SLUG, getStaticMuhuratDatesPost, WeddingMuhuratDatesArticle } from './blog/weddingMuhuratDates2026';
 import { CATERING_GUIDE_SLUG, getStaticCateringGuidePost, IndianWeddingCateringGuideArticle } from './blog/indianWeddingCateringGuide';
 import { PRE_WEDDING_SHOOT_SLUG, getStaticPreWeddingShootPost, PreWeddingShootGuideArticle } from './blog/preWeddingShootGuide';
-import { DECOR_GUIDE_SLUG, getStaticDecorGuidePost, IndianWeddingDecorGuideArticle } from './blog/indianWeddingDecorGuide';
-import { VENUE_GUIDE_SLUG, getStaticVenueGuidePost, WeddingVenueGuideArticle } from './blog/weddingVenueGuide';
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -90,8 +88,6 @@ export default function BlogPostPage() {
       if (slug === MUHURAT_DATES_SLUG) { const r = await tryDB(getStaticMuhuratDatesPost); setPost(r); applyPostSEO(r); return; }
       if (slug === CATERING_GUIDE_SLUG) { const r = await tryDB(getStaticCateringGuidePost); setPost(r); applyPostSEO(r); return; }
       if (slug === PRE_WEDDING_SHOOT_SLUG) { const r = await tryDB(getStaticPreWeddingShootPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === DECOR_GUIDE_SLUG) { const r = await tryDB(getStaticDecorGuidePost); setPost(r); applyPostSEO(r); return; }
-      if (slug === VENUE_GUIDE_SLUG) { const r = await tryDB(getStaticVenueGuidePost); setPost(r); applyPostSEO(r); return; }
 
       const { data, error } = await supabase
         .from('blogs')
@@ -178,8 +174,6 @@ export default function BlogPostPage() {
   if (post.slug === MUHURAT_DATES_SLUG) { return <WeddingMuhuratDatesArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />; }
   if (post.slug === CATERING_GUIDE_SLUG) { return <IndianWeddingCateringGuideArticle post={post} readTime={14} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />; }
   if (post.slug === PRE_WEDDING_SHOOT_SLUG) { return <PreWeddingShootGuideArticle post={post} readTime={15} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />; }
-  if (post.slug === DECOR_GUIDE_SLUG) { return <IndianWeddingDecorGuideArticle post={post} readTime={14} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />; }
-  if (post.slug === VENUE_GUIDE_SLUG) { return <WeddingVenueGuideArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />; }
 
   // Calculate read time based on word count
   const wordCount = (post.content || '').split(/\s+/).filter(Boolean).length;
