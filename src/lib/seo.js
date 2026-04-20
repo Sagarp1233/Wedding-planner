@@ -82,7 +82,7 @@ export function setArticleJsonLd(article) {
   script.id = 'article-jsonld';
   script.type = 'application/ld+json';
   
-  const siteUrl = ensureHttps((window.location.origin).replace(/\\/$/, ''));
+  const siteUrl = ensureHttps((window.location.origin).replace(/\/$/, ''));
 
   const jsonLdData = [
     {

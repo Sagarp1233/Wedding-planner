@@ -225,7 +225,11 @@ export default function BlogPostPage() {
   );
 
   // ── Static article renders — each wrapped in Suspense so they lazy load
-  if (post.slug === BUDGET_GUIDE_SLUG) {
+  // NOTE: We compare against the URL `slug` (from useParams), NOT `post.slug`
+  // (from DB). This prevents mismatches when the DB record's slug field differs
+  // slightly from the constant (e.g. trailing spaces, different separators, or
+  // the slug was edited in the admin panel). The URL is always the source of truth.
+  if (slug === BUDGET_GUIDE_SLUG) {
     return (
       <>
         {postHelmet}
@@ -242,7 +246,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === WEDDING_5L_SLUG) {
+  if (slug === WEDDING_5L_SLUG) {
     return (
       <>
         {postHelmet}
@@ -252,7 +256,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
+  if (slug === LOW_BUDGET_PREMIUM_SLUG) {
     return (
       <>
         {postHelmet}
@@ -262,7 +266,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
+  if (slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
     return (
       <>
         {postHelmet}
@@ -272,7 +276,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === BUDGET_CALCULATOR_SLUG) {
+  if (slug === BUDGET_CALCULATOR_SLUG) {
     return (
       <>
         {postHelmet}
@@ -282,7 +286,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
+  if (slug === LAST_MINUTE_CHECKLIST_SLUG) {
     return (
       <>
         {postHelmet}
@@ -292,7 +296,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === WHATSAPP_INVITE_SLUG) {
+  if (slug === WHATSAPP_INVITE_SLUG) {
     return (
       <>
         {postHelmet}
@@ -302,7 +306,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
+  if (slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
     return (
       <>
         {postHelmet}
@@ -312,7 +316,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === COURT_MARRIAGE_SLUG) {
+  if (slug === COURT_MARRIAGE_SLUG) {
     return (
       <>
         {postHelmet}
@@ -322,7 +326,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === MUHURAT_DATES_SLUG) {
+  if (slug === MUHURAT_DATES_SLUG) {
     return (
       <>
         {postHelmet}
@@ -332,7 +336,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === CATERING_GUIDE_SLUG) {
+  if (slug === CATERING_GUIDE_SLUG) {
     return (
       <>
         {postHelmet}
@@ -342,7 +346,7 @@ export default function BlogPostPage() {
       </>
     );
   }
-  if (post.slug === PRE_WEDDING_SHOOT_SLUG) {
+  if (slug === PRE_WEDDING_SHOOT_SLUG) {
     return (
       <>
         {postHelmet}
