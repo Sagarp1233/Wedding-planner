@@ -35,9 +35,9 @@ Disallow: /vendors
 Disallow: /inspiration
 Disallow: /settings
 
-Sitemap: ${baseUrl.replace(/\/$/, '')}/sitemap.xml
+Sitemap: ${baseUrl.replace(/\/+$/, '')}/sitemap.xml
 `;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=0, must-revalidate');
   res.status(200).send(body);
 }
