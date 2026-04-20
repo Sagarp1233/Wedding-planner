@@ -35,7 +35,7 @@ Disallow: /vendors
 Disallow: /inspiration
 Disallow: /settings
 
-Sitemap: ${baseUrl}sitemap.xml
+Sitemap: https://wedora.in/sitemap.xml
 `;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
