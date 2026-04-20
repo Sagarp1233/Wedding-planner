@@ -22,8 +22,6 @@ import { COURT_MARRIAGE_SLUG, getStaticCourtMarriagePost } from './blog/courtMar
 import { MUHURAT_DATES_SLUG, getStaticMuhuratDatesPost } from './blog/weddingMuhuratDates2026';
 import { CATERING_GUIDE_SLUG, getStaticCateringGuidePost } from './blog/indianWeddingCateringGuide';
 import { PRE_WEDDING_SHOOT_SLUG, getStaticPreWeddingShootPost } from './blog/preWeddingShootGuide';
-import { DECOR_GUIDE_SLUG, getStaticDecorGuidePost } from './blog/indianWeddingDecorGuide';
-import { VENUE_GUIDE_SLUG, getStaticVenueGuidePost } from './blog/weddingVenueGuide';
 
 // ── Article components — lazy loaded
 // Each article only downloads when a user actually visits that specific blog post
@@ -62,12 +60,6 @@ const IndianWeddingCateringGuideArticle = lazy(() =>
 );
 const PreWeddingShootGuideArticle = lazy(() =>
   import('./blog/preWeddingShootGuide').then(m => ({ default: m.PreWeddingShootGuideArticle }))
-);
-const IndianWeddingDecorGuideArticle = lazy(() =>
-  import('./blog/indianWeddingDecorGuide').then(m => ({ default: m.IndianWeddingDecorGuideArticle }))
-);
-const WeddingVenueGuideArticle = lazy(() =>
-  import('./blog/weddingVenueGuide').then(m => ({ default: m.WeddingVenueGuideArticle }))
 );
 
 // ── Skeleton shown while a lazy article chunk is downloading
@@ -152,8 +144,6 @@ export default function BlogPostPage() {
       if (slug === MUHURAT_DATES_SLUG) { const r = await tryDB(getStaticMuhuratDatesPost); setPost(r); applyPostSEO(r); return; }
       if (slug === CATERING_GUIDE_SLUG) { const r = await tryDB(getStaticCateringGuidePost); setPost(r); applyPostSEO(r); return; }
       if (slug === PRE_WEDDING_SHOOT_SLUG) { const r = await tryDB(getStaticPreWeddingShootPost); setPost(r); applyPostSEO(r); return; }
-      if (slug === DECOR_GUIDE_SLUG) { const r = await tryDB(getStaticDecorGuidePost); setPost(r); applyPostSEO(r); return; }
-      if (slug === VENUE_GUIDE_SLUG) { const r = await tryDB(getStaticVenueGuidePost); setPost(r); applyPostSEO(r); return; }
 
       const { data, error } = await supabase
         .from('blogs')
@@ -358,26 +348,6 @@ export default function BlogPostPage() {
         {postHelmet}
         <Suspense fallback={<ArticleSkeleton />}>
           <PreWeddingShootGuideArticle post={post} readTime={15} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-        </Suspense>
-      </>
-    );
-  }
-  if (post.slug === DECOR_GUIDE_SLUG) {
-    return (
-      <>
-        {postHelmet}
-        <Suspense fallback={<ArticleSkeleton />}>
-          <IndianWeddingDecorGuideArticle post={post} readTime={14} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-        </Suspense>
-      </>
-    );
-  }
-  if (post.slug === VENUE_GUIDE_SLUG) {
-    return (
-      <>
-        {postHelmet}
-        <Suspense fallback={<ArticleSkeleton />}>
-          <WeddingVenueGuideArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
         </Suspense>
       </>
     );
