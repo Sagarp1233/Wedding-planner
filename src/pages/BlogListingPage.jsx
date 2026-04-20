@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { Helmet } from 'react-helmet-async';
 import { clearArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
 import { useAuth } from '../context/AuthContext';
@@ -48,6 +49,9 @@ export default function BlogListingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
+      <Helmet>
+        <link rel="canonical" href="https://wedora.in/blog" />
+      </Helmet>
       {/* Navbar Minimal */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">

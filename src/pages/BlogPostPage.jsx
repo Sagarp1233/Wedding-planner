@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Copy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Helmet } from 'react-helmet-async';
 import { clearArticleJsonLd, clearFaqPageJsonLd, setArticleJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
 import BlogAcquisitionWidgets from '../components/landing/BlogAcquisitionWidgets';
@@ -194,68 +195,101 @@ export default function BlogPostPage() {
   }
   const affiliateCtaLabel = (post.affiliate_label && String(post.affiliate_label).trim()) || 'Learn more';
 
+  const _siteBase = (import.meta.env.VITE_PUBLIC_SITE_URL || 'https://wedora.in').replace(/\/$/, '');
+  const postHelmet = (
+    <Helmet>
+      <title>{post.meta_title || `${post.title} | Wedora Blog`}</title>
+      <meta name="description" content={post.meta_description || post.excerpt || 'Read this insightful article on Wedora.'} />
+      <link rel="canonical" href={`${_siteBase}/blog/${post.slug}`} />
+    </Helmet>
+  );
+
   // ── Static article renders — each wrapped in Suspense so they lazy load
   if (post.slug === BUDGET_GUIDE_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <IndianWeddingBudgetGuide2026Article
-          post={post}
-          readTime={14}
-          copied={copied}
-          onShare={handleShareURL}
-          affiliateHref={affiliateHref}
-          affiliateCtaLabel={affiliateCtaLabel}
-        />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <IndianWeddingBudgetGuide2026Article
+            post={post}
+            readTime={14}
+            copied={copied}
+            onShare={handleShareURL}
+            affiliateHref={affiliateHref}
+            affiliateCtaLabel={affiliateCtaLabel}
+          />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === WEDDING_5L_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <WeddingUnder5LakhsArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <WeddingUnder5LakhsArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === LOW_BUDGET_PREMIUM_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <LowBudgetPremiumWeddingArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <LowBudgetPremiumWeddingArticle post={post} readTime={13} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === PHOTOGRAPHY_CHECKLIST_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <PhotographyChecklistArticle post={post} readTime={10} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <PhotographyChecklistArticle post={post} readTime={10} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === BUDGET_CALCULATOR_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <BudgetCalculatorArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <BudgetCalculatorArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === LAST_MINUTE_CHECKLIST_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <LastMinuteChecklistArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <LastMinuteChecklistArticle post={post} readTime={12} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === WHATSAPP_INVITE_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <WhatsAppInviteArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <WhatsAppInviteArticle post={post} readTime={11} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
   if (post.slug === ARYA_SAMAJ_MARRIAGE_SLUG) {
     return (
-      <Suspense fallback={<ArticleSkeleton />}>
-        <AryaSamajMarriageArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
-      </Suspense>
+      <>
+        {postHelmet}
+        <Suspense fallback={<ArticleSkeleton />}>
+          <AryaSamajMarriageArticle post={post} readTime={16} copied={copied} onShare={handleShareURL} affiliateHref={affiliateHref} affiliateCtaLabel={affiliateCtaLabel} />
+        </Suspense>
+      </>
     );
   }
 
@@ -294,6 +328,7 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white relative pb-8">
+      {postHelmet}
       <BlogAcquisitionWidgets />
       {/* Navbar Minimal */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">

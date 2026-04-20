@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Heart, ArrowRight, Mail, ChevronRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { setSEO, clearArticleJsonLd, clearHomepageJsonLd } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
 import InvitationGenerator from '../components/landing/InvitationGenerator';
@@ -29,6 +30,9 @@ export default function CreateInvitationPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <link rel="canonical" href="https://wedora.in/create-invitation" />
+      </Helmet>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">

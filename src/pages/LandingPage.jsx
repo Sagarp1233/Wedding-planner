@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Heart, Wallet, Users, CheckSquare, CalendarHeart, Camera, Star, ArrowRight, Sparkles, ShieldCheck, Store, Menu, X, Mail, ChevronRight, MessageCircle, Zap, Crown, Award, TrendingUp, BarChart3, Clock, MapPin, PartyPopper, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { clearArticleJsonLd, clearHomepageJsonLd, setHomepageJsonLd, setSEO } from '../lib/seo';
 import { ensureHttps } from '../utils/ensureHttps';
 import StickyMobileCTA from '../components/landing/StickyMobileCTA';
@@ -77,6 +78,9 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <Helmet>
+        <link rel="canonical" href="https://wedora.in/" />
+      </Helmet>
       {/* ━━━ STICKY NAVBAR ━━━ */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -62,6 +63,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-white">
+      <Helmet>
+        <link rel="canonical" href="https://wedora.in/login" />
+      </Helmet>
       <PublicNav />
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-white via-blush to-ivory" />
