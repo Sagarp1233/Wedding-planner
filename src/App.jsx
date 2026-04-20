@@ -32,6 +32,8 @@ const UpdatePasswordPage    = lazy(() => import('./pages/UpdatePasswordPage'));
 // Blog Pages
 const BlogListingPage       = lazy(() => import('./pages/BlogListingPage'));
 const BlogPostPage          = lazy(() => import('./pages/BlogPostPage'));
+const PublicBudgetCalculatorPage = lazy(() => import('./pages/PublicBudgetCalculatorPage'));
+const PublicChecklistPage   = lazy(() => import('./pages/PublicChecklistPage'));
 
 // Admin Pages
 const AdminDashboardPage    = lazy(() => import('./pages/admin/AdminDashboardPage'));
@@ -138,6 +140,8 @@ function AppWithContext() {
             <Route path="/blog" element={<BlogListingPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/create-invitation" element={<CreateInvitationPage />} />
+            <Route path="/wedding-budget-calculator" element={<PublicBudgetCalculatorPage />} />
+            <Route path="/wedding-checklist" element={<PublicChecklistPage />} />
             <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
 
             {/* Wedding Picker */}

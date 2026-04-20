@@ -11,6 +11,8 @@ const STATIC_PAGES = [
   { path: '/',                   changefreq: 'weekly',  priority: '1.0'  },
   { path: '/blog',               changefreq: 'daily',   priority: '0.9'  },
   { path: '/create-invitation',  changefreq: 'monthly', priority: '0.9'  },
+  { path: '/wedding-budget-calculator', changefreq: 'monthly', priority: '0.9' },
+  { path: '/wedding-checklist',  changefreq: 'monthly', priority: '0.9' },
   { path: '/login',              changefreq: 'monthly', priority: '0.5'  },
   { path: '/signup',             changefreq: 'monthly', priority: '0.5'  },
 ];

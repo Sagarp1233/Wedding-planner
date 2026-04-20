@@ -500,6 +500,8 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold text-gray-900 mb-3">Free Tools</h4>
               <ul className="space-y-2 text-sm text-gray-500">
+                <li><Link to="/wedding-budget-calculator" className="hover:text-gray-700 transition-colors">Budget Calculator 2026</Link></li>
+                <li><Link to="/wedding-checklist" className="hover:text-gray-700 transition-colors">Interactive Checklist</Link></li>
                 <li><Link to="/create-invitation" className="hover:text-gray-700 transition-colors">Invitation Creator</Link></li>
                 <li><Link to="/blog/whatsapp-wedding-invitations-modern-trend-guide" className="hover:text-gray-700 transition-colors">WhatsApp Invitations</Link></li>
                 <li><Link to="/blog/indian-wedding-budget-guide-2026" className="hover:text-gray-700 transition-colors">Budget Guide</Link></li>

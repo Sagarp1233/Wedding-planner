@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
 
 const RELATED_ARTICLES = [
+  { title: 'Interactive Budget Calculator', slug: 'budget-calculator', desc: 'Calculate your ideal wedding budget instantly.', path: '/wedding-budget-calculator' },
+  { title: 'Ultimate Wedding Checklist', slug: 'checklist', desc: 'Interactive week-by-week timeline planner.', path: '/wedding-checklist' },
   { title: 'Complete Indian Wedding Budget Guide 2026', slug: 'indian-wedding-budget-guide-2026', desc: 'Plan every rupee from venue to photography.' },
   { title: 'How to Plan a Wedding Under ₹5 Lakh', slug: 'how-to-plan-wedding-under-5-lakhs-india', desc: 'Budget-friendly tips for a beautiful celebration.' },
   { title: 'WhatsApp Wedding Invitation Ideas', slug: 'whatsapp-wedding-invitations-modern-trend-guide', desc: 'Creative templates for digital invites.' },
-  { title: 'Wedding Photography Checklist', slug: 'wedding-photography-checklist-must-have-shots', desc: 'Never miss a must-have wedding shot.' },
-  { title: 'Wedding Budget Calculator', slug: 'wedding-budget-calculator-how-to-allocate-money', desc: 'Calculate your ideal wedding budget instantly.' },
-  { title: 'Last-Minute Wedding Checklist', slug: 'last-minute-wedding-checklist-30-days-before', desc: 'Essential tasks for the final weeks.' },
   { title: 'Low Budget Premium Wedding Ideas', slug: 'low-budget-wedding-ideas-india-look-premium', desc: 'Look expensive without the price tag.' },
 ];
 
@@ -44,7 +43,7 @@ export default function BlogInternalLinks({ currentSlug }) {
           {filtered.map(article => (
             <Link
               key={article.slug}
-              to={`/blog/${article.slug}`}
+              to={article.path || `/blog/${article.slug}`}
               className="p-4 rounded-xl border border-gray-100 bg-white hover:shadow-md hover:-translate-y-0.5 transition-all group"
             >
               <h4 className="text-sm font-bold text-gray-900 mb-1 group-hover:text-rose-gold transition-colors">
@@ -71,8 +70,13 @@ export default function BlogInternalLinks({ currentSlug }) {
             </Link>
           </li>
           <li>
-            <Link to="/signup" className="text-rose-gold hover:underline font-medium">
-              → Wedding Budget Planner (Free)
+            <Link to="/wedding-budget-calculator" className="text-rose-gold hover:underline font-medium">
+              → Interactive Budget Calculator (Free)
+            </Link>
+          </li>
+          <li>
+            <Link to="/wedding-checklist" className="text-rose-gold hover:underline font-medium">
+              → Interactive Timeline Checklist (Free)
             </Link>
           </li>
           <li>
