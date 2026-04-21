@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Store, ArrowRight, Eye, Phone, Mail, Calendar, MessageCircle, Edit3, ExternalLink, AlertCircle, CheckCircle2, Clock, XCircle, ChevronRight } from 'lucide-react';
+import { Store, ArrowRight, Eye, Phone, Mail, Calendar, MessageCircle, Edit3, ExternalLink, AlertCircle, CheckCircle2, Clock, XCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { fetchMyListing, fetchLeadsForVendor, getCategoryLabel, getCategoryEmoji, formatPrice } from '../../lib/marketplace';
 
 export default function VendorPortalPage() {
@@ -53,9 +53,16 @@ export default function VendorPortalPage() {
   // ─── No Listing Yet ─────────────────────────────────────────────────
   if (!listing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-blush to-ivory px-4 sm:px-6 py-12">
-        <div className="max-w-xl mx-auto text-center">
-          <div className="glass-card p-8 sm:p-12">
+      <div className="min-h-screen bg-gradient-to-br from-white via-blush to-ivory px-4 sm:px-6 py-8 sm:py-12">
+        <div className="max-w-xl mx-auto">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors mb-6"
+          >
+            <ChevronLeft className="w-4 h-4" /> Back
+          </button>
+
+          <div className="glass-card p-8 sm:p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-gold/20">
               <Store className="w-8 h-8 text-white" />
             </div>

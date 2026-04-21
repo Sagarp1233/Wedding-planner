@@ -164,6 +164,56 @@ export async function submitEnquiry(vendorId, { coupleName, phone, email, weddin
   return { success: true };
 }
 
+/**
+ * Fetch reviews for a vendor, complete with the reviewer's name
+ */
+export async function fetchVendorReviews(vendorId) {
+  const { data, error } = await supabase
+    .from('vendor_reviews')
+    .select(`
+      id, rating, comment, created_at, user_id,
+      users ( name )
+    `)
+    .eq('vendor_id', vendorId)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('[Marketplace] fetchVendorReviews error:', error); return []; }
+  return data || [];
+}
+
+/**
+ * Submit or update a review.
+ */
+export async function submitVendorReview(vendorId, userId, rating, comment) {
+  const { data, error } = await supabase
+    .from('vendor_reviews')
+    .upsert({
+      vendor_id: vendorId,
+      user_id: userId,
+      rating,
+      comment,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'vendor_id, user_id' })
+    .select()
+    .single();
+
+  if (error) { console.error('[Marketplace] submitVendorReview error:', error); return { success: false, error: error.message }; }
+  return { success: true, data };
+}
+
+/**
+ * Delete a user's own review.
+ */
+export async function deleteVendorReview(reviewId) {
+  const { error } = await supabase
+    .from('vendor_reviews')
+    .delete()
+    .eq('id', reviewId);
+    
+  if (error) { console.error('[Marketplace] deleteVendorReview error:', error); return { success: false, error: error.message }; }
+  return { success: true };
+}
+
 // ─── Vendor Portal Queries ──────────────────────────────────────────────────
 
 /**

@@ -1,24 +1,35 @@
 import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { MapPin, Phone, Mail, Globe, ChevronRight, BadgeCheck, Heart, Send, MessageCircle, ArrowLeft, Clock, IndianRupee } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, ChevronRight, BadgeCheck, Heart, Send, MessageCircle, ArrowLeft, Clock, IndianRupee, Star, StarHalf, UserCircle2, Trash2 } from 'lucide-react';
 import PublicNav from '../../components/layout/PublicNav';
 import { setSEO } from '../../lib/seo';
 import { ensureHttps } from '../../utils/ensureHttps';
 import {
   fetchVendorBySlug,
   fetchVendorMedia,
+  fetchVendorReviews,
+  submitVendorReview,
+  deleteVendorReview,
   submitEnquiry,
   getCategoryLabel,
   getCategoryEmoji,
   formatPrice,
 } from '../../lib/marketplace';
+import { useAuth } from '../../context/AuthContext';
+import { useApp } from '../../context/AppContext';
 
 export default function VendorDetailPage() {
   const { category, slug } = useParams();
   const [vendor, setVendor] = useState(null);
   const [media, setMedia] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxImg, setLightboxImg] = useState(null);
+
+  // Review form
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   // Enquiry form
   const [formData, setFormData] = useState({ coupleName: '', phone: '', email: '', weddingDate: '', message: '' });
@@ -27,6 +38,42 @@ export default function VendorDetailPage() {
   const [formError, setFormError] = useState('');
 
   const categoryLabel = getCategoryLabel(category);
+  const { isAuthenticated, activeWeddingId } = useAuth();
+  const { state, dispatch } = useApp();
+
+  const isShortlisted = vendor && state?.vendors?.some(
+    v => v.name === vendor.business_name && v.phone === (vendor.phone || '')
+  );
+
+  function toggleShortlist() {
+    if (!isAuthenticated || !activeWeddingId) {
+      alert('Please log in and create a wedding plan to shortlist vendors!');
+      return;
+    }
+    if (isShortlisted) {
+      const match = state.vendors.find(v => v.name === vendor.business_name && v.phone === (vendor.phone || ''));
+      if (match) {
+        dispatch({ type: 'DELETE_VENDOR', payload: match.id });
+      }
+    } else {
+      dispatch({
+        type: 'ADD_VENDOR',
+        payload: {
+          name: vendor.business_name,
+          category: vendor.category, // Map marketplace category to tracker category
+          contactPerson: '',
+          phone: vendor.phone || '',
+          email: vendor.email || '',
+          location: vendor.city,
+          quotedAmount: vendor.price_range_min || 0,
+          advancePaid: 0,
+          nextPaymentDate: '',
+          notes: `Found on Wedora Marketplace: ${window.location.href}`,
+          status: 'shortlisted'
+        }
+      });
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -36,6 +83,8 @@ export default function VendorDetailPage() {
         setVendor(v);
         const m = await fetchVendorMedia(v.id);
         setMedia(m);
+        const r = await fetchVendorReviews(v.id);
+        setReviews(r);
 
         const origin = ensureHttps((import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, ''));
         setSEO({
@@ -84,6 +133,35 @@ export default function VendorDetailPage() {
       setSubmitted(true);
     } else {
       setFormError('Something went wrong. Please try again.');
+    }
+  }
+
+  async function handleReviewSubmit(e) {
+    e.preventDefault();
+    if (!isAuthenticated) return alert("Please log in to submit a review.");
+    if (reviewRating === 0) return alert("Please select a star rating.");
+    
+    setSubmittingReview(true);
+    const res = await submitVendorReview(vendor.id, currentUser?.id, reviewRating, reviewComment);
+    setSubmittingReview(false);
+    
+    if (res.success) {
+      setReviewRating(0);
+      setReviewComment('');
+      // Reload reviews
+      const updatedReviews = await fetchVendorReviews(vendor.id);
+      setReviews(updatedReviews);
+    } else {
+      alert("Failed to submit review.");
+    }
+  }
+
+  async function handleDeleteReview(reviewId) {
+    if (confirm("Are you sure you want to delete this review?")) {
+      const res = await deleteVendorReview(reviewId);
+      if (res.success) {
+        setReviews(reviews.filter(r => r.id !== reviewId));
+      }
     }
   }
 
@@ -166,12 +244,23 @@ export default function VendorDetailPage() {
             <div className="lg:col-span-2 space-y-8">
               {/* Title & Info */}
               <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className="flex items-start gap-3 mb-3">
-                  <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">{vendor.business_name}</h1>
-                  {vendor.is_verified && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold mt-1">
-                      <BadgeCheck className="w-3.5 h-3.5" /> Verified
-                    </span>
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">{vendor.business_name}</h1>
+                    {vendor.is_verified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold mt-1">
+                        <BadgeCheck className="w-3.5 h-3.5" /> Verified
+                      </span>
+                    )}
+                  </div>
+                  {(isAuthenticated && activeWeddingId) && (
+                    <button 
+                      onClick={toggleShortlist}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex-shrink-0 ${isShortlisted ? 'bg-rose-gold text-white hover:bg-rose-gold/90' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-rose-gold'}`}
+                    >
+                      <Heart className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`} />
+                      <span className="hidden sm:inline">{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
+                    </button>
                   )}
                 </div>
 
@@ -249,6 +338,110 @@ export default function VendorDetailPage() {
                   </div>
                 </div>
               )}
+              {/* Reviews Section */}
+              <div className="animate-fade-in-up" id="reviews" style={{ animationDelay: '350ms' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-serif font-bold text-gray-900">Reviews & Ratings</h2>
+                  <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{reviews.length}</span>
+                </div>
+
+                {/* Review Form (Authenticated only & if they haven't reviewed) */}
+                {isAuthenticated ? (
+                  !reviews.some(r => r.user_id === currentUser?.id) ? (
+                    <div className="glass-card p-5 mb-6 bg-gradient-to-br from-rose-gold/5 border flex flex-col gap-3">
+                      <h3 className="text-sm font-bold text-gray-900">Rate your experience</h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button 
+                            key={star} 
+                            onClick={() => setReviewRating(star)}
+                            className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
+                          >
+                            <Star 
+                              className={`w-7 h-7 sm:w-8 sm:h-8 ${star <= reviewRating ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} 
+                              strokeWidth={1.5}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        rows={3}
+                        placeholder="Share your experience working with this vendor..."
+                        value={reviewComment}
+                        onChange={e => setReviewComment(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30 resize-none"
+                      />
+                      <div className="flex justify-end mt-2">
+                        <button 
+                          onClick={handleReviewSubmit}
+                          disabled={submittingReview || reviewRating === 0}
+                          className="px-6 py-2 rounded-xl bg-gray-900 text-white font-semibold text-sm shadow hover:bg-gray-800 transition-colors disabled:opacity-50"
+                        >
+                          {submittingReview ? 'Submitting...' : 'Post Review'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="glass-card p-4 mb-6 bg-gray-50 text-center border">
+                      <p className="text-sm text-gray-600">You have already left a review for this vendor.</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="glass-card p-5 mb-6 bg-gray-50 text-center border border-dashed">
+                    <p className="text-sm text-gray-600 mb-3">Log in to leave a review and help other couples.</p>
+                    <Link to="/login" className="inline-flex items-center px-5 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold shadow-sm hover:border-gray-300">
+                      Log In
+                    </Link>
+                  </div>
+                )}
+
+                {/* Review List */}
+                <div className="space-y-4">
+                  {reviews.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-3xl mb-2 opacity-50">✨</div>
+                      <p className="text-sm text-gray-500">No reviews yet. Be the first to share your experience!</p>
+                    </div>
+                  ) : (
+                    reviews.map(review => (
+                      <div key={review.id} className="glass-card p-5">
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shrink-0">
+                              <UserCircle2 className="w-6 h-6 text-gray-400" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-gray-900">{review.users?.name || 'Happy Couple'}</p>
+                              <p className="text-xs text-gray-400">
+                                {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center flex-col items-end gap-1">
+                            <div className="flex items-center gap-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-200 fill-gray-200'}`} />
+                              ))}
+                            </div>
+                            {isAuthenticated && currentUser?.id === review.user_id && (
+                              <button 
+                                onClick={() => handleDeleteReview(review.id)}
+                                className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 mt-1 opacity-60 hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="w-3 h-3" /> Delete
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        {review.comment && (
+                          <p className="text-sm text-gray-700 leading-relaxed bg-gray-50/50 p-3 rounded-xl border border-gray-100">{review.comment}</p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Sidebar — Enquiry Form */}

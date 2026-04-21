@@ -190,9 +190,19 @@ export default function MarketplaceLandingPage() {
                         <span>From {formatPrice(v.price_range_min)}</span>
                       )}
                     </div>
-                    <span className="text-xs font-semibold text-rose-gold flex items-center gap-1">
-                      View Profile <ChevronRight className="w-3 h-3" />
-                    </span>
+                    <div className="flex items-center justify-between">
+                      {(v.rating_avg && v.reviews_count > 0) ? (
+                        <span className="flex items-center gap-1 text-xs font-semibold text-gray-900 border border-gray-200/60 bg-gray-50/50 px-2 py-0.5 rounded-lg">
+                          <Star className="w-3.5 h-3.5 text-amber-500" fill="currentColor" />
+                          {Number(v.rating_avg).toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">New vendor</span>
+                      )}
+                      <span className="text-xs font-semibold text-rose-gold flex items-center gap-1">
+                        View Profile <ChevronRight className="w-3 h-3" />
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
