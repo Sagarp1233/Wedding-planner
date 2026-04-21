@@ -35,11 +35,20 @@ const BlogPostPage          = lazy(() => import('./pages/BlogPostPage'));
 const PublicBudgetCalculatorPage = lazy(() => import('./pages/PublicBudgetCalculatorPage'));
 const PublicChecklistPage   = lazy(() => import('./pages/PublicChecklistPage'));
 
+// Marketplace Pages
+const MarketplaceLandingPage   = lazy(() => import('./pages/marketplace/MarketplaceLandingPage'));
+const CategoryListingPage      = lazy(() => import('./pages/marketplace/CategoryListingPage'));
+const VendorDetailPage         = lazy(() => import('./pages/marketplace/VendorDetailPage'));
+const VendorPortalPage         = lazy(() => import('./pages/marketplace/VendorPortalPage'));
+const VendorListingEditorPage  = lazy(() => import('./pages/marketplace/VendorListingEditorPage'));
+
 // Admin Pages
 const AdminDashboardPage    = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminLoginPage        = lazy(() => import('./pages/admin/AdminLoginPage'));
 const AdminBlogPage         = lazy(() => import('./pages/admin/AdminBlogPage'));
 const AdminBlogEditorPage   = lazy(() => import('./pages/admin/AdminBlogEditorPage'));
+const AdminVendorListPage   = lazy(() => import('./pages/admin/AdminVendorListPage'));
+const AdminVendorReviewPage = lazy(() => import('./pages/admin/AdminVendorReviewPage'));
 // ──────────────────────────────────────────────────────────────────────────
 
 // Route guard: redirect to login if not authenticated
@@ -144,6 +153,15 @@ function AppWithContext() {
             <Route path="/wedding-checklist" element={<PublicChecklistPage />} />
             <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
 
+            {/* Public Marketplace (no login required) */}
+            <Route path="/marketplace" element={<MarketplaceLandingPage />} />
+            <Route path="/marketplace/:category" element={<CategoryListingPage />} />
+            <Route path="/marketplace/:category/:slug" element={<VendorDetailPage />} />
+
+            {/* Vendor Portal (login required, but no onboarding needed) */}
+            <Route path="/vendor-portal" element={<ProtectedRoute><VendorPortalPage /></ProtectedRoute>} />
+            <Route path="/vendor-portal/edit" element={<ProtectedRoute><VendorListingEditorPage /></ProtectedRoute>} />
+
             {/* Wedding Picker */}
             <Route path="/weddings" element={
               <ProtectedRoute><WeddingPickerPage /></ProtectedRoute>
@@ -174,6 +192,8 @@ function AppWithContext() {
               <Route path="/admin/blog"         element={<AdminBlogPage />} />
               <Route path="/admin/blog/new"     element={<AdminBlogEditorPage />} />
               <Route path="/admin/blog/:id/edit" element={<AdminBlogEditorPage />} />
+              <Route path="/admin/vendors"      element={<AdminVendorListPage />} />
+              <Route path="/admin/vendors/:id"  element={<AdminVendorReviewPage />} />
             </Route>
 
             {/* Fallback */}

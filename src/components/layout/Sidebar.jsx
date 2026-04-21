@@ -1,20 +1,36 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown, Mail, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown, Mail, MessageCircle, ShoppingBag, Briefcase } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
 
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/invitations', label: 'Invitations', icon: Mail },
-  { to: '/whatsapp', label: 'WhatsApp Tools', icon: MessageCircle },
-  { to: '/budget', label: 'Budget', icon: Wallet },
-  { to: '/guests', label: 'Guests', icon: Users },
-  { to: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
-  { to: '/vendors', label: 'Vendors', icon: Store },
-  { to: '/inspiration', label: 'Inspiration', icon: Camera },
-  { to: '/blog', label: 'Blog', icon: Newspaper },
+const NAV_SECTIONS = [
+  {
+    label: 'PLANNING',
+    items: [
+      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/budget', label: 'Budget', icon: Wallet },
+      { to: '/guests', label: 'Guests', icon: Users },
+      { to: '/tasks', label: 'Tasks', icon: CheckSquare },
+      { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
+    ]
+  },
+  {
+    label: 'VENDORS',
+    items: [
+      { to: '/vendors', label: 'My Vendors', icon: Store },
+      { to: '/marketplace', label: 'Find Vendors', icon: ShoppingBag },
+    ]
+  },
+  {
+    label: 'MORE',
+    items: [
+      { to: '/inspiration', label: 'Inspiration', icon: Camera },
+      { to: '/invitations', label: 'Invitations', icon: Mail },
+      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
+      { to: '/blog', label: 'Blog', icon: Newspaper },
+    ]
+  },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -58,51 +74,35 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Countdown */}
-        {state.wedding.weddingDate && (
-          <div className="mx-4 mb-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
-            {/* Left accent stripe */}
-            <div className="absolute left-0 top-3 bottom-3 w-1 rounded-full bg-gradient-to-b from-amber-400 to-orange-500" />
-            <div className="pl-3">
-              <p className="text-[10px] font-bold text-amber-600/70 uppercase tracking-[0.2em] mb-1.5">Wedding Day</p>
-              <div className="flex items-baseline gap-1.5">
-                <p className="text-3xl font-serif font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 0}</p>
-                <span className="text-sm font-medium text-gray-400">days to go</span>
-              </div>
-              <div className="h-px bg-gray-100 my-2.5" />
-              <p className="text-xs text-gray-500 font-medium">
-                {new Date(state.wedding.weddingDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-              {state.wedding.location && (
-                <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                  📍 {state.wedding.location}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Navigation */}
         <nav className="flex-1 px-3 overflow-y-auto">
-          <div className="space-y-1">
-            {NAV_ITEMS.map(item => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={onClose}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                  ${isActive
-                    ? 'bg-gradient-to-r from-rose-gold/15 to-rose-gold/5 text-rose-gold shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-              >
-                <item.icon className="w-[18px] h-[18px]" />
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.label} className="mb-4">
+              <div className="px-4 py-1 flex items-center gap-2 mb-1.5">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{section.label}</span>
+                <div className="h-px bg-gray-100 flex-1" />
+              </div>
+              <div className="space-y-1">
+                {section.items.map(item => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={onClose}
+                    className={({ isActive }) => `
+                      flex items-center gap-2.5 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-200
+                      ${isActive
+                        ? 'bg-gradient-to-r from-rose-gold/15 to-rose-gold/5 text-rose-gold shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    <item.icon className="w-[18px] h-[18px]" />
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
@@ -140,6 +140,38 @@ export default function Sidebar({ isOpen, onClose }) {
               Admin Blog
             </NavLink>
           )}
+
+          {isAdmin && (
+            <NavLink
+              to="/admin/vendors"
+              onClick={onClose}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-gradient-to-r from-blue-600/15 to-blue-500/5 text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                }
+              `}
+            >
+              <ShoppingBag className="w-[18px] h-[18px]" />
+              Vendor Moderation
+            </NavLink>
+          )}
+
+          <NavLink
+            to="/vendor-portal"
+            onClick={onClose}
+            className={({ isActive }) => `
+              flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+              ${isActive
+                ? 'bg-gradient-to-r from-rose-gold/15 to-rose-gold/5 text-rose-gold shadow-sm'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }
+            `}
+          >
+            <Briefcase className="w-[18px] h-[18px]" />
+            My Vendor Listing
+          </NavLink>
 
           <NavLink
             to="/settings"

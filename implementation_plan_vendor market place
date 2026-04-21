@@ -1,0 +1,990 @@
+# Wedora Vendor Marketplace — Implementation Plan v2
+
+## Executive Summary
+
+Build a three-sided Vendor Marketplace ecosystem within the existing Wedora platform:
+- **Couples** discover, filter, and shortlist vendors from a public directory
+- **Vendors** register, manage their business profiles, portfolios, and subscription plans
+- **Admins** moderate listings, manage subscriptions, and control featured placements
+
+The marketplace will be the **primary organic traffic engine** for Wedora — every vendor profile is a fully SEO-optimized, publicly crawlable page with structured data.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Critical Architectural Decision:** The existing `vendors` table (scoped to `wedding_id`) is the **private Vendor Tracker** — a couple's personal vendor management tool. The marketplace requires a **completely separate schema** (`marketplace_vendors`, `vendor_listings`, etc.) that represents real businesses. When a couple shortlists a marketplace vendor, we create a bridge record linking the two systems. This keeps the existing Vendor Tracker fully intact and backward-compatible.
+
+> [!WARNING]
+> **Supabase Storage Required:** Vendor portfolios need image/video uploads. This plan assumes Supabase Storage is enabled on your project. If not, we'll need to configure a storage bucket (`vendor-media`) with appropriate policies.
+
+> [!IMPORTANT]
+> **Vendor Auth Model:** Vendors will register using the same Supabase auth system but with a `role: 'vendor'` in `user_metadata`. This means a single person can be both a couple-user AND a vendor (different contexts, same login). Please confirm this is acceptable vs. requiring separate accounts.
+
+---
+
+## Navigation Architecture (Redesigned)
+
+This is the core UX redesign. The current sidebar has a **flat list of 10+ items** which would become unmanageable with marketplace additions. The new design uses **three distinct layout contexts** with clean, grouped navigation.
+
+### The Problem (Current State)
+```
+Current Sidebar (flat, 12+ items):
+├── Dashboard
+├── Invitations
+├── WhatsApp Tools
+├── Budget
+├── Guests
+├── Tasks
+├── Timeline
+├── Vendors (Tracker)
+├── Inspiration
+├── Blog
+├── [Admin Dashboard]      ← admin only
+├── [Admin Blog]           ← admin only
+├── Settings
+└── User / Logout
+```
+Adding marketplace (3+ items), vendor dashboard (5+ items), and admin controls (2+ items) would create a **20+ item sidebar** — terrible UX.
+
+### The Solution: Three Layout Contexts
+
+```mermaid
+graph LR
+    subgraph "Context 1: Public Marketplace"
+        A["Top Navbar Only<br/>(like Blog pages)"]
+    end
+    
+    subgraph "Context 2: Couple Dashboard"
+        B["Grouped Sidebar<br/>(Planning + Vendors + More)"]
+    end
+
+    subgraph "Context 3: Vendor Dashboard"
+        C["Separate Vendor Sidebar<br/>(Business management)"]
+    end
+    
+    A -. "Login / Signup" .-> B
+    B -. "Context Switch" .-> C
+    C -. "Context Switch" .-> B
+```
+
+---
+
+### Context 1: Public Marketplace Pages — Top Navbar (No Sidebar)
+
+Routes: `/vendors`, `/vendors/:category`, `/vendors/:category/:slug`
+
+Uses the **existing `PublicNav.jsx`** (same pattern as blog pages). These are public, SEO-crawlable pages — they should feel like browsing a directory website, not a dashboard app.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  🤍 Wedora    Vendors  Blog  Budget Calculator  Login│
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│   Find Your Perfect Wedding Vendors                  │
+│   [🔍 Search vendors...              ] [📍 City ▼]  │
+│                                                      │
+│   📸 Photographers  🏛️ Venues  💄 Makeup  🍽️ Caterers│
+│                                                      │
+│   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │
+│   │ Vendor  │ │ Vendor  │ │ Vendor  │ │ Vendor  │  │
+│   │ Card    │ │ Card    │ │ Card    │ │ Card    │  │
+│   │ ⭐4.8 ❤│ │ ⭐4.5 ❤│ │ ⭐4.9 ❤│ │ ⭐4.2 ❤│  │
+│   └─────────┘ └─────────┘ └─────────┘ └─────────┘  │
+└──────────────────────────────────────────────────────┘
+```
+
+**Why?**
+- Marketplace is a **content/discovery** surface, not a management tool
+- Matches the established blog pattern — no sidebar, just a clean navbar
+- Better SEO — full-width content, no layout shift from sidebar
+- Mobile-first: no drawer to toggle, just a clean responsive page
+
+---
+
+### Context 2: Couple Dashboard — Grouped Sidebar
+
+Routes: `/dashboard`, `/budget`, `/guests`, `/tasks`, `/timeline`, `/vendors`, etc.
+
+The current flat list is replaced with **3 logical sections** separated by subtle headers + dividers:
+
+```
+┌─────────────────────┐
+│  🤍 Wedora          │
+│  Rahul & Priya      │
+├─────────────────────┤
+│  ┌─────────────────┐│
+│  │ 127 days to go  ││
+│  │ Jun 15, 2026    ││
+│  └─────────────────┘│
+├─ PLANNING ──────────┤
+│  📊 Dashboard       │
+│  💰 Budget          │
+│  👥 Guests          │
+│  ✅ Tasks           │
+│  📅 Timeline        │
+├─ VENDORS ───────────┤
+│  🏪 My Vendors      │  ← renamed from "Vendors"
+│  🔍 Find Vendors    │  ← NEW: links to /vendors marketplace
+├─ MORE ──────────────┤
+│  📷 Inspiration     │
+│  ✉️ Invitations     │
+│  💬 WhatsApp        │
+│  📰 Blog            │
+├─────────────────────┤
+│  ⚙️ Settings        │
+│  🛡️ Admin           │  ← admin only
+│  👤 User / Logout   │
+└─────────────────────┘
+```
+
+**Key changes:**
+1. **Section headers** — tiny, uppercase, muted labels ("PLANNING", "VENDORS", "MORE") with divider lines
+2. **"Vendors" renamed to "My Vendors"** — clearly distinguishes personal tracker from marketplace
+3. **"Find Vendors"** — single new item linking to the public marketplace directory
+4. **"MORE" section** — groups secondary tools (Invitations, WhatsApp, Inspiration, Blog) that are used less frequently
+5. **Admin links stay at bottom** — only visible to admins, grouped under a single "Admin" collapsible
+
+This reduces cognitive load from a wall of 10 items to **3 clear sections** of 4-5 items each.
+
+---
+
+### Context 3: Vendor Dashboard — Separate Layout
+
+Routes: `/vendor/dashboard`, `/vendor/profile`, `/vendor/inquiries`, `/vendor/subscription`
+
+Vendors get their **own dedicated layout** (`VendorLayout.jsx`) with a compact sidebar focused on business management:
+
+```
+┌─────────────────────┐
+│  🤍 Wedora Vendor   │
+│  Royal Photography  │
+│  ✅ Pro Plan        │
+├─────────────────────┤
+│  📊 Dashboard       │
+│  👤 My Profile      │
+│  📸 Portfolio       │
+│  📬 Inquiries (3)   │  ← unread count badge
+│  ⭐ Reviews         │
+│  💎 Subscription    │
+├─────────────────────┤
+│  🔄 Switch to       │  ← context switcher
+│     Wedding Planner │
+│  ⬅ View My Listing │  ← public profile link  
+├─────────────────────┤
+│  👤 User / Logout   │
+└─────────────────────┘
+```
+
+**Key design decisions:**
+- **Completely separate from the couple sidebar** — different layout component, different routes
+- **Context Switcher** at the bottom lets dual-role users (vendor + couple) jump between their wedding planner and vendor dashboard
+- Only **6 items** — clean and focused
+- **Unread badge** on Inquiries to drive vendor engagement
+
+---
+
+### Context Switcher Interaction
+
+For users who are both a couple AND a vendor, the sidebar header shows a discreet role toggle:
+
+```
+┌─────────────────────┐
+│  🤍 Wedora          │
+│  ┌─────────────────┐│
+│  │ 🎉 Wedding Plan ││  ← active (highlighted)
+│  │ 🏪 Vendor Panel ││  ← click to switch
+│  └─────────────────┘│
+├─────────────────────┤
+```
+
+This is a **segmented control** at the top of the sidebar — one click switches the entire layout context (routes, sidebar items, page content). Implemented as a simple `navigate('/vendor/dashboard')` or `navigate('/dashboard')`.
+
+---
+
+### Mobile Navigation
+
+On mobile (< 1024px), the sidebar becomes a **slide-in drawer** (existing behavior). The grouped sections make the drawer much more scannable:
+
+```
+┌──────────────────────────────────────┐
+│  ✕                     🤍 Wedora    │
+├──────────────────────────────────────┤
+│  PLANNING                           │
+│  📊 Dashboard   💰 Budget           │
+│  👥 Guests      ✅ Tasks            │
+│  📅 Timeline                        │
+├──────────────────────────────────────┤
+│  VENDORS                            │
+│  🏪 My Vendors  🔍 Find Vendors    │
+├──────────────────────────────────────┤
+│  MORE                               │
+│  📷 Inspiration ✉️ Invitations     │
+│  💬 WhatsApp    📰 Blog            │
+├──────────────────────────────────────┤
+│  ⚙️ Settings           🚪 Logout   │
+└──────────────────────────────────────┘
+```
+
+For the **public marketplace on mobile**, the top navbar collapses into a hamburger menu with: Vendors, Blog, Budget Calculator, Login/Signup.
+
+---
+
+### Navigation Summary Table
+
+| Page Context | Layout | Navigation | Route Guard |
+|---|---|---|---|
+| Public Marketplace | `PublicNav` (top bar) | Vendors, Blog, Tools, Login | None (public) |
+| Vendor Profile | `PublicNav` (top bar) | Same as above | None (public) |
+| Couple Dashboard | `AppLayout` + grouped `Sidebar` | 3 sections: Planning, Vendors, More | `OnboardedRoute` |
+| Vendor Dashboard | `VendorLayout` + `VendorSidebar` | 6 vendor items + context switcher | `VendorRoute` |
+| Admin Panel | `AppLayout` + grouped `Sidebar` | Admin items in sidebar footer | `AdminRoute` |
+
+---
+
+## System Architecture
+
+```mermaid
+graph TB
+    subgraph "Public Pages - TopNav Layout"
+        A["/vendors — Marketplace Directory"]
+        B["/vendors/:category — Category Pages"]
+        C["/vendors/:category/:slug — Vendor Profile"]
+    end
+
+    subgraph "Couple Dashboard - Grouped Sidebar"
+        D["/vendors — My Vendors Tracker (Existing)"]
+        E["Shortlist CTA → Auto-sync to Tracker"]
+    end
+
+    subgraph "Vendor Dashboard - Vendor Sidebar"
+        F["/vendor/dashboard — Vendor Home"]
+        G["/vendor/profile — Edit Profile"]
+        H["/vendor/portfolio — Manage Media"]
+        I["/vendor/subscription — Plan Management"]
+    end
+
+    subgraph "Admin - Sidebar Footer"
+        J["/admin/vendors — Moderate Listings"]
+        K["/admin/subscriptions — Manage Plans"]
+        L["/admin/reviews — Moderate Reviews"]
+    end
+
+    A --> B --> C
+    C -- "Shortlist" --> E
+    E -- "Auto-creates record" --> D
+    F --> G & H & I
+    J --> K & L
+```
+
+---
+
+## Database Schema
+
+### New Tables
+
+#### `marketplace_vendors` — Core vendor business entity
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK, `gen_random_uuid()` |
+| `user_id` | uuid | FK → `auth.users`, the vendor's account |
+| `business_name` | text | NOT NULL |
+| `slug` | text | UNIQUE, URL-safe, auto-generated from business_name |
+| `category` | text | Primary category (photographer, venue, etc.) |
+| `subcategories` | text[] | Additional categories |
+| `description` | text | Rich text business description |
+| `short_description` | text | 150-char excerpt for cards |
+| `logo_url` | text | Business logo |
+| `cover_image_url` | text | Hero/banner image |
+| `city` | text | Primary city |
+| `state` | text | State |
+| `service_areas` | text[] | All cities/areas served |
+| `address` | text | Full address (optional) |
+| `phone` | text | Contact phone |
+| `email` | text | Contact email |
+| `website` | text | External website |
+| `instagram` | text | Instagram handle |
+| `min_price` | numeric | Starting price (for filtering) |
+| `max_price` | numeric | Upper price range |
+| `price_label` | text | e.g., "₹50,000 – ₹2,00,000" |
+| `experience_years` | integer | Years in business |
+| `team_size` | integer | Team size |
+| `avg_rating` | numeric(2,1) | Computed average (0.0–5.0) |
+| `total_reviews` | integer | Computed review count |
+| `subscription_plan` | text | 'free', 'pro', 'premium' (default: 'free') |
+| `is_featured` | boolean | Admin-controlled featured flag |
+| `is_verified` | boolean | Admin-verified badge |
+| `status` | text | 'pending', 'approved', 'rejected', 'suspended' |
+| `meta_title` | text | SEO override |
+| `meta_description` | text | SEO override |
+| `created_at` | timestamptz | Default `now()` |
+| `updated_at` | timestamptz | Auto-updated via trigger |
+
+---
+
+#### `vendor_services` — Individual service offerings
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK |
+| `vendor_id` | uuid | FK → `marketplace_vendors` |
+| `name` | text | Service name |
+| `description` | text | Service description |
+| `price` | numeric | Price (nullable for "Contact for pricing") |
+| `price_type` | text | 'fixed', 'starting_at', 'per_day', 'per_event', 'custom' |
+| `display_order` | integer | Sort order |
+
+---
+
+#### `vendor_portfolio` — Gallery media items
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK |
+| `vendor_id` | uuid | FK → `marketplace_vendors` |
+| `media_url` | text | Supabase Storage URL |
+| `media_type` | text | 'image' or 'video' |
+| `caption` | text | Optional caption |
+| `display_order` | integer | Sort order |
+| `created_at` | timestamptz | |
+
+---
+
+#### `vendor_reviews` — Couple reviews
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK |
+| `vendor_id` | uuid | FK → `marketplace_vendors` |
+| `user_id` | uuid | FK → `auth.users` (reviewer) |
+| `wedding_id` | uuid | FK → `weddings` (optional reference) |
+| `rating` | integer | 1–5 stars |
+| `title` | text | Review headline |
+| `content` | text | Review body |
+| `status` | text | 'pending', 'approved', 'rejected' |
+| `created_at` | timestamptz | |
+
+---
+
+#### `vendor_shortlists` — Bridge: Marketplace ↔ Vendor Tracker
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK |
+| `user_id` | uuid | FK → `auth.users` |
+| `wedding_id` | uuid | FK → `weddings` |
+| `marketplace_vendor_id` | uuid | FK → `marketplace_vendors` |
+| `tracker_vendor_id` | uuid | FK → `vendors` (auto-created record) |
+| `shortlisted_at` | timestamptz | Default `now()` |
+| UNIQUE constraint | | `(wedding_id, marketplace_vendor_id)` — prevents duplication |
+
+---
+
+#### `vendor_inquiries` — Lead capture
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK |
+| `vendor_id` | uuid | FK → `marketplace_vendors` |
+| `user_id` | uuid | FK → `auth.users` (nullable for guests) |
+| `name` | text | Inquirer name |
+| `email` | text | Inquirer email |
+| `phone` | text | Phone |
+| `message` | text | Inquiry message |
+| `wedding_date` | date | When's the wedding |
+| `status` | text | 'new', 'read', 'replied' |
+| `created_at` | timestamptz | |
+
+---
+
+#### `subscription_plans` — Plan definitions (admin-managed)
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | text | PK: 'free', 'pro', 'premium' |
+| `name` | text | Display name |
+| `price_monthly` | numeric | Monthly price (₹) |
+| `price_yearly` | numeric | Yearly price (₹) |
+| `max_images` | integer | Portfolio image limit |
+| `max_services` | integer | Service listing limit |
+| `max_categories` | integer | Category limit |
+| `reviews_enabled` | boolean | Can receive reviews |
+| `featured_eligible` | boolean | Can be featured |
+| `priority_rank` | integer | Search ranking boost (1=lowest, 3=highest) |
+| `seo_indexing` | boolean | Indexed by search engines |
+| `badge_text` | text | e.g., "Pro", "Premium" |
+
+---
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    auth_users ||--o{ marketplace_vendors : "registers as"
+    marketplace_vendors ||--o{ vendor_services : "offers"
+    marketplace_vendors ||--o{ vendor_portfolio : "showcases"
+    marketplace_vendors ||--o{ vendor_reviews : "receives"
+    marketplace_vendors ||--o{ vendor_inquiries : "receives"
+    marketplace_vendors ||--o{ vendor_shortlists : "shortlisted via"
+    
+    auth_users ||--o{ vendor_reviews : "writes"
+    auth_users ||--o{ vendor_shortlists : "shortlists"
+    weddings ||--o{ vendor_shortlists : "tracks in"
+    
+    vendor_shortlists ||--|| vendors : "auto-creates tracker entry"
+    
+    subscription_plans ||--o{ marketplace_vendors : "subscribed to"
+```
+
+---
+
+## Proposed Changes
+
+### Phase 1: Database & Backend Foundation
+
+---
+
+#### [NEW] [20260420_vendor_marketplace.sql](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/supabase/migrations/20260420_vendor_marketplace.sql)
+
+Complete SQL migration creating all 7 new tables with:
+- RLS policies for each table (public read for approved vendors, vendor-only write for own data, admin full access)
+- Indexes on `category`, `city`, `slug`, `status`, `subscription_plan`, `avg_rating`
+- GIN index on `service_areas` for array containment queries
+- Trigger function to auto-update `updated_at` timestamps
+- Trigger function to recompute `avg_rating` and `total_reviews` on review insert/update/delete
+- Seed data for `subscription_plans` (Free, Pro, Premium)
+
+---
+
+### Phase 2: Navigation Redesign
+
+---
+
+#### [MODIFY] [Sidebar.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/components/layout/Sidebar.jsx)
+
+Complete redesign with grouped navigation sections:
+
+**Before** (flat list of 10 items):
+```js
+const NAV_ITEMS = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/invitations', label: 'Invitations', icon: Mail },
+  { to: '/whatsapp', label: 'WhatsApp Tools', icon: MessageCircle },
+  // ... 7 more items in a single flat list
+];
+```
+
+**After** (3 grouped sections + context switcher):
+```js
+const NAV_SECTIONS = [
+  {
+    label: 'PLANNING',
+    items: [
+      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/budget', label: 'Budget', icon: Wallet },
+      { to: '/guests', label: 'Guests', icon: Users },
+      { to: '/tasks', label: 'Tasks', icon: CheckSquare },
+      { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
+    ]
+  },
+  {
+    label: 'VENDORS',
+    items: [
+      { to: '/vendors', label: 'My Vendors', icon: Store },
+      { to: '/marketplace', label: 'Find Vendors', icon: Search, isExternal: true },
+    ]
+  },
+  {
+    label: 'MORE',
+    items: [
+      { to: '/inspiration', label: 'Inspiration', icon: Camera },
+      { to: '/invitations', label: 'Invitations', icon: Mail },
+      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
+      { to: '/blog', label: 'Blog', icon: Newspaper },
+    ]
+  },
+];
+```
+
+Each section renders with:
+- Tiny uppercase muted section header
+- 1px divider line above each header
+- Items within the section grouped tightly
+- "Find Vendors" gets a subtle `→` arrow indicating it opens the public marketplace
+
+---
+
+#### [NEW] [VendorLayout.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/components/layout/VendorLayout.jsx)
+
+Separate layout for vendor dashboard with:
+- Its own `VendorSidebar` component (6 items: Dashboard, Profile, Portfolio, Inquiries, Reviews, Subscription)
+- Context switcher to jump back to wedding planner
+- "View My Listing" external link to public profile
+- Same glassmorphic design language as couple sidebar but with a distinct accent color (e.g., indigo/blue) to visually differentiate vendor mode
+
+---
+
+#### [NEW] [VendorSidebar.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/components/layout/VendorSidebar.jsx)
+
+Vendor-specific sidebar:
+```js
+const VENDOR_NAV = [
+  { to: '/vendor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/vendor/profile', label: 'My Profile', icon: UserCircle },
+  { to: '/vendor/portfolio', label: 'Portfolio', icon: Image },
+  { to: '/vendor/inquiries', label: 'Inquiries', icon: MessageSquare, badge: true },
+  { to: '/vendor/reviews', label: 'Reviews', icon: Star },
+  { to: '/vendor/subscription', label: 'Subscription', icon: Crown },
+];
+```
+
+---
+
+#### [MODIFY] [PublicNav.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/components/layout/PublicNav.jsx)
+
+Extend the existing public navbar to include:
+- "Vendors" link → `/vendors` marketplace directory
+- "List Your Business" CTA for potential vendors
+- Highlight active link when on vendor marketplace pages
+
+---
+
+#### [MODIFY] [AppLayout.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/components/layout/AppLayout.jsx)
+
+The couple's layout stays the same structure but uses the redesigned grouped `Sidebar.jsx`.
+
+---
+
+### Phase 3: Shared Utilities & Context
+
+---
+
+#### [NEW] [marketplaceApi.js](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/lib/marketplaceApi.js)
+
+Centralized API layer for all marketplace Supabase queries:
+- `fetchVendors({ category, city, minPrice, maxPrice, rating, search, sort, page, limit })` — paginated vendor discovery with filters
+- `fetchVendorBySlug(slug)` — single vendor profile with services + portfolio + reviews
+- `fetchCategories()` — aggregated category counts
+- `fetchCities()` — distinct cities for location filter
+- `shortlistVendor(userId, weddingId, vendorId)` — creates shortlist bridge + auto-inserts into `vendors` (tracker)
+- `removeShortlist(userId, weddingId, vendorId)` — removes bridge + optional tracker cleanup
+- `submitInquiry(vendorId, data)` — lead capture
+- `submitReview(vendorId, data)` — review submission
+- `fetchShortlistedIds(userId, weddingId)` — returns Set of marketplace vendor IDs for quick "is shortlisted" checks
+
+---
+
+#### [NEW] [MarketplaceContext.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/context/MarketplaceContext.jsx)
+
+Lightweight context for marketplace state (separate from AppContext to avoid bloating the wedding planner state):
+- `shortlistedVendorIds` — Set for O(1) lookup
+- `toggleShortlist(vendorId)` — optimistic toggle with DB sync
+- Auto-loads shortlisted IDs on mount (when user is authenticated + has active wedding)
+- Realtime channel subscription for `vendor_shortlists` table changes
+
+---
+
+#### [MODIFY] [AppContext.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/context/AppContext.jsx)
+
+Add a new reducer action:
+- `ADD_VENDOR_FROM_MARKETPLACE` — accepts a marketplace vendor object, maps it to the tracker schema (`name`, `category`, `contactPerson`, `phone`, `email`, `location`, `quotedAmount: minPrice`, `status: 'shortlisted'`), and inserts into `vendors` state + DB
+
+---
+
+### Phase 4: Public Marketplace Pages (SEO-Critical)
+
+---
+
+#### [NEW] [VendorMarketplacePage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/marketplace/VendorMarketplacePage.jsx)
+
+The main directory page at `/vendors`. Uses `PublicNav` layout. Features:
+- **Hero section** with search bar + popular category pills
+- **Advanced filter sidebar/drawer**: category, city, budget range slider, rating, subscription tier badge
+- **Vendor grid** with lazy-loaded cards showing:
+  - Cover image (with lazy loading + skeleton shimmer)
+  - Business name, category badge, city
+  - Rating stars + review count
+  - Price range
+  - "Featured" / "Verified" / "Pro" badges
+  - **Shortlist heart button** (filled/unfilled, triggers optimistic toggle)
+- **Smart sorting**: Featured First → Premium → Pro → Free → Rating → Newest
+- **Infinite scroll** with intersection observer (or "Load More" button)
+- **SEO**: Full `setSEO()` call, `LocalBusiness` JSON-LD array, breadcrumbs
+- **Empty state**: Beautiful illustration when no results match filters
+
+---
+
+#### [NEW] [VendorCategoryPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/marketplace/VendorCategoryPage.jsx)
+
+Category landing pages at `/vendors/photographers`, `/vendors/venues`, etc. Features:
+- Category-specific hero with description
+- Pre-filtered vendor grid (same component as main marketplace)
+- Category-specific SEO (e.g., "Best Wedding Photographers in India — Wedora")
+- Cross-links to related categories
+- Breadcrumbs: Home → Vendors → [Category]
+
+---
+
+#### [NEW] [VendorProfilePage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/marketplace/VendorProfilePage.jsx)
+
+Individual vendor profile at `/vendors/:category/:slug`. The most SEO-critical page. Features:
+- **Hero section**: Cover image, logo, business name, verified badge, rating, price range, city
+- **Quick actions bar**: Shortlist button, Send Inquiry button, Share button, phone/email CTAs
+- **About section**: Full description, experience, team size
+- **Services & Pricing**: Cards for each service offering with prices
+- **Portfolio gallery**: Masonry/grid layout with lightbox for images, embedded video player
+  - Lazy loaded with blur-up placeholder technique
+- **Reviews section**: Star distribution chart, individual review cards, "Write a Review" CTA (for logged-in users who've booked)
+- **Inquiry form**: Modal/drawer with name, email, phone, wedding date, message
+- **Similar vendors**: Related vendor cards (same category + city)
+- **SEO**: `LocalBusiness` JSON-LD with `AggregateRating`, OpenGraph images, breadcrumbs
+- **Subscription-aware rendering**:
+  - Free: Basic info only, limited portfolio (5 images), no reviews section
+  - Pro: Full info, 30 images, reviews enabled
+  - Premium: Everything + featured badge, unlimited images, priority placement
+
+---
+
+#### [NEW] Marketplace Components (in `src/components/marketplace/`)
+
+| Component | Purpose |
+|---|---|
+| `VendorCard.jsx` | Reusable card for grid display |
+| `VendorGrid.jsx` | Responsive grid with infinite scroll |
+| `VendorFilters.jsx` | Filter sidebar (desktop) / drawer (mobile) |
+| `ReviewCard.jsx` | Individual review display |
+| `ReviewForm.jsx` | Write review form |
+| `InquiryModal.jsx` | Lead capture modal |
+| `PortfolioGallery.jsx` | Masonry gallery + lightbox |
+| `ServiceCard.jsx` | Individual service display |
+| `PlanCard.jsx` | Subscription plan comparison |
+| `StarRating.jsx` | Interactive star rating |
+| `ShortlistButton.jsx` | Animated heart button |
+
+---
+
+### Phase 5: Shortlist ↔ Vendor Tracker Integration
+
+---
+
+#### [MODIFY] [VendorsPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/VendorsPage.jsx)
+
+Update the existing Vendor Tracker page to:
+- Show a **"Discover Vendors"** CTA button linking to `/vendors` marketplace
+- Display a subtle marketplace badge on vendors that originated from marketplace shortlisting (linked by `vendor_shortlists` bridge)
+- Clicking the marketplace badge opens the vendor's full profile page in a new tab
+
+---
+
+### Phase 6: Vendor Dashboard (Vendor-Side)
+
+---
+
+#### [NEW] [VendorOnboardingPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/vendor/VendorOnboardingPage.jsx)
+
+Multi-step onboarding wizard for new vendors:
+1. **Business Info**: Name, category, city, description
+2. **Contact & Social**: Phone, email, website, Instagram
+3. **Services & Pricing**: Add service offerings
+4. **Portfolio**: Upload initial portfolio images
+5. **Plan Selection**: Choose Free, Pro, or Premium
+
+---
+
+#### [NEW] [VendorDashboardPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/vendor/VendorDashboardPage.jsx)
+
+Vendor home dashboard showing:
+- Profile completeness score
+- Inquiry stats (new, read, replied)
+- View count / shortlist count
+- Recent reviews
+- Current subscription plan with upgrade CTA
+- Quick links to edit profile, portfolio, services
+
+---
+
+#### [NEW] [VendorProfileEditPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/vendor/VendorProfileEditPage.jsx)
+
+Full profile editor with live preview:
+- Business details form
+- Service management (CRUD)
+- Portfolio uploader (drag-and-drop, reorder, delete)
+- SEO fields (meta title, meta description)
+
+---
+
+#### [NEW] [VendorInquiriesPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/vendor/VendorInquiriesPage.jsx)
+
+Inbox for vendor inquiries with status management (new → read → replied).
+
+---
+
+#### [NEW] [VendorSubscriptionPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/vendor/VendorSubscriptionPage.jsx)
+
+Current plan display + upgrade flow with feature comparison table.
+
+---
+
+### Phase 7: Admin Marketplace Controls
+
+---
+
+#### [NEW] [AdminVendorsPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/admin/AdminVendorsPage.jsx)
+
+Admin vendor management:
+- Table view of all vendors with status filters (pending, approved, rejected, suspended)
+- Approve/Reject actions with optional rejection reason
+- Toggle featured/verified badges
+- Override subscription plan
+- Quick view vendor profile
+
+---
+
+#### [NEW] [AdminReviewsPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/admin/AdminReviewsPage.jsx)
+
+Review moderation queue:
+- Pending reviews list
+- Approve/Reject with reason
+- Flag inappropriate content
+
+---
+
+#### [MODIFY] [AdminDashboardPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/admin/AdminDashboardPage.jsx)
+
+Add vendor marketplace stats cards:
+- Total vendors (pending, approved)
+- Pending reviews
+- Recent inquiries
+- Quick links to `/admin/vendors` and `/admin/reviews`
+
+---
+
+### Phase 8: Routing & SEO
+
+---
+
+#### [MODIFY] [App.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/App.jsx)
+
+Add new routes organized by layout context:
+
+```jsx
+{/* ── Public Marketplace (SEO-crawlable, PublicNav layout, no sidebar) ── */}
+<Route path="/vendors" element={<VendorMarketplacePage />} />
+<Route path="/vendors/:category" element={<VendorCategoryPage />} />
+<Route path="/vendors/:category/:slug" element={<VendorProfilePage />} />
+
+{/* ── Vendor Dashboard (VendorLayout + VendorSidebar) ── */}
+<Route path="/vendor/onboarding" element={<VendorRoute><VendorOnboardingPage /></VendorRoute>} />
+<Route element={<VendorRoute><VendorLayout /></VendorRoute>}>
+  <Route path="/vendor/dashboard" element={<VendorDashboardPage />} />
+  <Route path="/vendor/profile" element={<VendorProfileEditPage />} />
+  <Route path="/vendor/inquiries" element={<VendorInquiriesPage />} />
+  <Route path="/vendor/subscription" element={<VendorSubscriptionPage />} />
+</Route>
+
+{/* ── Admin Vendor Controls (existing AppLayout + AdminRoute) ── */}
+<Route path="/admin/vendors" element={<AdminVendorsPage />} />
+<Route path="/admin/reviews" element={<AdminReviewsPage />} />
+```
+
+Add new route guard:
+```jsx
+function VendorRoute({ children }) {
+  const { isAuthenticated, currentUser, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  const isVendor = currentUser?.user_metadata?.role === 'vendor';
+  if (!isVendor) return <Navigate to="/vendor/onboarding" replace />;
+  return children;
+}
+```
+
+---
+
+#### [MODIFY] [sitemap.xml.js](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/api/sitemap.xml.js)
+
+Extend dynamic sitemap to include:
+- `/vendors` (priority 0.9, daily)
+- `/vendors/:category` for each category (priority 0.8, daily)
+- `/vendors/:category/:slug` for each approved vendor (priority 0.7, weekly)
+
+---
+
+#### [MODIFY] [seo.js](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/lib/seo.js)
+
+Add new JSON-LD helpers:
+- `setLocalBusinessJsonLd(vendor)` — LocalBusiness schema with AggregateRating
+- `setVendorBreadcrumbJsonLd(category, vendor)` — Breadcrumb schema
+- `setItemListJsonLd(vendors)` — ItemList schema for directory pages
+
+---
+
+#### [MODIFY] [LandingPage.jsx](file:///C:/Users/sagar/.gemini/antigravity/scratch/wedding-planner/src/pages/LandingPage.jsx)
+
+Add a "Find Vendors" section to the landing page:
+- Featured vendor category cards
+- "Browse All Vendors" CTA
+- Top-rated vendor highlights
+
+---
+
+## Shortlisting Flow — Detailed Integration
+
+```mermaid
+sequenceDiagram
+    participant Couple as Couple (Browser)
+    participant MC as MarketplaceContext
+    participant API as marketplaceApi.js
+    participant DB as Supabase
+    participant AC as AppContext (Vendor Tracker)
+
+    Couple->>MC: Click ❤ Shortlist on VendorCard
+    MC->>MC: Optimistically add vendorId to shortlistedIds Set
+    MC->>API: shortlistVendor(userId, weddingId, vendorId)
+    API->>DB: INSERT into vendor_shortlists
+    API->>DB: INSERT into vendors (tracker record)
+    DB-->>API: Return { shortlistId, trackerVendorId }
+    API->>DB: UPDATE vendor_shortlists.tracker_vendor_id
+    API-->>MC: Success
+    MC->>AC: dispatch({ type: 'ADD_VENDOR_FROM_MARKETPLACE', payload })
+    Note over AC: Vendor Tracker now shows the shortlisted vendor
+    
+    Couple->>Couple: Navigate to /vendors (My Vendors)
+    Note over Couple: Shortlisted vendor appears automatically
+```
+
+**Key guarantees:**
+1. **No duplication**: `UNIQUE(wedding_id, marketplace_vendor_id)` constraint on `vendor_shortlists`
+2. **Real-time sync**: Supabase Realtime channel on `vendor_shortlists` + `vendors` tables
+3. **Optimistic UI**: Heart turns filled instantly, DB sync in background
+4. **Bi-directional cleanup**: Removing from Vendor Tracker also removes the shortlist bridge record
+
+---
+
+## Subscription Tier Feature Matrix
+
+| Feature | Free | Pro (₹999/mo) | Premium (₹2,999/mo) |
+|---|---|---|---|
+| Listings | 1 category | 3 categories | Unlimited |
+| Portfolio images | 5 | 30 | Unlimited |
+| Search visibility | Standard | Enhanced (+20% boost) | Priority (top of results) |
+| Reviews | ❌ | ✅ | ✅ |
+| Featured badge | ❌ | ❌ | ✅ |
+| Inquiry leads | ✅ | ✅ | ✅ |
+| Analytics | Basic views | Full analytics | Full + competitor insights |
+| SEO indexing | Basic | Full | Full + priority crawl |
+| Homepage exposure | ❌ | ❌ | ✅ |
+| Verified badge | ❌ | Eligible | ✅ (auto) |
+
+> [!NOTE]
+> Pricing is configurable via admin panel. The above are suggested defaults.
+
+---
+
+## Component Architecture Summary
+
+```
+src/
+├── components/
+│   ├── marketplace/
+│   │   ├── VendorCard.jsx          # Reusable vendor card
+│   │   ├── VendorGrid.jsx          # Grid with infinite scroll
+│   │   ├── VendorFilters.jsx       # Filter sidebar/drawer
+│   │   ├── ReviewCard.jsx          # Individual review display
+│   │   ├── ReviewForm.jsx          # Write review form
+│   │   ├── InquiryModal.jsx        # Lead capture modal
+│   │   ├── PortfolioGallery.jsx    # Masonry gallery + lightbox
+│   │   ├── ServiceCard.jsx         # Individual service display
+│   │   ├── PlanCard.jsx            # Subscription plan comparison
+│   │   ├── StarRating.jsx          # Interactive star rating
+│   │   └── ShortlistButton.jsx     # Animated heart button
+│   └── layout/
+│       ├── AppLayout.jsx           # Couple layout (unchanged)
+│       ├── Sidebar.jsx             # REDESIGNED: grouped sections
+│       ├── VendorLayout.jsx        # NEW: vendor dashboard layout
+│       ├── VendorSidebar.jsx       # NEW: vendor nav
+│       ├── PublicNav.jsx           # MODIFIED: + marketplace links
+│       └── TopBar.jsx              # Unchanged
+│
+├── context/
+│   ├── AppContext.jsx              # + ADD_VENDOR_FROM_MARKETPLACE
+│   ├── AuthContext.jsx             # Unchanged
+│   └── MarketplaceContext.jsx      # NEW: shortlist state
+│
+├── lib/
+│   ├── marketplaceApi.js           # NEW: Supabase query layer
+│   ├── seo.js                      # + vendor JSON-LD helpers
+│   └── supabase.js                 # Unchanged
+│
+├── pages/
+│   ├── marketplace/
+│   │   ├── VendorMarketplacePage.jsx   # /vendors (public)
+│   │   ├── VendorCategoryPage.jsx      # /vendors/:category (public)
+│   │   └── VendorProfilePage.jsx       # /vendors/:category/:slug (public)
+│   │
+│   ├── vendor/
+│   │   ├── VendorOnboardingPage.jsx    # Vendor registration wizard
+│   │   ├── VendorDashboardPage.jsx     # Vendor home
+│   │   ├── VendorProfileEditPage.jsx   # Edit vendor profile
+│   │   ├── VendorInquiriesPage.jsx     # Manage lead inquiries
+│   │   └── VendorSubscriptionPage.jsx  # Plan management
+│   │
+│   ├── admin/
+│   │   ├── AdminVendorsPage.jsx        # Vendor moderation (NEW)
+│   │   └── AdminReviewsPage.jsx        # Review moderation (NEW)
+│   │
+│   └── VendorsPage.jsx                 # MODIFIED: "My Vendors" tracker
+│
+└── data/
+    └── templates.js                     # MODIFIED: marketplace categories
+```
+
+---
+
+## Implementation Order
+
+| Phase | Scope | Focus |
+|---|---|---|
+| **Phase 1** | Database schema + migration + RLS | Core foundation |
+| **Phase 2** | Sidebar redesign + VendorLayout + VendorSidebar | Navigation UX |
+| **Phase 3** | API layer + MarketplaceContext + shortlist logic | Data layer |
+| **Phase 4** | Public marketplace pages (Directory + Category + Profile) | SEO-critical UI |
+| **Phase 5** | Shortlist ↔ Vendor Tracker integration | Bridge logic |
+| **Phase 6** | Vendor dashboard (onboarding + profile editor + inquiries) | Vendor-side |
+| **Phase 7** | Admin controls (moderation + subscriptions + reviews) | Admin-side |
+| **Phase 8** | Routing, sitemap, SEO, performance polish | Final polish |
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> 1. **Payment Integration**: The subscription plans mention pricing (₹999/mo, ₹2,999/mo). Should we integrate Razorpay/Stripe in this phase, or handle payments manually for now and add gateway integration later?
+
+> [!IMPORTANT]
+> 2. **Vendor Registration**: Should vendors register via the public marketplace ("List Your Business" CTA) or only through admin invitation/approval initially?
+
+> [!WARNING]
+> 3. **Image Storage Quota**: Supabase free tier has 1GB storage. With vendor portfolios, this will fill quickly. Do you have a paid Supabase plan, or should we use external CDN (e.g., Cloudinary) for vendor media?
+
+> [!NOTE]
+> 4. **Seed Data**: Should I create realistic demo vendor data (10-20 vendors across categories) for testing and initial launch, or will real vendors be onboarded first?
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run `vite build` to verify zero compilation errors
+- Verify all new routes render without crashes
+- Test RLS policies by querying each table as different user roles
+- Verify shortlist flow end-to-end: marketplace → bridge → tracker
+
+### Browser Testing
+- Open marketplace pages and verify rendering, filtering, pagination
+- Test shortlist toggle and verify it appears in Vendor Tracker
+- Test vendor onboarding flow
+- Test admin approve/reject flow
+- Verify SEO meta tags and JSON-LD using browser DevTools
+- Test responsive layout on mobile viewport (375px)
+- Verify grouped sidebar renders correctly with section headers
+
+### Manual Verification
+- Request user to verify sitemap includes vendor pages
+- Request user to deploy to Vercel staging and test with real Supabase data
+- Request user to test on actual mobile device

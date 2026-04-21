@@ -95,6 +95,7 @@ export default function LandingPage() {
             <a href="#features" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Features</a>
             <a href="#how-it-works" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">How It Works</a>
             <a href="#free-tools" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Free Tools</a>
+            <Link to="/marketplace" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Vendors</Link>
             <Link to="/blog" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Blog</Link>
             <Link to="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Log In</Link>
             <Link to="/signup" className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg shadow-rose-gold/25 hover:shadow-xl hover:shadow-rose-gold/30 transition-all hover:-translate-y-0.5 active:translate-y-0">
@@ -112,6 +113,7 @@ export default function LandingPage() {
             <a href="/#features" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Features</a>
             <a href="/#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">How It Works</a>
             <a href="/#free-tools" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Free Tools</a>
+            <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Vendors</Link>
             <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Blog</Link>
             <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Log In</Link>
             <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg">Start Planning Free</Link>
@@ -352,44 +354,39 @@ export default function LandingPage() {
         </section>
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            VENDOR MARKETPLACE — Coming Soon
+            VENDOR MARKETPLACE — Live Directory
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section className="py-12 sm:py-16 px-4 sm:px-6 bg-gray-50/50">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 sm:mb-12">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-semibold mb-3 tracking-wide uppercase">
-                <Store className="w-3.5 h-3.5" /> Coming Soon
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold mb-3 tracking-wide uppercase">
+                <Store className="w-3.5 h-3.5" /> Explore Now
               </div>
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900 mb-3">
                 Vendor <span className="gradient-text">Marketplace</span>
               </h2>
               <p className="text-base sm:text-lg text-gray-500 max-w-xl mx-auto">
-                Discover verified wedding vendors near you — photographers, venues, decorators, caterers & more. Compare, review, and book directly.
+                Discover verified wedding vendors near you — photographers, venues, decorators, caterers & more. Compare, review, and enquire directly.
               </p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-10">
               {MARKETPLACE_CATEGORIES.map((cat, i) => (
-                <div key={i} className="glass-card p-4 text-center group hover:border-rose-gold/20 transition-all">
+                <Link key={i} to={`/marketplace/${cat.name.toLowerCase()}`} className="glass-card-hover p-4 text-center group">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center mx-auto mb-2.5 group-hover:from-rose-gold/10 group-hover:to-plum/5 transition-colors">
                     <cat.icon className="w-5 h-5 text-gray-400 group-hover:text-rose-gold transition-colors" />
                   </div>
                   <p className="text-xs font-semibold text-gray-700">{cat.name}</p>
                   <p className="text-[10px] text-gray-400 mt-0.5">{cat.count}</p>
-                </div>
+                </Link>
               ))}
             </div>
 
             <div className="text-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-gray-200 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse-soft" />
-                <p className="text-sm text-gray-600"><span className="font-semibold text-gray-900">Launching soon!</span> Get early access by signing up.</p>
-              </div>
-              <div className="mt-5">
-                <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-                  Get Early Access <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
+              <Link to="/marketplace" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-xl shadow-rose-gold/25 hover:shadow-2xl hover:-translate-y-1 transition-all">
+                Browse All Vendors <ArrowRight className="w-5 h-5" />
+              </Link>
+              <p className="text-xs text-gray-400 mt-3">Free to browse · No signup required</p>
             </div>
           </div>
         </section>

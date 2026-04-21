@@ -13,8 +13,15 @@ const STATIC_PAGES = [
   { path: '/create-invitation',  changefreq: 'monthly', priority: '0.9'  },
   { path: '/wedding-budget-calculator', changefreq: 'monthly', priority: '0.9' },
   { path: '/wedding-checklist',  changefreq: 'monthly', priority: '0.9' },
+  { path: '/marketplace',        changefreq: 'daily',   priority: '0.9' },
   { path: '/login',              changefreq: 'monthly', priority: '0.5'  },
   { path: '/signup',             changefreq: 'monthly', priority: '0.5'  },
+];
+
+const VENDOR_CATEGORIES = [
+  'venue', 'photographer', 'videographer', 'caterer', 'decorator',
+  'florist', 'dj', 'mehendi', 'makeup', 'jeweller',
+  'transport', 'planner', 'invitation', 'cake',
 ];
 
 function escapeXml(value) {
@@ -64,6 +71,24 @@ async function fetchPublishedPosts() {
   return response.json();
 }
 
+async function fetchApprovedVendors() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnon) return [];
+
+  const apiBase = forceHttps(supabaseUrl.trim().replace(/\/$/, ''));
+  const url = `${apiBase}/rest/v1/marketplace_vendors?select=slug,category,updated_at,created_at&status=eq.approved&order=updated_at.desc.nullslast`;
+  const response = await fetch(url, {
+    headers: {
+      apikey: supabaseAnon,
+      Authorization: `Bearer ${supabaseAnon}`
+    }
+  });
+
+  if (!response.ok) return [];
+  return response.json();
+}
+
 function buildUrlEntry(loc, lastmod, changefreq, priority) {
   return `  <url>
     <loc>${escapeXml(loc)}</loc>${lastmod ? `\n    <lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ''}
@@ -75,7 +100,10 @@ function buildUrlEntry(loc, lastmod, changefreq, priority) {
 export default async function handler(req, res) {
   try {
     const baseUrl = getBaseUrl(req);
-    const posts = await fetchPublishedPosts();
+    const [posts, vendors] = await Promise.all([
+      fetchPublishedPosts(),
+      fetchApprovedVendors(),
+    ]);
     const now = new Date().toISOString();
 
     const entries = [];
@@ -85,12 +113,26 @@ export default async function handler(req, res) {
       entries.push(buildUrlEntry(`${baseUrl}${page.path}`, now, page.changefreq, page.priority));
     }
 
+    // Marketplace category pages
+    for (const cat of VENDOR_CATEGORIES) {
+      entries.push(buildUrlEntry(`${baseUrl}/marketplace/${cat}`, now, 'daily', '0.8'));
+    }
+
     // Dynamic blog post pages
     for (const post of posts) {
       const slug = (post.slug || '').trim();
       if (!slug) continue;
       const lastmod = post.updated_at || post.published_at || post.created_at || now;
       entries.push(buildUrlEntry(`${baseUrl}/blog/${slug}`, lastmod, 'weekly', '0.8'));
+    }
+
+    // Dynamic vendor detail pages
+    for (const vendor of vendors) {
+      const slug = (vendor.slug || '').trim();
+      const category = (vendor.category || '').trim();
+      if (!slug || !category) continue;
+      const lastmod = vendor.updated_at || vendor.created_at || now;
+      entries.push(buildUrlEntry(`${baseUrl}/marketplace/${category}/${slug}`, lastmod, 'weekly', '0.7'));
     }
 
     const body = `<?xml version="1.0" encoding="UTF-8"?>

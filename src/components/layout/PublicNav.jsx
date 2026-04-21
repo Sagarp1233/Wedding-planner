@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Menu, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function PublicNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
@@ -19,11 +21,20 @@ export default function PublicNav() {
           <a href="/#features" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Features</a>
           <a href="/#how-it-works" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">How It Works</a>
           <a href="/#free-tools" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Free Tools</a>
+          <Link to="/marketplace" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Vendors</Link>
           <Link to="/blog" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Blog</Link>
-          <Link to="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Log In</Link>
-          <Link to="/signup" className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg shadow-rose-gold/25 hover:shadow-xl hover:shadow-rose-gold/30 transition-all hover:-translate-y-0.5 active:translate-y-0">
-            Start Planning Free
-          </Link>
+          {isAuthenticated ? (
+            <Link to="/dashboard" className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg shadow-rose-gold/25 hover:shadow-xl hover:shadow-rose-gold/30 transition-all hover:-translate-y-0.5 active:translate-y-0">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">Log In</Link>
+              <Link to="/signup" className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg shadow-rose-gold/25 hover:shadow-xl hover:shadow-rose-gold/30 transition-all hover:-translate-y-0.5 active:translate-y-0">
+                Start Planning Free
+              </Link>
+            </>
+          )}
         </div>
 
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Toggle menu">
@@ -36,9 +47,16 @@ export default function PublicNav() {
           <a href="/#features" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Features</a>
           <a href="/#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">How It Works</a>
           <a href="/#free-tools" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Free Tools</a>
+          <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Vendors</Link>
           <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Blog</Link>
-          <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Log In</Link>
-          <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg">Start Planning Free</Link>
+          {isAuthenticated ? (
+            <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg">Go to Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Log In</Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block w-full px-4 py-3 text-center rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg">Start Planning Free</Link>
+            </>
+          )}
         </div>
       )}
     </nav>
