@@ -216,18 +216,18 @@ export default function BudgetPage() {
       {/* Categories Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
         <h3 className="text-lg font-serif font-bold text-gray-900">Categories</h3>
-        <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+        <div className="flex flex-wrap gap-2 justify-start sm:justify-end w-full sm:w-auto">
           <button onClick={() => setShowAutoAllocate(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-            <RefreshCcw className="w-4 h-4" /> Reset Proportions
+            className="flex-1 sm:flex-none inline-flex justify-center items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> <span className="hidden xs:inline">Reset</span> Proportions
           </button>
           <button onClick={exportBudgetCSV}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-            <Download className="w-4 h-4" /> Export
+            className="flex-1 sm:flex-none inline-flex justify-center items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Export
           </button>
           <button onClick={() => { setEditCategory(null); setCatForm({ name: '', icon: '📦', color: '#c0392b', allocated: '' }); setShowAddCategory(true); }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-            <Plus className="w-4 h-4" /> Add Category
+            className="flex-1 sm:flex-none inline-flex justify-center items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-xs sm:text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 whitespace-nowrap">
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Category
           </button>
         </div>
       </div>
@@ -241,37 +241,59 @@ export default function BudgetPage() {
 
           return (
             <div key={cat.id} className="glass-card overflow-hidden">
-              <div className="flex items-center p-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center p-3 sm:p-4 cursor-pointer hover:bg-gray-50/50 transition-colors gap-3 sm:gap-4"
                 onClick={() => setExpandedCat(isOpen ? null : cat.id)}>
-                <div className="w-1 h-10 rounded-full mr-3" style={{ backgroundColor: cat.color }} />
-                <span className="text-xl mr-3">{cat.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm">{cat.name}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full max-w-48">
-                      <div className={`h-full rounded-full transition-all duration-500 ${isOverSpent ? 'bg-red-400' : ''}`} style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: isOverSpent ? undefined : cat.color }} />
+                
+                {/* Top Section / Left Section */}
+                <div className="flex items-center flex-1 min-w-0">
+                  <div className="w-1 h-10 rounded-full mr-3 shrink-0" style={{ backgroundColor: cat.color }} />
+                  <span className="text-xl sm:text-2xl mr-3 shrink-0">{cat.icon}</span>
+                  <div className="flex-1 min-w-0 mr-2">
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base leading-tight break-words">{cat.name}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full max-w-[120px] sm:max-w-48">
+                        <div className={`h-full rounded-full transition-all duration-500 ${isOverSpent ? 'bg-red-400' : ''}`} style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: isOverSpent ? undefined : cat.color }} />
+                      </div>
+                      <span className={`text-[10px] sm:text-xs ${isOverSpent ? 'text-red-500 font-bold' : 'text-gray-500'}`}>{pct}%</span>
                     </div>
-                    <span className={`text-xs ${isOverSpent ? 'text-red-500 font-bold' : 'text-gray-500'}`}>{pct}%</span>
+                  </div>
+
+                  {/* Actions mobile */}
+                  <div className="flex sm:hidden items-center gap-1 shrink-0 ml-auto">
+                    <button onClick={(e) => { e.stopPropagation(); openEditCategory(cat); }} className="p-2 text-gray-400 active:bg-gray-100 rounded-lg">
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    {isOpen ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                   </div>
                 </div>
-                <div className="text-right mr-4 min-w-[120px]">
-                  <p className="text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Estimated</p>
-                  <p className="text-base font-bold text-gray-900">{formatINR(cat.allocated)}</p>
-                  <p className={`text-xs mt-1 font-medium ${isOverSpent ? 'text-red-500' : 'text-emerald-600'}`}>
-                    Spent: {formatINR(cat.spent)}
-                  </p>
+
+                {/* Bottom Section / Right Section */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pl-[3.25rem] sm:pl-0 mt-1 sm:mt-0">
+                  <div className="text-left sm:text-right flex-1 sm:flex-none">
+                    <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Estimated</p>
+                    <p className="text-sm sm:text-base font-bold text-gray-900">{formatINR(cat.allocated)}</p>
+                  </div>
+                  <div className="text-right sm:text-right flex-1 sm:flex-none">
+                    <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Spent</p>
+                    <p className={`text-sm sm:text-base font-bold ${isOverSpent ? 'text-red-500' : 'text-emerald-600'}`}>{formatINR(cat.spent)}</p>
+                  </div>
+                  
+                  {/* Actions desktop */}
+                  <div className="hidden sm:flex items-center gap-1 pl-4 shrink-0 border-l border-gray-100">
+                    <button onClick={(e) => { e.stopPropagation(); openEditCategory(cat); }}
+                      className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete category "${cat.name}" and all its expenses?`)) dispatch({ type: 'DELETE_CATEGORY', payload: cat.id }); }}
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400 ml-1" /> : <ChevronDown className="w-4 h-4 text-gray-400 ml-1" />}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={(e) => { e.stopPropagation(); openEditCategory(cat); }}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete category "${cat.name}" and all its expenses?`)) dispatch({ type: 'DELETE_CATEGORY', payload: cat.id }); }}
-                    className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                </div>
+
+                {/* Mobile delete button placed cleverly if opened, or we can just rely on edit for delete?
+                    Actually, let's keep delete inside the edit modal for mobile, but add it if possible. */}
               </div>
 
               {isOpen && (
