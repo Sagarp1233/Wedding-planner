@@ -50,7 +50,19 @@ export default function LoginPage() {
       const result = await login(form.email.trim(), form.password);
       if (result.success) {
         await refreshSessionAndOnboarding();
-        navigate('/dashboard', { replace: true });
+        
+        const user = result.user;
+        const role = user.user_metadata?.role;
+        const isAdmin = user.email === 'admin@wedora.in' || role === 'admin';
+
+        if (isAdmin) {
+          navigate('/admin', { replace: true });
+        } else if (role === 'vendor') {
+          navigate('/vendor/dashboard', { replace: true });
+        } else {
+          // Default couple redirection
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         setError(result.error || 'Failed to login');
       }

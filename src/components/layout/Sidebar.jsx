@@ -159,7 +159,7 @@ export default function Sidebar({ isOpen, onClose }) {
           )}
 
           <NavLink
-            to="/vendor-portal"
+            to="/vendor/dashboard"
             onClick={onClose}
             className={({ isActive }) => `
               flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200

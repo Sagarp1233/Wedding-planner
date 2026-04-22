@@ -88,7 +88,7 @@ export default function VendorPortalPage() {
             </div>
 
             <Link
-              to="/vendor-portal/edit"
+              to="/vendor/dashboard/edit"
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-xl shadow-rose-gold/25 hover:shadow-2xl hover:-translate-y-1 transition-all"
               id="create-listing-button"
             >
@@ -115,7 +115,7 @@ export default function VendorPortalPage() {
             <p className="text-sm text-gray-500">Manage your listing, view leads, and grow your business</p>
           </div>
           <Link
-            to="/vendor-portal/edit"
+            to="/vendor/dashboard/edit"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
             id="edit-listing-button"
           >

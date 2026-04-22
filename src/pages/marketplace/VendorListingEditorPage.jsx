@@ -129,7 +129,7 @@ export default function VendorListingEditorPage() {
       }
 
       // Show success briefly then redirect
-      setTimeout(() => navigate('/vendor-portal'), 2000);
+      setTimeout(() => navigate('/vendor/dashboard'), 2000);
     } else {
       setError(result.error || 'Something went wrong. Please try again.');
     }
@@ -155,7 +155,7 @@ export default function VendorListingEditorPage() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-8 animate-fade-in-up">
-          <button onClick={() => navigate('/vendor-portal')} className="p-2 rounded-xl hover:bg-white/80 transition-colors" aria-label="Go back">
+          <button onClick={() => navigate('/vendor/dashboard')} className="p-2 rounded-xl hover:bg-white/80 transition-colors" aria-label="Go back">
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <div>
@@ -420,7 +420,7 @@ export default function VendorListingEditorPage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/vendor-portal')}
+              onClick={() => navigate('/vendor/dashboard')}
               className="w-full sm:w-auto px-6 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Cancel

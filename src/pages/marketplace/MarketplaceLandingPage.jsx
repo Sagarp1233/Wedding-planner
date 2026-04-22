@@ -226,7 +226,7 @@ export default function MarketplaceLandingPage() {
                 List your business on Wedora for free. Reach thousands of couples planning their wedding across India.
               </p>
               <Link
-                to="/vendor-portal"
+                to="/vendor/dashboard"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-xl shadow-rose-gold/25 hover:shadow-2xl hover:-translate-y-1 transition-all"
                 id="vendor-cta"
               >

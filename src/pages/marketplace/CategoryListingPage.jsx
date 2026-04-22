@@ -259,7 +259,7 @@ export default function CategoryListingPage() {
               List your business on Wedora for free and reach couples planning their wedding.
             </p>
             <Link
-              to="/vendor-portal"
+              to="/vendor/dashboard"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
             >
               Create Free Listing <ArrowRight className="w-4 h-4" />

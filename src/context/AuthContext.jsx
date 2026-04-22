@@ -247,23 +247,46 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function signup(name, email, password) {
+  async function signup(name, email, password, role = 'couple', vendorData = null) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name } }
+      options: { data: { full_name: name, role } }
     });
     if (error) return { success: false, error: error.message };
+
+    const user = data.user;
+
+    // Handle Vendor Provisioning
+    if (role === 'vendor' && vendorData) {
+      // Append a random hash to ensure slug uniqueness reliably
+      const slugBase = vendorData.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const uniqueSuffix = Math.random().toString(36).substring(2, 6);
+      const slug = `${slugBase}-${uniqueSuffix}`;
+      
+      const { error: vendorError } = await supabase.from('marketplace_vendors').insert({
+        user_id: user.id,
+        business_name: vendorData.businessName,
+        slug: slug,
+        category: vendorData.category,
+        city: vendorData.city,
+        phone: vendorData.phone || '',
+        status: 'pending' 
+      });
+      if (vendorError) {
+        console.error('[Wedora] Failed to create vendor profile:', vendorError);
+      }
+    }
 
     // Trigger onboarding email in the background
     // (We don't await this so it doesn't block the user flow)
     fetch('/api/send-welcome', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email })
+      body: JSON.stringify({ name, email, role })
     }).catch(err => console.error('[Wedora] Failed to trigger welcome email', err));
 
-    return { success: true, user: data.user };
+    return { success: true, user };
   }
 
   async function login(email, password) {

@@ -159,8 +159,8 @@ function AppWithContext() {
             <Route path="/marketplace/:category/:slug" element={<VendorDetailPage />} />
 
             {/* Vendor Portal (login required, but no onboarding needed) */}
-            <Route path="/vendor-portal" element={<ProtectedRoute><VendorPortalPage /></ProtectedRoute>} />
-            <Route path="/vendor-portal/edit" element={<ProtectedRoute><VendorListingEditorPage /></ProtectedRoute>} />
+            <Route path="/vendor/dashboard" element={<ProtectedRoute><VendorPortalPage /></ProtectedRoute>} />
+            <Route path="/vendor/dashboard/edit" element={<ProtectedRoute><VendorListingEditorPage /></ProtectedRoute>} />
 
             {/* Wedding Picker */}
             <Route path="/weddings" element={
