@@ -300,6 +300,17 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut();
   }
 
+  async function signInWithGoogle(role = 'couple') {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + (role === 'vendor' ? '/vendor/dashboard' : '/dashboard')
+      }
+    });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  }
+
   return (
     <AuthContext.Provider value={{
       currentUser,
@@ -308,6 +319,7 @@ export function AuthProvider({ children }) {
       signup,
       login,
       logout,
+      signInWithGoogle,
       markOnboarded,
       refreshSessionAndOnboarding,
       isAuthenticated: !!currentUser,
