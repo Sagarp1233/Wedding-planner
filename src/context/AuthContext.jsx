@@ -109,9 +109,10 @@ export function AuthProvider({ children }) {
   }
 
   // Reloads all user data: config, profile, weddings
-  const loadUserData = async (userId, aliveTracker) => {
+  const loadUserData = async (sessionUser, aliveTracker) => {
     if (!aliveTracker.alive) return;
     setOnboardingResolved(false);
+    const userId = sessionUser.id;
 
     try {
       // Execute fetches in parallel
@@ -130,7 +131,28 @@ export function AuthProvider({ children }) {
         });
       }
 
-      const userProfile = profileRes.data || { is_onboarded: false, active_wedding_id: null, plan: 'free' };
+      let userProfile = profileRes.data || { is_onboarded: false, active_wedding_id: null, plan: 'free' };
+
+      // --- OAUTH VENDOR FIX ---
+      // If signed up via Google, assign role and bypass Couple Onboarding
+      const intendedRole = sessionStorage.getItem('wedora_oauth_role');
+      const currentRole = sessionUser.user_metadata?.role;
+      
+      if (intendedRole && !currentRole) {
+         supabase.auth.updateUser({ data: { role: intendedRole } }).catch(console.error);
+         sessionStorage.removeItem('wedora_oauth_role');
+         
+         if (intendedRole === 'vendor') {
+            userProfile.is_onboarded = true; 
+            supabase.from('users').update({ is_onboarded: true }).eq('id', userId).catch(console.error);
+         }
+      } else if (currentRole === 'vendor' && !userProfile.is_onboarded) {
+         // Existing vendor logging in with Google 
+         userProfile.is_onboarded = true;
+         supabase.from('users').update({ is_onboarded: true }).eq('id', userId).catch(console.error);
+      }
+      // -------------------------
+
       setProfile(userProfile);
       setWeddings(weddingsRes);
 
@@ -176,7 +198,7 @@ export function AuthProvider({ children }) {
         setAuthReady(true);
         
         if (session?.user) {
-          await loadUserData(session.user.id, aliveTracker);
+          await loadUserData(session.user, aliveTracker);
         } else {
           finishNoUser();
         }
@@ -205,7 +227,7 @@ export function AuthProvider({ children }) {
           finishNoUser();
           return;
         }
-        await loadUserData(session.user.id, aliveTracker);
+        await loadUserData(session.user, aliveTracker);
       });
       subscription = sub;
     })();
@@ -239,7 +261,7 @@ export function AuthProvider({ children }) {
     setCurrentUser(session?.user ?? null);
     setAuthReady(true);
     if (session?.user) {
-      await loadUserData(session.user.id, { alive: true });
+      await loadUserData(session.user, { alive: true });
     } else {
       setWeddings([]);
       setProfile(null);
@@ -301,6 +323,7 @@ export function AuthProvider({ children }) {
   }
 
   async function signInWithGoogle(role = 'couple') {
+    sessionStorage.setItem('wedora_oauth_role', role);
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
