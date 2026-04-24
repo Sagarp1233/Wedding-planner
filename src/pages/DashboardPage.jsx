@@ -1,14 +1,18 @@
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import TopBar from '../components/layout/TopBar';
 import { useApp } from '../context/AppContext';
 import { formatINR, getDaysUntil, formatDate } from '../utils/helpers';
-import { Wallet, Users, CheckSquare, CalendarHeart, TrendingDown, ArrowRight, AlertTriangle, MapPin, Clock } from 'lucide-react';
+import { Wallet, Users, CheckSquare, CalendarHeart, TrendingDown, ArrowRight, AlertTriangle, MapPin, Clock, Sparkles, Check } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function DashboardPage() {
   const { onMenuClick } = useOutletContext();
   const { state } = useApp();
+  const { profileCompleted } = useAuth();
+  const [profileCardDismissed, setProfileCardDismissed] = useState(false);
   const { wedding, budgetCategories, expenses, guests, tasks, events } = state;
 
   const totalBudget = wedding.totalBudget;
@@ -69,6 +73,40 @@ export default function DashboardPage() {
           <Link to="/budget" className="ml-auto text-sm font-semibold text-red-600 hover:underline whitespace-nowrap">
             Review →
           </Link>
+        </div>
+      )}
+
+      {/* Profile Completion Prompt */}
+      {!profileCompleted && !profileCardDismissed && (
+        <div className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose-gold/5 via-plum/5 to-violet-500/5 border border-rose-gold/20 p-5 sm:p-6 animate-fade-in-up">
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-rose-gold/5 blur-3xl -z-10" />
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-gold to-plum flex items-center justify-center flex-shrink-0 shadow-lg shadow-rose-gold/20">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-serif font-bold text-gray-900 mb-1">Personalize your wedding plan 💍</h3>
+              <p className="text-sm text-gray-600 mb-3">Complete your profile in 60 seconds to unlock:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-4">
+                {['Custom budget allocation', 'Accurate checklist', 'Better vendor matches', 'Guest planning tools'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-2.5 h-2.5 text-emerald-600" />
+                    </div>
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-3">
+                <Link to="/personalize" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+                  <Sparkles className="w-4 h-4" /> Complete Now
+                </Link>
+                <button onClick={() => setProfileCardDismissed(true)} className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

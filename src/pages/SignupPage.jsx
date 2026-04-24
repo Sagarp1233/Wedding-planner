@@ -55,10 +55,7 @@ export default function SignupPage() {
 
     if (role === 'couple') {
       if (!form.partner2.trim()) return setError('Please enter your partner\'s name');
-      if (!form.city.trim()) return setError('Please enter your wedding city');
       if (!form.weddingDate) return setError('Please select a wedding date');
-      if (!form.totalBudget || Number(form.totalBudget) <= 0) return setError('Please enter a valid budget estimate');
-      if (!form.guestEstimate || Number(form.guestEstimate) <= 0) return setError('Please enter a valid guest estimate');
     }
 
     if (role === 'vendor') {
@@ -85,7 +82,7 @@ export default function SignupPage() {
         if (role === 'couple') {
           // Immediately setup wedding data so they can go to dashboard
           try {
-            const budget = Number(form.totalBudget) || 500000;
+            const budget = 1000000; // Default: ₹10L — user will customize in PersonalizeWizard
             const uid = result.user.id;
             
             const { data: newWedding, error: wedErr } = await supabase.from('weddings').insert({
@@ -93,8 +90,8 @@ export default function SignupPage() {
               partner1: form.name.trim() || 'Partner 1',
               partner2: form.partner2.trim() || 'Partner 2',
               wedding_date: form.weddingDate,
-              location: form.city.trim(),
-              wedding_style: form.weddingType,
+              location: '',
+              wedding_style: 'hindu',
               total_budget: budget,
             }).select('*').single();
 
@@ -103,7 +100,7 @@ export default function SignupPage() {
             const newWeddingId = newWedding.id;
             const budgetCategories = generateBudgetCategories(budget);
             const tasks = generateTasks(form.weddingDate);
-            const events = generateEvents(form.weddingDate, form.weddingType);
+            const events = generateEvents(form.weddingDate, 'hindu');
 
             const insertPromises = [];
             if (budgetCategories.length > 0) insertPromises.push(supabase.from('budget_categories').insert(budgetCategories.map(c => ({ wedding_id: newWeddingId, name: c.name, icon: c.icon, color: c.color, allocated: c.allocated }))));
@@ -112,7 +109,7 @@ export default function SignupPage() {
             await Promise.all(insertPromises);
 
             await refreshSessionAndOnboarding();
-            navigate('/dashboard', { replace: true });
+            navigate('/personalize', { replace: true });
           } catch (e) {
             console.error('[Wedora] Automagic onboarding failed during signup:', e);
             // Fallback: Send to standard onboarding page in rare failure mode
@@ -267,7 +264,7 @@ export default function SignupPage() {
                         <div className="relative">
                           <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                           <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                            placeholder="Bride's Name"
+                            placeholder="Partner 1's Name"
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
                           />
                         </div>
@@ -276,46 +273,7 @@ export default function SignupPage() {
                         <div className="relative">
                           <Heart className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                           <input type="text" value={form.partner2} onChange={e => setForm({ ...form, partner2: e.target.value })}
-                            placeholder="Groom's Name"
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="relative">
-                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                          <input type="text" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}
-                            placeholder="Wedding City"
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="relative">
-                          {/* Calendar is a native input normally, but we use a padding trick */}
-                          <input type="date" value={form.weddingDate} onChange={e => setForm({ ...form, weddingDate: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white text-gray-600"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <select value={form.weddingType} onChange={e => setForm({ ...form, weddingType: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white text-gray-600"
-                        >
-                          {WEDDING_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <div className="relative">
-                          <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                          <input type="number" value={form.guestEstimate} onChange={e => setForm({ ...form, guestEstimate: e.target.value })}
-                            placeholder="Guest Count"
+                            placeholder="Partner 2's Name"
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
                           />
                         </div>
@@ -324,10 +282,9 @@ export default function SignupPage() {
 
                     <div>
                       <div className="relative">
-                        <Wallet className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input type="number" value={form.totalBudget} onChange={e => setForm({ ...form, totalBudget: e.target.value })}
-                          placeholder="Estimated Budget (₹)"
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
+                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input type="date" value={form.weddingDate} onChange={e => setForm({ ...form, weddingDate: e.target.value })}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-rose-gold focus:ring-2 focus:ring-rose-gold/20 outline-none transition-all text-sm bg-gray-50/50 hover:bg-white focus:bg-white text-gray-600"
                         />
                       </div>
                     </div>

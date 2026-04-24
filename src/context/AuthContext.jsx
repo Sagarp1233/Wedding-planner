@@ -41,6 +41,15 @@ export function AuthProvider({ children }) {
     }
   }, [currentUser]);
 
+  // Generic profile field updater — used by PersonalizeWizard and other settings
+  const updateProfileField = useCallback(async (updates) => {
+    setProfile(prev => prev ? { ...prev, ...updates } : null);
+    if (currentUser) {
+      await supabase.from('users').update(updates).eq('id', currentUser.id);
+    }
+  }, [currentUser]);
+
+  const profileCompleted = profile?.onboarding_completed || false;
   const isPro = profile?.plan === 'pro' || currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
   const isAdmin = currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
   const maxWeddings = isPro ? appConfig.pro_plan_limit : appConfig.free_plan_limit;
@@ -393,6 +402,9 @@ export function AuthProvider({ children }) {
       maxWeddings,
       isPro,
       appConfig,
+      profileCompleted,
+      updateProfileField,
+      profile,
     }}>
       {children}
     </AuthContext.Provider>

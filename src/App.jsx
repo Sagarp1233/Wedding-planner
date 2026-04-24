@@ -28,6 +28,7 @@ const CreateInvitationPage  = lazy(() => import('./pages/CreateInvitationPage'))
 const InvitationsPage       = lazy(() => import('./pages/InvitationsPage'));
 const WhatsappPage          = lazy(() => import('./pages/WhatsappPage'));
 const UpdatePasswordPage    = lazy(() => import('./pages/UpdatePasswordPage'));
+const PersonalizeWizard     = lazy(() => import('./pages/PersonalizeWizard'));
 
 // Blog Pages
 const BlogListingPage       = lazy(() => import('./pages/BlogListingPage'));
@@ -170,6 +171,11 @@ function AppWithContext() {
             {/* Onboarding */}
             <Route path="/onboarding" element={
               <ProtectedRoute><OnboardingPage /></ProtectedRoute>
+            } />
+
+            {/* Post-signup personalization wizard */}
+            <Route path="/personalize" element={
+              <ProtectedRoute><PersonalizeWizard /></ProtectedRoute>
             } />
 
             {/* Protected App */}
