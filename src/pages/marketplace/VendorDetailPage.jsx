@@ -293,32 +293,42 @@ export default function VendorDetailPage() {
               {/* Contact Details */}
               <div className="animate-fade-in-up" style={{ animationDelay: '250ms' }}>
                 <h2 className="text-lg font-serif font-bold text-gray-900 mb-3">Contact Details</h2>
-                <div className="glass-card p-5 space-y-3">
-                  {vendor.phone && (
-                    <a href={`tel:${vendor.phone}`} className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
-                      <Phone className="w-4 h-4 text-gray-400" /> {vendor.phone}
-                    </a>
-                  )}
-                  {vendor.email && (
-                    <a href={`mailto:${vendor.email}`} className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
-                      <Mail className="w-4 h-4 text-gray-400" /> {vendor.email}
-                    </a>
-                  )}
-                  {vendor.website && (
-                    <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
-                      <Globe className="w-4 h-4 text-gray-400" /> {vendor.website}
-                    </a>
-                  )}
-                  {vendor.phone && (
-                    <button
-                      onClick={handleWhatsApp}
-                      className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-semibold shadow hover:shadow-lg transition-all hover:-translate-y-0.5"
-                      id="whatsapp-button"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Chat on WhatsApp
-                    </button>
-                  )}
-                </div>
+                {isAuthenticated ? (
+                  <div className="glass-card p-5 space-y-3">
+                    {vendor.phone && (
+                      <a href={`tel:${vendor.phone}`} className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
+                        <Phone className="w-4 h-4 text-gray-400" /> {vendor.phone}
+                      </a>
+                    )}
+                    {vendor.email && (
+                      <a href={`mailto:${vendor.email}`} className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
+                        <Mail className="w-4 h-4 text-gray-400" /> {vendor.email}
+                      </a>
+                    )}
+                    {vendor.website && (
+                      <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-700 hover:text-rose-gold transition-colors">
+                        <Globe className="w-4 h-4 text-gray-400" /> {vendor.website}
+                      </a>
+                    )}
+                    {vendor.phone && (
+                      <button
+                        onClick={handleWhatsApp}
+                        className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-semibold shadow hover:shadow-lg transition-all hover:-translate-y-0.5"
+                        id="whatsapp-button"
+                      >
+                        <MessageCircle className="w-4 h-4" /> Chat on WhatsApp
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="glass-card p-6 text-center bg-gray-50/50 border border-dashed border-gray-200">
+                    <p className="text-sm font-semibold text-gray-900 mb-2">Contact details are locked</p>
+                    <p className="text-xs text-gray-500 mb-4">Please log in to view phone number, email, and website.</p>
+                    <Link to="/login" className="inline-flex items-center px-5 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold shadow-sm hover:bg-gray-800 transition-colors">
+                      Log In to View
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Portfolio Gallery */}
@@ -451,82 +461,92 @@ export default function VendorDetailPage() {
                   <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">Send an Enquiry</h3>
                   <p className="text-xs text-gray-500 mb-5">Get in touch with {vendor.business_name} about your wedding</p>
 
-                  {submitted ? (
-                    <div className="text-center py-6">
-                      <div className="text-4xl mb-3">✅</div>
-                      <h4 className="text-base font-bold text-gray-900 mb-1">Enquiry Sent!</h4>
-                      <p className="text-sm text-gray-600">
-                        {vendor.business_name} will get back to you soon. You can also reach them directly via phone or WhatsApp.
-                      </p>
-                    </div>
+                  {isAuthenticated ? (
+                    submitted ? (
+                      <div className="text-center py-6">
+                        <div className="text-4xl mb-3">✅</div>
+                        <h4 className="text-base font-bold text-gray-900 mb-1">Enquiry Sent!</h4>
+                        <p className="text-sm text-gray-600">
+                          {vendor.business_name} will get back to you soon. You can also reach them directly via phone or WhatsApp.
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                          <label htmlFor="enquiry-name" className="block text-xs font-semibold text-gray-600 mb-1">Your Name *</label>
+                          <input
+                            id="enquiry-name"
+                            type="text"
+                            value={formData.coupleName}
+                            onChange={e => setFormData(p => ({ ...p, coupleName: e.target.value }))}
+                            placeholder="e.g. Priya & Rahul"
+                            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="enquiry-phone" className="block text-xs font-semibold text-gray-600 mb-1">Phone Number *</label>
+                          <input
+                            id="enquiry-phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                            placeholder="e.g. 9876543210"
+                            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="enquiry-email" className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+                          <input
+                            id="enquiry-email"
+                            type="email"
+                            value={formData.email}
+                            onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                            placeholder="your@email.com"
+                            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="enquiry-date" className="block text-xs font-semibold text-gray-600 mb-1">Wedding Date</label>
+                          <input
+                            id="enquiry-date"
+                            type="date"
+                            value={formData.weddingDate}
+                            onChange={e => setFormData(p => ({ ...p, weddingDate: e.target.value }))}
+                            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="enquiry-message" className="block text-xs font-semibold text-gray-600 mb-1">Message</label>
+                          <textarea
+                            id="enquiry-message"
+                            rows={3}
+                            value={formData.message}
+                            onChange={e => setFormData(p => ({ ...p, message: e.target.value }))}
+                            placeholder="Tell them about your wedding plans..."
+                            className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30 resize-none"
+                          />
+                        </div>
+                        {formError && (
+                          <p className="text-xs text-red-500 font-medium">{formError}</p>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
+                          id="submit-enquiry"
+                        >
+                          {submitting ? 'Sending...' : <><Send className="w-4 h-4" /> Send Enquiry</>}
+                        </button>
+                      </form>
+                    )
                   ) : (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <label htmlFor="enquiry-name" className="block text-xs font-semibold text-gray-600 mb-1">Your Name *</label>
-                        <input
-                          id="enquiry-name"
-                          type="text"
-                          value={formData.coupleName}
-                          onChange={e => setFormData(p => ({ ...p, coupleName: e.target.value }))}
-                          placeholder="e.g. Priya & Rahul"
-                          className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="enquiry-phone" className="block text-xs font-semibold text-gray-600 mb-1">Phone Number *</label>
-                        <input
-                          id="enquiry-phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
-                          placeholder="e.g. 9876543210"
-                          className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="enquiry-email" className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-                        <input
-                          id="enquiry-email"
-                          type="email"
-                          value={formData.email}
-                          onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
-                          placeholder="your@email.com"
-                          className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="enquiry-date" className="block text-xs font-semibold text-gray-600 mb-1">Wedding Date</label>
-                        <input
-                          id="enquiry-date"
-                          type="date"
-                          value={formData.weddingDate}
-                          onChange={e => setFormData(p => ({ ...p, weddingDate: e.target.value }))}
-                          className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="enquiry-message" className="block text-xs font-semibold text-gray-600 mb-1">Message</label>
-                        <textarea
-                          id="enquiry-message"
-                          rows={3}
-                          value={formData.message}
-                          onChange={e => setFormData(p => ({ ...p, message: e.target.value }))}
-                          placeholder="Tell them about your wedding plans..."
-                          className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30 resize-none"
-                        />
-                      </div>
-                      {formError && (
-                        <p className="text-xs text-red-500 font-medium">{formError}</p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
-                        id="submit-enquiry"
-                      >
-                        {submitting ? 'Sending...' : <><Send className="w-4 h-4" /> Send Enquiry</>}
-                      </button>
-                    </form>
+                    <div className="text-center py-8 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                      <p className="text-sm font-semibold text-gray-900 mb-2">Want to contact {vendor.business_name}?</p>
+                      <p className="text-xs text-gray-500 mb-5 px-4">Log in to send an enquiry and manage your shortlisted vendors.</p>
+                      <Link to="/login" className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow hover:shadow-lg transition-all">
+                        Log In to Enquire
+                      </Link>
+                    </div>
                   )}
                 </div>
               </div>
