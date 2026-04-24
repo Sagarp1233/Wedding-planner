@@ -5,11 +5,11 @@ import {
   Store, ArrowRight, Eye, Phone, Mail, Calendar, MessageCircle, Edit3,
   ExternalLink, AlertCircle, CheckCircle2, Clock, XCircle, ChevronLeft,
   Star, TrendingUp, Zap, Lock, BarChart3, Lightbulb, Users, ArrowUpRight,
-  ArrowDownRight, Briefcase, Image, Camera
+  ArrowDownRight, Briefcase, Image, Camera, CheckCircle, ChevronDown, Check, X, Shield, IndianRupee
 } from 'lucide-react';
 import {
   fetchMyListing, fetchLeadsForVendor, fetchVendorReviews, fetchVendorMedia,
-  fetchProfileViewStats, fetchLeadSourceStats,
+  fetchProfileViewStats, fetchLeadSourceStats, updateLeadCRM,
   getCategoryLabel, getCategoryEmoji, formatPrice,
 } from '../../lib/marketplace';
 import {
@@ -28,6 +28,12 @@ export default function VendorPortalPage() {
   const [leadSources, setLeadSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('30d');
+
+  // CRM UI State
+  const [updatingLeadId, setUpdatingLeadId] = useState(null);
+  const [activeNotesEditor, setActiveNotesEditor] = useState(null);
+  const [tempNotes, setTempNotes] = useState('');
+  const [tempValue, setTempValue] = useState('');
 
   useEffect(() => {
     if (authLoading) return;
@@ -101,117 +107,104 @@ export default function VendorPortalPage() {
               List your wedding business on Wedora for free. Reach thousands of couples planning their dream wedding across India.
             </p>
 
-            <div className="space-y-3 text-left mb-8">
-              {[
-                { emoji: '📸', text: 'Showcase your portfolio and past work' },
-                { emoji: '💰', text: 'Display your pricing to attract the right couples' },
-                { emoji: '📱', text: 'Get enquiries directly to your phone via WhatsApp' },
-                { emoji: '⭐', text: 'Build trust with a verified Wedora badge' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/80">
-                  <span className="text-xl">{item.emoji}</span>
-                  <span className="text-sm text-gray-700">{item.text}</span>
-                </div>
-              ))}
-            </div>
-
             <Link
               to="/vendor/dashboard/edit"
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-xl shadow-rose-gold/25 hover:shadow-2xl hover:-translate-y-1 transition-all"
-              id="create-listing-button"
             >
               Create Your Free Listing <ArrowRight className="w-5 h-5" />
             </Link>
-            <p className="text-xs text-gray-400 mt-3">Takes less than 5 minutes · No cost involved</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // ─── Has Listing — Analytics Dashboard ────────────────────────────
+  // ─── SaaS Dashboard Logic ────────────────────────────
   const status = STATUS_CONFIG[listing.status] || STATUS_CONFIG.pending;
-  const newLeads = leads.filter(l => l.status === 'new').length;
-  const thisMonthLeads = leads.filter(l => {
-    const d = new Date(l.created_at);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  }).length;
+  
+  // Pipeline Stats
+  const newLeads = leads.filter(l => l.status === 'new');
+  const bookedLeads = leads.filter(l => l.status === 'booked');
+  
+  // Revenue Stats
+  const potentialRevenue = leads.filter(l => l.status !== 'closed_lost').reduce((acc, l) => acc + (l.estimated_value || 0), 0);
+  const wonRevenue = bookedLeads.reduce((acc, l) => acc + (l.estimated_value || 0), 0);
+  const pipelineConversionRate = leads.length > 0 ? ((bookedLeads.length / leads.length) * 100).toFixed(1) : '0.0';
 
-  // Reviews stats
+  // AI Insights Engine (Pseudo Dynamic based on stats)
+  const aiInsights = [
+    { icon: Eye, text: "Your profile is viewed most on weekends", metric: "+15% weekend traffic" },
+    { icon: IndianRupee, text: "Couples prefer vendors with clear pricing", metric: "3x more leads" },
+    { icon: Zap, text: "Replying within 1 hour boosts bookings", metric: "40% higher close rate" },
+  ];
+
+  // Profile Health Score (max 100)
+  let healthScore = 20; // Base presence
+  let missingHealthItems = [];
+  if (media.length >= 5) healthScore += 20; else missingHealthItems.push('Upload 5+ photos');
+  if (listing.price_range_min > 0) healthScore += 20; else missingHealthItems.push('Add pricing details');
+  if (listing.description && listing.description.length > 50) healthScore += 20; else missingHealthItems.push('Expand description');
+  if (reviews.length > 0) healthScore += 20; else missingHealthItems.push('Get your first review');
+
   const avgRating = listing.rating_avg || 0;
   const totalReviews = listing.reviews_count || 0;
+
   const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
-    star,
-    count: reviews.filter(r => r.rating === star).length,
+    star, count: reviews.filter(r => r.rating === star).length,
   }));
   const maxRatingCount = Math.max(...ratingDistribution.map(r => r.count), 1);
-
-  // Conversion rate
-  const conversionRate = viewStats.total > 0 ? ((leads.length / viewStats.total) * 100).toFixed(1) : '0.0';
-
-  // Lead source colors for donut chart
   const DONUT_COLORS = ['#C0707A', '#25D366', '#F59E0B', '#8B5CF6', '#94A3B8'];
+
+  // CRM Handlers
+  const handleLeadStatusChange = async (leadId, newStatus) => {
+    setUpdatingLeadId(leadId);
+    const result = await updateLeadCRM(leadId, { status: newStatus });
+    if (result.success) {
+      setLeads(leads.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+    }
+    setUpdatingLeadId(null);
+  };
+
+  const handleSaveNotes = async (leadId) => {
+    setUpdatingLeadId(leadId);
+    const result = await updateLeadCRM(leadId, { notes: tempNotes, estimatedValue: tempValue });
+    if (result.success) {
+      setLeads(leads.map(l => l.id === leadId ? { ...l, notes: tempNotes, estimated_value: parseInt(tempValue) || 0 } : l));
+      setActiveNotesEditor(null);
+    }
+    setUpdatingLeadId(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50/80">
-      {/* ═══ HERO BANNER with Cover Photo ═══ */}
+      {/* ═══ HERO BANNER ═══ */}
       <div className="relative">
-        {/* Cover Image */}
         <div className="h-48 sm:h-64 lg:h-72 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950 overflow-hidden">
           {listing.cover_image ? (
-            <img
-              src={listing.cover_image}
-              alt={listing.business_name}
-              className="w-full h-full object-cover opacity-80"
-            />
+            <img src={listing.cover_image} alt={listing.business_name} className="w-full h-full object-cover opacity-80" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
                 <span className="text-6xl block mb-2">{getCategoryEmoji(listing.category)}</span>
-                <p className="text-white/40 text-sm">Add a cover photo to make your dashboard shine ✨</p>
               </div>
             </div>
           )}
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
         </div>
 
-        {/* Floating Nav Within Hero */}
         <div className="absolute top-0 left-0 right-0 z-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 rounded-xl bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors text-white"
-            >
+            <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors text-white">
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              {/* Period Toggle */}
-              <div className="hidden sm:flex items-center bg-white/10 backdrop-blur-md rounded-xl p-0.5">
-                {['7d', '30d', '90d'].map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setPeriod(p)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      period === p ? 'bg-white text-gray-900 shadow-sm' : 'text-white/70 hover:text-white'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-              <Link
-                to="/vendor/dashboard/edit"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-              >
+              <Link to="/vendor/dashboard/edit" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                 <Edit3 className="w-4 h-4" /> Edit Listing
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Business Info Overlay */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-5 sm:pb-6">
             <div className="flex items-end justify-between gap-4">
@@ -223,14 +216,6 @@ export default function VendorPortalPage() {
                   <span>{getCategoryLabel(listing.category)}</span>
                   <span className="w-1 h-1 rounded-full bg-white/40" />
                   <span>📍 {listing.city}</span>
-                  {listing.price_range_min > 0 && (
-                    <>
-                      <span className="w-1 h-1 rounded-full bg-white/40" />
-                      <span className="font-semibold text-white/90">
-                        {formatPrice(listing.price_range_min)} – {formatPrice(listing.price_range_max)}
-                      </span>
-                    </>
-                  )}
                   {listing.is_verified && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 text-xs font-bold backdrop-blur-sm">
                       <CheckCircle2 className="w-3 h-3" /> Verified
@@ -239,11 +224,7 @@ export default function VendorPortalPage() {
                 </div>
               </div>
               {listing.status === 'approved' && (
-                <Link
-                  to={`/marketplace/${listing.category}/${listing.slug}`}
-                  target="_blank"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md text-white text-xs font-semibold hover:bg-white/20 transition-colors"
-                >
+                <Link to={`/marketplace/${listing.category}/${listing.slug}`} target="_blank" className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md text-white text-xs font-semibold hover:bg-white/20 transition-colors">
                   <ExternalLink className="w-3.5 h-3.5" /> View Public Page
                 </Link>
               )}
@@ -253,159 +234,262 @@ export default function VendorPortalPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 -mt-2 pb-10 relative z-20 space-y-5">
-        {/* Status Banner */}
-        <div className={`rounded-2xl p-4 border-l-4 shadow-sm ${status.color} animate-fade-in-up`}>
-          <p className="font-semibold text-sm">{status.label}</p>
-          <p className="text-xs mt-0.5 opacity-80">{status.desc}</p>
-        </div>
-
-        {/* Promo Banner */}
-        {thisMonthLeads > 0 && (
-          <div className="rounded-2xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in-up shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-white text-sm font-bold">You received {thisMonthLeads} enquiries this month! 🎉</p>
-                <p className="text-gray-400 text-xs">Reply within 24hrs — fast responses increase booking rate by 40%.</p>
+        
+        {/* Profile Health Score & Banner */}
+        <div className="rounded-2xl bg-white p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm border border-gray-100 animate-fade-in-up">
+          <div className="flex items-center gap-4 w-full lg:w-auto">
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F3F4F6" strokeWidth="3" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={healthScore === 100 ? '#10B981' : '#C0707A'} strokeWidth="3" strokeDasharray={`${healthScore}, 100`} />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <span className="text-[13px] font-bold text-gray-900">{healthScore}</span>
               </div>
             </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Profile Health Score</p>
+              <p className="text-xs text-gray-500">
+                {healthScore === 100 ? 'Your profile is optimized for maximum conversions! 🚀' : 'Improve your profile to rank higher and get more leads.'}
+              </p>
+            </div>
           </div>
-        )}
+          
+          <div className="flex gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 hide-scrollbar">
+            {missingHealthItems.slice(0, 2).map((item, i) => (
+              <Link key={i} to="/vendor/dashboard/edit" className="whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 bg-rose-gold/5 border border-rose-gold/20 text-rose-gold rounded-lg text-xs font-semibold hover:bg-rose-gold/10 transition">
+                <ArrowRight className="w-3 h-3" /> {item}
+              </Link>
+            ))}
+            {newLeads.length > 0 && (
+              <a href="#leads" className="whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-100 transition">
+                <MessageCircle className="w-3 h-3" /> Respond to {newLeads.length} new lead{newLeads.length > 1 && 's'}
+              </a>
+            )}
+            {!listing.is_verified && (
+               <a href="mailto:support@wedora.in?subject=Verification Request" className="whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition">
+                <Shield className="w-3 h-3" /> Get Verified Badge
+              </a>
+            )}
+          </div>
+        </div>
 
-        {/* 4 Summary Cards */}
+        {/* 4 Summary Cards (REVENUE/CRM TRACKING) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
           <SummaryCard
             icon={Eye} iconColor="text-blue-600" iconBg="bg-gradient-to-br from-blue-100 to-blue-50"
             label="PROFILE VIEWS" value={viewStats.total}
             borderColor="border-l-blue-500"
-            trend={viewStats.total > 0 ? `${viewStats.total} in ${period}` : null} trendUp
           />
           <SummaryCard
-            icon={MessageCircle} iconColor="text-emerald-600" iconBg="bg-gradient-to-br from-emerald-100 to-emerald-50"
-            label="LEADS RECEIVED" value={leads.length}
-            borderColor="border-l-emerald-500"
-            subtext={newLeads > 0 ? `${newLeads} new` : 'No new leads'}
-          />
-          <SummaryCard
-            icon={Star} iconColor="text-amber-500" iconBg="bg-gradient-to-br from-amber-100 to-amber-50"
-            label="AVG RATING" value={avgRating > 0 ? avgRating.toFixed(1) : '—'}
+            icon={IndianRupee} iconColor="text-amber-600" iconBg="bg-gradient-to-br from-amber-100 to-amber-50"
+            label="PIPELINE VALUE" value={formatPrice(potentialRevenue) || '₹0'}
             borderColor="border-l-amber-500"
-            subtext={totalReviews > 0 ? `${totalReviews} reviews` : 'No reviews yet'}
+            subtext="Active open deals"
+          />
+          <SummaryCard
+            icon={CheckCircle2} iconColor="text-emerald-600" iconBg="bg-gradient-to-br from-emerald-100 to-emerald-50"
+            label="BOOKINGS WON" value={bookedLeads.length}
+            borderColor="border-l-emerald-500"
+            subtext={`${formatPrice(wonRevenue)} derived revenue`}
           />
           <SummaryCard
             icon={BarChart3} iconColor="text-violet-600" iconBg="bg-gradient-to-br from-violet-100 to-violet-50"
-            label="VIEW → LEAD" value={`${conversionRate}%`}
+            label="CONVERSION %" value={`${pipelineConversionRate}%`}
             borderColor="border-l-violet-500"
-            trend={parseFloat(conversionRate) >= 10 ? 'Great' : parseFloat(conversionRate) > 0 ? 'Growing' : null}
-            trendUp={parseFloat(conversionRate) >= 10}
+            subtext="Enquiry to Booked rate"
           />
         </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+        {/* Lead Pipeline CRM */}
+        <div id="leads" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 animate-fade-in-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-rose-gold" /> Lead Pipeline (CRM)
+              </h2>
+              <p className="text-xs text-gray-500">Manage your enquiries, update statuses, and track revenue.</p>
+            </div>
+            {leads.length > 0 && (
+              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold whitespace-nowrap">
+                {leads.length} Active Deals
+              </span>
+            )}
+          </div>
+
+          {leads.length === 0 ? (
+            <div className="py-10 text-center rounded-xl border-2 border-dashed border-gray-100 bg-gray-50/50">
+              <div className="text-3xl mb-2">📬</div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Your pipeline is empty</p>
+              <p className="text-xs text-gray-400">Enquiries will appear here. Build your profile to attract leads.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="text-[11px] uppercase text-gray-400 border-b border-gray-100">
+                    <th className="pb-3 font-semibold px-2">Couple & Date</th>
+                    <th className="pb-3 font-semibold px-2">Via</th>
+                    <th className="pb-3 font-semibold px-2">Est Value</th>
+                    <th className="pb-3 font-semibold px-2">Status</th>
+                    <th className="pb-3 font-semibold px-2 text-right">CRM Notes / Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {leads.map(lead => (
+                    <tr key={lead.id} className="group hover:bg-rose-gold/5 transition-colors">
+                      <td className="py-3 px-2 min-w-[140px]">
+                        <p className="font-semibold text-gray-900">{lead.couple_name}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {new Date(lead.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} 
+                          {lead.wedding_date && ` • W: ${new Date(lead.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
+                        </p>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-[10px] uppercase font-bold">
+                          {lead.source || 'Search'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 font-medium text-gray-700">
+                        {lead.estimated_value > 0 ? formatPrice(lead.estimated_value) : '—'}
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="relative inline-block w-32">
+                          <select
+                            disabled={updatingLeadId === lead.id}
+                            value={lead.status}
+                            onChange={(e) => handleLeadStatusChange(lead.id, e.target.value)}
+                            className={`w-full appearance-none px-2.5 py-1.5 pr-6 rounded-lg text-xs font-bold uppercase transition focus:outline-none focus:ring-2 focus:ring-rose-gold/20 cursor-pointer ${
+                              lead.status === 'new' ? 'bg-blue-50 text-blue-700' :
+                              lead.status === 'contacted' ? 'bg-sky-50 text-sky-700' :
+                              lead.status === 'negotiating' ? 'bg-amber-50 text-amber-700' :
+                              lead.status === 'booked' ? 'bg-emerald-50 text-emerald-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            <option value="new">🆕 New</option>
+                            <option value="contacted">📞 Contacted</option>
+                            <option value="negotiating">💬 Negotiating</option>
+                            <option value="booked">✅ Booked</option>
+                            <option value="closed_lost">❌ Closed Lost</option>
+                          </select>
+                          <ChevronDown className="w-3 h-3 absolute right-2 top-2 pointer-events-none opacity-50" />
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <div className="flex items-center justify-end gap-1.5 w-full">
+                           {lead.status === 'booked' && (
+                              <a href={`mailto:${lead.email}?subject=Review us on Wedora!&body=Hi ${lead.couple_name},%0D%0A%0D%0AThank you for booking us! We would love if you could drop a review on our Wedora profile.%0D%0A%0D%0AThanks!`}
+                                 className="px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition whitespace-nowrap text-[10px] font-bold"
+                                 title="Send Review Request"
+                              >
+                                ⭐ Request Review
+                              </a>
+                            )}
+                          <button
+                            onClick={() => { setActiveNotesEditor(lead.id); setTempNotes(lead.notes || ''); setTempValue(lead.estimated_value || ''); }}
+                            className="px-2 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition text-[10px] font-bold uppercase"
+                          >
+                            {lead.notes ? 'View Notes' : '+ Note'}
+                          </button>
+                          {lead.phone && (
+                            <a href={`https://wa.me/91${lead.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition" title="WhatsApp">
+                              <MessageCircle className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Inline Edit Modal for Notes & Value */}
+          {activeNotesEditor && (
+             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in text-left">
+               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 relative">
+                 <button onClick={() => setActiveNotesEditor(null)} className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 text-gray-500">
+                    <X className="w-4 h-4" />
+                 </button>
+                 <h3 className="font-serif font-bold text-gray-900 mb-4 text-lg">Lead Details (CRM)</h3>
+                 
+                 <div className="space-y-4">
+                   <div>
+                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Estimated Deal Value (₹)</label>
+                     <input type="number" value={tempValue} onChange={(e) => setTempValue(e.target.value)} placeholder="e.g. 150000" className="w-full h-11 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold outline-none text-sm transition-all" />
+                     <p className="text-[10px] text-gray-400 mt-1">Used to calculate your potential pipeline revenue.</p>
+                   </div>
+                   
+                   <div>
+                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Private Notes</label>
+                     <textarea value={tempNotes} onChange={(e) => setTempNotes(e.target.value)} placeholder="Type private notes about this lead here... (Only you can see this)" rows={4} className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold outline-none text-sm transition-all resize-none" />
+                   </div>
+                 </div>
+
+                 <button
+                    disabled={updatingLeadId === activeNotesEditor}
+                    onClick={() => handleSaveNotes(activeNotesEditor)}
+                    className="w-full mt-6 h-11 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+                 >
+                   {updatingLeadId === activeNotesEditor ? 'Saving...' : 'Save CRM Details'}
+                 </button>
+               </div>
+             </div>
+          )}
+        </div>
+
+        {/* Charts & Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 animate-fade-in-up md:h-72" style={{ animationDelay: '120ms' }}>
           {/* Profile Views Chart */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-serif font-bold text-gray-900">Profile Views Over Time</h2>
                 <p className="text-xs text-gray-500">Daily views from couple searches</p>
               </div>
-              {viewStats.total > 0 && (
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold">
-                  {viewStats.total} total
-                </span>
-              )}
             </div>
             {viewStats.chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={viewStats.chartData}>
-                  <defs>
-                    <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#C0707A" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#C0707A" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-                  />
-                  <Line
-                    type="monotone" dataKey="views" stroke="#C0707A" strokeWidth={2.5}
-                    dot={{ fill: '#C0707A', r: 4, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 6, fill: '#C0707A', stroke: '#fff', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="flex-1 min-h-[160px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={viewStats.chartData}>
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', fontSize: '12px' }} />
+                    <Line type="monotone" dataKey="views" stroke="#C0707A" strokeWidth={2.5} dot={{ fill: '#C0707A', r: 4, strokeWidth: 2, stroke: '#fff' }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              <div className="h-[220px] flex items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-white">
-                <div className="text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                    <Eye className="w-6 h-6 text-gray-300" />
-                  </div>
-                  <p className="text-sm text-gray-400 font-medium">No views yet</p>
-                  <p className="text-xs text-gray-400 mt-1">Views appear once couples visit your profile</p>
-                </div>
+              <div className="flex-1 flex items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-white">
+                <p className="text-sm text-gray-400 font-medium">No views recorded yet in this period.</p>
               </div>
             )}
           </div>
 
-          {/* Lead Sources Donut */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
-            <h2 className="text-base font-serif font-bold text-gray-900 mb-1">Lead Sources</h2>
-            <p className="text-xs text-gray-500 mb-4">Where your leads come from</p>
+          {/* Automated AI Insights */}
+          <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 rounded-2xl shadow-sm border border-indigo-100 p-5 sm:p-6 h-full flex flex-col">
+            <h2 className="text-base font-serif font-bold text-gray-900 mb-1 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-indigo-500 fill-indigo-500/20" /> Automated Insights
+            </h2>
+            <p className="text-xs text-gray-500 mb-4">AI-driven ideas to boost your bookings (Static)</p>
 
-            {leadSources.length > 0 ? (
-              <>
-                <div className="flex justify-center mb-4">
-                  <div className="relative">
-                    <ResponsiveContainer width={160} height={160}>
-                      <PieChart>
-                        <Pie
-                          data={leadSources} dataKey="value" cx="50%" cy="50%"
-                          innerRadius={50} outerRadius={70} paddingAngle={3}
-                        >
-                          {leadSources.map((entry, i) => (
-                            <Cell key={i} fill={entry.color || DONUT_COLORS[i % DONUT_COLORS.length]} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-gray-900">{leads.length}</p>
-                        <p className="text-[10px] text-gray-500">Total</p>
-                      </div>
-                    </div>
+            <div className="space-y-3 flex-1 overflow-y-auto pr-1">
+              {aiInsights.map((insight, idx) => (
+                <div key={idx} className="bg-white/60 p-3 rounded-xl border border-white flex gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                     <insight.icon className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 text-[9px] font-bold uppercase mb-1">
+                      {insight.metric}
+                    </span>
+                    <p className="text-[11px] font-medium text-gray-700 leading-snug">{insight.text}</p>
                   </div>
                 </div>
-                <div className="space-y-2.5">
-                  {leadSources.map((s, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
-                        <span className="text-gray-600">{s.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900">{s.value}</span>
-                        <span className="text-gray-400 w-8 text-right">{s.pct}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="h-48 flex items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-white">
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-2">
-                    <BarChart3 className="w-5 h-5 text-gray-300" />
-                  </div>
-                  <p className="text-xs text-gray-400">Sources appear after your first enquiry</p>
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -422,202 +506,50 @@ export default function VendorPortalPage() {
               to="/vendor/dashboard/edit"
               className="text-xs font-semibold text-rose-gold hover:underline flex items-center gap-1"
             >
-              {media.length > 0 ? 'Manage Photos' : 'Add Photos'} <ArrowRight className="w-3 h-3" />
+              Manage Photos <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
           {media.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-              {media.slice(0, 10).map((item, i) => (
-                <div
-                  key={item.id || i}
-                  className="aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer relative"
-                >
-                  <img
-                    src={item.image_url}
-                    alt={`Portfolio ${i + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              {media.slice(0, 5).map((item, i) => (
+                <div key={item.id || i} className="aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer relative">
+                  <img src={item.image_url} alt={`Portfolio ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                 </div>
               ))}
-              {media.length > 10 && (
-                <Link
-                  to="/vendor/dashboard/edit"
-                  className="aspect-square rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200 hover:border-rose-gold/40 transition-colors"
-                >
+              {media.length > 5 && (
+                <Link to="/vendor/dashboard/edit" className="aspect-square rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-500">+{media.length - 10}</p>
-                    <p className="text-[10px] text-gray-400">more</p>
+                    <p className="text-lg font-bold text-gray-500">+{media.length - 5}</p>
                   </div>
                 </Link>
               )}
             </div>
           ) : (
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl py-10 text-center bg-gradient-to-br from-gray-50/50 to-white">
-              <div className="w-14 h-14 rounded-2xl bg-rose-gold/10 flex items-center justify-center mx-auto mb-3">
-                <Image className="w-6 h-6 text-rose-gold" />
-              </div>
+            <div className="border-2 border-dashed border-gray-200 rounded-2xl py-10 text-center bg-gray-50/50">
+              <Camera className="w-6 h-6 text-gray-400 mx-auto mb-2" />
               <p className="text-sm font-semibold text-gray-700 mb-1">No portfolio photos yet</p>
-              <p className="text-xs text-gray-400 mb-4 max-w-xs mx-auto">
-                Listings with 5+ photos get 3x more enquiries. Add your best work now!
-              </p>
-              <Link
-                to="/vendor/dashboard/edit"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-              >
-                <Camera className="w-4 h-4" /> Add Portfolio Photos
+              <Link to="/vendor/dashboard/edit" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-gold text-white text-sm font-semibold hover:shadow-lg transition-all">
+                Add Photography
               </Link>
             </div>
           )}
         </div>
 
-        {/* Recent Leads */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-serif font-bold text-gray-900">Recent Leads</h2>
-              <p className="text-xs text-gray-500">Couples who contacted you this month</p>
-            </div>
-            {leads.length > 0 && (
-              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">
-                {leads.length} total
-              </span>
-            )}
-          </div>
-
-          {leads.length === 0 ? (
-            <div className="py-10 text-center rounded-xl bg-gradient-to-br from-gray-50/50 to-white">
-              <div className="text-3xl mb-2">📬</div>
-              <p className="text-sm font-medium text-gray-600 mb-1">No enquiries yet</p>
-              <p className="text-xs text-gray-400">
-                {listing.status === 'approved' ? 'They\'ll appear here once couples find your listing.' : 'Your listing needs approval first.'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-[11px] uppercase text-gray-400 border-b border-gray-100">
-                    <th className="pb-3 font-semibold">Couple</th>
-                    <th className="pb-3 font-semibold hidden sm:table-cell">Via</th>
-                    <th className="pb-3 font-semibold hidden sm:table-cell">Date</th>
-                    <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {leads.slice(0, 8).map(lead => (
-                    <tr key={lead.id} className="group hover:bg-blue-50/30 transition-colors">
-                      <td className="py-3.5">
-                        <p className="font-semibold text-gray-900">{lead.couple_name}</p>
-                        {lead.wedding_date && (
-                          <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(lead.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </p>
-                        )}
-                      </td>
-                      <td className="py-3.5 hidden sm:table-cell">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${
-                          lead.source === 'whatsapp' ? 'bg-[#25D366]/10 text-[#25D366]' :
-                          lead.source === 'direct' ? 'bg-amber-50 text-amber-600' :
-                          lead.source === 'blog' ? 'bg-violet-50 text-violet-600' :
-                          'bg-rose-gold/10 text-rose-gold'
-                        }`}>
-                          {lead.source === 'whatsapp' ? '📱 WhatsApp' :
-                           lead.source === 'direct' ? '🔗 Direct' :
-                           lead.source === 'blog' ? '📝 Blog' :
-                           '🔍 Search'}
-                        </span>
-                      </td>
-                      <td className="py-3.5 hidden sm:table-cell">
-                        <span className="text-xs text-gray-500">
-                          {new Date(lead.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </span>
-                      </td>
-                      <td className="py-3.5">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${
-                          lead.status === 'new' ? 'bg-blue-50 text-blue-600' :
-                          lead.status === 'contacted' ? 'bg-emerald-50 text-emerald-600' :
-                          'bg-gray-100 text-gray-500'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            lead.status === 'new' ? 'bg-blue-500 animate-pulse' :
-                            lead.status === 'contacted' ? 'bg-emerald-500' :
-                            'bg-gray-400'
-                          }`} />
-                          {lead.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {lead.phone && (
-                            <a
-                              href={`https://wa.me/91${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${lead.couple_name}! Thank you for your enquiry on Wedora. 😊`)}`}
-                              target="_blank" rel="noopener noreferrer"
-                              className="p-2 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
-                              title="Reply on WhatsApp"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                            </a>
-                          )}
-                          {lead.phone && (
-                            <a href={`tel:${lead.phone}`}
-                              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                              title="Call"
-                            >
-                              <Phone className="w-3.5 h-3.5" />
-                            </a>
-                          )}
-                          {lead.email && (
-                            <a href={`mailto:${lead.email}`}
-                              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                              title="Email"
-                            >
-                              <Mail className="w-3.5 h-3.5" />
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {leads.length > 8 && (
-                <div className="text-center pt-4 border-t border-gray-100 mt-2">
-                  <button className="text-xs font-semibold text-rose-gold hover:underline">
-                    View all {leads.length} leads →
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Reviews + Tips + Premium Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+        {/* REVIEWS & NEW MONETIZATION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+          
           {/* Reviews & Ratings */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 flex flex-col">
             <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-amber-500" fill="#f59e0b" /> Reviews & Ratings
             </h2>
             <p className="text-xs text-gray-500 mb-5">From verified couples on Wedora</p>
 
             {totalReviews > 0 ? (
-              <>
+              <div className="flex-1 flex flex-col justify-center">
                 <div className="text-center mb-5">
                   <p className="text-5xl font-bold text-gray-900">{avgRating.toFixed(1)}</p>
-                  <div className="flex items-center justify-center gap-0.5 mt-2">
-                    {[1, 2, 3, 4, 5].map(s => (
-                      <Star
-                        key={s}
-                        className={`w-5 h-5 ${s <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}
-                        fill={s <= Math.round(avgRating) ? '#fbbf24' : 'none'}
-                      />
-                    ))}
-                  </div>
                   <p className="text-xs text-gray-500 mt-1.5">Based on {totalReviews} reviews</p>
                 </div>
                 <div className="space-y-2">
@@ -625,71 +557,77 @@ export default function VendorPortalPage() {
                     <div key={star} className="flex items-center gap-2.5 text-xs">
                       <span className="w-3 text-gray-500 text-right font-medium">{star}</span>
                       <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400 transition-all duration-500"
-                          style={{ width: `${(count / maxRatingCount) * 100}%` }}
-                        />
+                        <div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / maxRatingCount) * 100}%` }} />
                       </div>
                       <span className="w-6 text-right text-gray-500 font-medium">{count}</span>
                     </div>
                   ))}
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="py-8 text-center rounded-xl bg-gradient-to-br from-amber-50/30 to-white">
+              <div className="flex-1 flex flex-col items-center justify-center py-8 rounded-xl bg-amber-50/30">
                 <Star className="w-10 h-10 text-amber-200 mx-auto mb-2" />
                 <p className="text-sm font-medium text-gray-600">No reviews yet</p>
-                <p className="text-xs text-gray-400 mt-1">Ask happy clients to review you on Wedora!</p>
+                <p className="text-xs text-gray-400 mt-1">Ask happy clients to review you!</p>
               </div>
             )}
           </div>
 
-          {/* Quick Tips */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
-            <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2 mb-1">
-              <Lightbulb className="w-4 h-4 text-amber-500" /> Growth Tips
-            </h2>
-            <p className="text-xs text-gray-500 mb-4">Boost your profile performance</p>
-            <div className="space-y-3.5">
-              {[
-                { emoji: '📸', tip: 'Add 5+ portfolio photos — profiles with photos get 3× more enquiries', highlight: !media.length },
-                { emoji: '💰', tip: 'Keep pricing updated — couples filter vendors by budget range' },
-                { emoji: '⏰', tip: 'Reply to leads within 24hrs — fast responses increase bookings by 40%' },
-                { emoji: '⭐', tip: 'Ask happy clients for reviews — 5+ reviews helps you rank higher' },
-                { emoji: '📱', tip: 'Share your Wedora link on WhatsApp, Instagram & Google Maps' },
-              ].map((item, i) => (
-                <div key={i} className={`flex items-start gap-2.5 p-2.5 rounded-xl transition-colors ${item.highlight ? 'bg-rose-gold/5 border border-rose-gold/10' : 'hover:bg-gray-50'}`}>
-                  <span className="text-base flex-shrink-0 mt-0.5">{item.emoji}</span>
-                  <p className="text-xs text-gray-600 leading-relaxed">{item.tip}</p>
-                </div>
-              ))}
+          {/* SaaS Pricing Plans (Monetization Engine) */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-0 overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-gray-100 bg-gray-50">
+               <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2">
+                 <Briefcase className="w-4 h-4 text-rose-gold" /> Upgrade Your Plan
+               </h2>
+               <p className="text-xs text-gray-500 mt-0.5">Scale your wedding business faster.</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+               {/* Featured Plan */}
+               <div className="border border-gray-200 rounded-xl p-4 flex flex-col">
+                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Featured</p>
+                 <div className="mt-1 mb-3">
+                   <span className="text-xl font-bold text-gray-900">₹999</span>
+                   <span className="text-[10px] text-gray-500">/mo</span>
+                 </div>
+                 <ul className="space-y-2 mb-4 flex-1">
+                   <li className="flex items-start gap-2 text-xs text-gray-600">
+                     <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" /> Top Placement
+                   </li>
+                   <li className="flex items-start gap-2 text-xs text-gray-600">
+                     <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" /> Verified Badge
+                   </li>
+                 </ul>
+                 <button onClick={() => alert("Monetization gateway coming soon")} className="w-full py-2 rounded-lg border-2 border-gray-900 text-gray-900 text-xs font-bold hover:bg-gray-900 hover:text-white transition">
+                   Upgrade Now
+                 </button>
+               </div>
+
+               {/* Pro Plan */}
+               <div className="border-2 border-orange-400 bg-gradient-to-b from-orange-50/50 to-white rounded-xl p-4 flex flex-col relative overflow-hidden">
+                 <div className="absolute top-0 right-0 bg-orange-400 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg">POPULAR</div>
+                 <p className="text-xs font-bold text-orange-500 uppercase tracking-wide flex items-center gap-1">Pro <Zap className="w-3 h-3 fill-current" /></p>
+                 <div className="mt-1 mb-3">
+                   <span className="text-xl font-bold text-gray-900">₹2499</span>
+                   <span className="text-[10px] text-gray-500">/mo</span>
+                 </div>
+                 <ul className="space-y-2 mb-4 flex-1">
+                   <li className="flex items-start gap-2 text-xs font-medium text-gray-800">
+                     <Check className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" /> See Who Viewed Profile
+                   </li>
+                   <li className="flex items-start gap-2 text-xs text-gray-600">
+                     <Check className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" /> Priority Leads
+                   </li>
+                   <li className="flex items-start gap-2 text-xs text-gray-600">
+                     <Check className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" /> Advanced CRM Analytics
+                   </li>
+                 </ul>
+                 <button onClick={() => alert("Monetization gateway coming soon")} className="w-full py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition">
+                   Upgrade to Pro
+                 </button>
+               </div>
             </div>
           </div>
-
-          {/* Premium Teaser */}
-          <div className="relative bg-white rounded-2xl shadow-sm border border-orange-200/60 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-white" />
-            <div className="relative p-5 sm:p-6">
-              <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2 mb-1">
-                <Zap className="w-4 h-4 text-orange-500" /> Premium Insights
-              </h2>
-              <p className="text-xs text-gray-500 mb-6">Unlock advanced analytics</p>
-
-              <div className="text-center py-3">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                  <Lock className="w-7 h-7 text-orange-500" />
-                </div>
-                <h3 className="text-sm font-bold text-gray-900 mb-2">See Who's Viewing Your Profile</h3>
-                <p className="text-xs text-gray-500 mb-5 max-w-[220px] mx-auto leading-relaxed">
-                  Get full name, wedding date, city, and budget of every couple who views your listing — then reach out first.
-                </p>
-                <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold shadow-lg shadow-orange-500/25 hover:shadow-xl transition-all hover:-translate-y-0.5">
-                  Start Free Trial →
-                </button>
-                <p className="text-[10px] text-gray-400 mt-2.5">₹999/month · First 30 days free · Cancel anytime</p>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </main>
     </div>

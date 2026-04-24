@@ -397,6 +397,27 @@ export async function fetchLeadsForVendor(vendorId) {
   return data || [];
 }
 
+/**
+ * Vendor CRM: Update a lead's status, notes, and estimated value.
+ */
+export async function updateLeadCRM(leadId, updates) {
+  const payload = {};
+  if (updates.status !== undefined) payload.status = updates.status;
+  if (updates.notes !== undefined) payload.notes = updates.notes;
+  if (updates.estimatedValue !== undefined) payload.estimated_value = parseInt(updates.estimatedValue) || 0;
+
+  const { error } = await supabase
+    .from('vendor_leads')
+    .update(payload)
+    .eq('id', leadId);
+
+  if (error) { 
+    console.error('[Marketplace] updateLeadCRM error:', error); 
+    return { success: false, error: error.message }; 
+  }
+  return { success: true };
+}
+
 // ─── Admin Queries ──────────────────────────────────────────────────────────
 
 /**
