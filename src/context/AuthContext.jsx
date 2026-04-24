@@ -131,7 +131,28 @@ export function AuthProvider({ children }) {
         });
       }
 
-      let userProfile = profileRes.data || { is_onboarded: false, active_wedding_id: null, plan: 'free' };
+      // If profile fetch failed (RLS race condition, network issue), retry once
+      let userProfile = profileRes.data;
+      if (!userProfile) {
+        console.warn('[Wedora] Profile fetch returned null, retrying...', profileRes.error?.message);
+        // Small delay to let the auth token propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const { data: retryData, error: retryError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (retryData) {
+          console.log('[Wedora] Profile retry succeeded');
+          userProfile = retryData;
+        } else {
+          console.warn('[Wedora] Profile retry also failed:', retryError?.message);
+          userProfile = { is_onboarded: false, active_wedding_id: null, plan: 'free' };
+        }
+      }
+
+      console.log('[Wedora] Profile loaded:', { is_onboarded: userProfile.is_onboarded, active_wedding_id: userProfile.active_wedding_id, plan: userProfile.plan });
+      console.log('[Wedora] Weddings found:', weddingsRes.length);
 
       // --- OAUTH VENDOR FIX ---
       // If signed up via Google, assign role and bypass Couple Onboarding
@@ -164,6 +185,7 @@ export function AuthProvider({ children }) {
         userProfile.active_wedding_id = firstId;
         userProfile.is_onboarded = true;
         setProfile({ ...userProfile });
+        console.log('[Wedora] Auto-fixed profile:', { active_wedding_id: firstId, is_onboarded: true });
         
         supabase.from('users').update({ 
           active_wedding_id: firstId,
