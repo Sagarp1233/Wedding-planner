@@ -92,8 +92,8 @@ export default function InvitationGenerator({ hideUpsell }) {
     if (hasData) setShowPreview(true);
   };
 
-  const handleDownload = useCallback(async () => {
-    if (!previewRef.current) return;
+  // Renders the invitation to a canvas and returns the canvas element
+  const renderToCanvas = useCallback(async () => {
     const canvas = canvasRef.current || document.createElement('canvas');
     canvasRef.current = canvas;
     const ctx = canvas.getContext('2d');
@@ -101,12 +101,35 @@ export default function InvitationGenerator({ hideUpsell }) {
     canvas.width = w;
     canvas.height = h;
 
-    // Draw template background
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = selectedTemplate.image;
-    await new Promise(r => { img.onload = r; img.onerror = r; });
-    ctx.drawImage(img, 0, 0, w, h);
+    // Draw template background image
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      // Use absolute URL to avoid CORS issues in production
+      const baseUrl = window.location.origin;
+      img.src = selectedTemplate.image.startsWith('/') ? `${baseUrl}${selectedTemplate.image}` : selectedTemplate.image;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      ctx.drawImage(img, 0, 0, w, h);
+    } catch {
+      // Fallback: fill with a gradient if the image fails to load
+      const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+      if (selectedTemplate.id === 'hindu') {
+        bgGrad.addColorStop(0, '#4a0e0e'); bgGrad.addColorStop(1, '#2d0707');
+      } else if (selectedTemplate.id === 'muslim') {
+        bgGrad.addColorStop(0, '#0a3c28'); bgGrad.addColorStop(1, '#052819');
+      } else if (selectedTemplate.id === 'christian') {
+        bgGrad.addColorStop(0, '#fef9ef'); bgGrad.addColorStop(1, '#fff8f0');
+      } else if (selectedTemplate.id === 'telugu') {
+        bgGrad.addColorStop(0, '#fff5dc'); bgGrad.addColorStop(1, '#ffebc8');
+      } else {
+        bgGrad.addColorStop(0, '#ffffff'); bgGrad.addColorStop(1, '#fdf2f0');
+      }
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+    }
 
     // Overlay
     const grad = ctx.createLinearGradient(0, 0, 0, h);
@@ -173,7 +196,7 @@ export default function InvitationGenerator({ hideUpsell }) {
       ctx.fillStyle = textColor;
       ctx.globalAlpha = 0.7;
       ctx.font = '14px Inter, sans-serif';
-      ctx.fillText(displayVenue, w / 2, 560);
+      ctx.fillText(`📍 ${displayVenue}`, w / 2, 560);
       ctx.globalAlpha = 1;
     }
 
@@ -184,17 +207,50 @@ export default function InvitationGenerator({ hideUpsell }) {
     ctx.fillText('Made with ❤ on Wedora.in', w / 2, h - 30);
     ctx.globalAlpha = 1;
 
-    // Download
-    const link = document.createElement('a');
-    link.download = `wedding-invitation-${selectedTemplate.id}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    return canvas;
   }, [selectedTemplate, displayBride, displayGroom, displayDate, displayVenue, venue]);
 
-  const handleShareWhatsApp = () => {
-    const text = `💌 You're Invited!\n\n${selectedTemplate.inviteTitle}\n\n${displayBride} & ${displayGroom}\n\n📅 ${displayDate}${venue ? `\n📍 ${displayVenue}` : ''}\n\nCreate your own invitation free: https://wedora.in`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
+  const handleDownload = useCallback(async () => {
+    if (!previewRef.current) return;
+    try {
+      const canvas = await renderToCanvas();
+      const link = document.createElement('a');
+      link.download = `wedding-invitation-${selectedTemplate.id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('[Wedora] Download failed:', err);
+      alert('Download failed. Please try again or take a screenshot.');
+    }
+  }, [renderToCanvas, selectedTemplate]);
+
+  const handleShareWhatsApp = useCallback(async () => {
+    const caption = `💌 You're Invited!\n\n${selectedTemplate.inviteTitle}\n\n${displayBride} & ${displayGroom}\n\n📅 ${displayDate}${venue ? `\n📍 ${displayVenue}` : ''}\n\nCreate your own invitation free: https://wedora.in`;
+
+    // Try native sharing with image first (works on mobile + desktop with support)
+    try {
+      const canvas = await renderToCanvas();
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], `wedding-invitation-${selectedTemplate.id}.png`, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          text: caption,
+          files: [file],
+        });
+        return;
+      }
+    } catch (err) {
+      // User cancelled share or share API not supported — fall through to text fallback
+      if (err.name === 'AbortError') return;
+      console.warn('[Wedora] Image share not supported, falling back to text:', err.message);
+    }
+
+    // Fallback: open WhatsApp with text only
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+  }, [renderToCanvas, selectedTemplate, displayBride, displayGroom, displayDate, displayVenue, venue]);
 
   return (
     <section id="invitation-generator" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
