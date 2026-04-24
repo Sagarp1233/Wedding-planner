@@ -10,6 +10,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login, signInWithGoogle, refreshSessionAndOnboarding } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [role, setRole] = useState('couple'); // UI toggle only
   const [error, setError] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,9 +88,30 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md animate-fade-in-up mt-16 sm:mt-24 z-10">
         {/* Card */}
         <div className="bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl shadow-rose-900/5 rounded-[2rem] p-6 sm:p-10">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-sm text-gray-500">Log in to continue planning your wedding</p>
+            <p className="text-sm text-gray-500">
+              {role === 'couple' ? 'Log in to continue planning your wedding' : 'Log in to manage your wedding business'}
+            </p>
+          </div>
+
+          <div className="flex bg-gray-100/80 p-1 rounded-xl mb-6 shadow-inner">
+            <button
+              onClick={() => setRole('couple')}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                role === 'couple' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Couple
+            </button>
+            <button
+              onClick={() => setRole('vendor')}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                role === 'vendor' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Vendor Business
+            </button>
           </div>
 
           {error && (
