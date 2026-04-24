@@ -49,7 +49,9 @@ export function AuthProvider({ children }) {
     }
   }, [currentUser]);
 
-  const profileCompleted = profile?.onboarding_completed || false;
+  // Legacy users who signed up with the old flow (which collected budget/guests/type)
+  // are already onboarded with full data — treat them as profile-completed too
+  const profileCompleted = profile?.onboarding_completed || profile?.is_onboarded || false;
   const isPro = profile?.plan === 'pro' || currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
   const isAdmin = currentUser?.email === 'admin@wedora.in' || currentUser?.user_metadata?.role === 'admin';
   const maxWeddings = isPro ? appConfig.pro_plan_limit : appConfig.free_plan_limit;

@@ -12,6 +12,10 @@ ALTER TABLE public.users
   ADD COLUMN IF NOT EXISTS wedding_style text,
   ADD COLUMN IF NOT EXISTS onboarding_completed boolean NOT NULL DEFAULT false;
 
+-- Backfill: existing onboarded users already provided data during old signup flow
+-- Mark them as having completed the personalization
+UPDATE public.users SET onboarding_completed = true WHERE is_onboarded = true;
+
 -- ═══════════════════════════════════════════════════════════════════
 -- DONE! New columns added to public.users for couple preferences.
 -- No RLS changes needed — users already have UPDATE on their own row.
