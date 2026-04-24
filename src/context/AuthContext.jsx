@@ -156,11 +156,19 @@ export function AuthProvider({ children }) {
       setProfile(userProfile);
       setWeddings(weddingsRes);
 
-      // Auto-fix active wedding ID if it's missing but we have weddings
-      if (!userProfile.active_wedding_id && weddingsRes.length > 0) {
-        const firstId = weddingsRes[0].id;
-        setProfile(prev => ({ ...prev, active_wedding_id: firstId }));
-        supabase.from('users').update({ active_wedding_id: firstId }).eq('id', userId);
+      // Auto-fix active wedding ID and onboarding status if missing but we have weddings
+      if ((!userProfile.active_wedding_id || !userProfile.is_onboarded) && weddingsRes.length > 0) {
+        const firstId = userProfile.active_wedding_id || weddingsRes[0].id;
+        
+        // Update local object so current render cycle and state see the fixed values
+        userProfile.active_wedding_id = firstId;
+        userProfile.is_onboarded = true;
+        setProfile({ ...userProfile });
+        
+        supabase.from('users').update({ 
+          active_wedding_id: firstId,
+          is_onboarded: true 
+        }).eq('id', userId).catch((err) => console.error('[Wedora] Auto-fix users table error:', err));
       }
 
     } catch (err) {
