@@ -348,7 +348,11 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
+    // Clear user and profile simultaneously to prevent race condition
+    // where route guards see authenticated + not-onboarded and briefly redirect to /onboarding
+    setCurrentUser(null);
     setProfile(null);
+    setWeddings([]);
     await supabase.auth.signOut();
   }
 
