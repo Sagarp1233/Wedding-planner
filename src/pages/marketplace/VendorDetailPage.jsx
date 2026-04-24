@@ -11,6 +11,7 @@ import {
   submitVendorReview,
   deleteVendorReview,
   submitEnquiry,
+  trackProfileView,
   getCategoryLabel,
   getCategoryEmoji,
   formatPrice,
@@ -38,7 +39,7 @@ export default function VendorDetailPage() {
   const [formError, setFormError] = useState('');
 
   const categoryLabel = getCategoryLabel(category);
-  const { isAuthenticated, activeWeddingId } = useAuth();
+  const { isAuthenticated, activeWeddingId, currentUser } = useAuth();
   const { state, dispatch } = useApp();
 
   const isShortlisted = vendor && state?.vendors?.some(
@@ -85,6 +86,9 @@ export default function VendorDetailPage() {
         setMedia(m);
         const r = await fetchVendorReviews(v.id);
         setReviews(r);
+
+        // Track profile view (fire-and-forget)
+        trackProfileView(v.id, currentUser?.id || null);
 
         const origin = ensureHttps((import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, ''));
         setSEO({

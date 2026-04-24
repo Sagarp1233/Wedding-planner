@@ -148,7 +148,7 @@ export async function fetchVendorMedia(vendorId) {
 /**
  * Submit an enquiry lead for a vendor.
  */
-export async function submitEnquiry(vendorId, { coupleName, phone, email, weddingDate, message }) {
+export async function submitEnquiry(vendorId, { coupleName, phone, email, weddingDate, message, source = 'marketplace' }) {
   const { error } = await supabase
     .from('vendor_leads')
     .insert({
@@ -158,10 +158,90 @@ export async function submitEnquiry(vendorId, { coupleName, phone, email, weddin
       email,
       wedding_date: weddingDate || null,
       message,
+      source,
     });
 
   if (error) { console.error('[Marketplace] submitEnquiry error:', error); return { success: false, error: error.message }; }
   return { success: true };
+}
+
+// ─── Analytics / Tracking ───────────────────────────────────────────────────
+
+/**
+ * Track a profile view when a couple visits a vendor's detail page.
+ * Fire-and-forget — errors are silently ignored.
+ */
+export async function trackProfileView(vendorId, viewerId = null) {
+  try {
+    await supabase.from('vendor_profile_views').insert({
+      vendor_id: vendorId,
+      viewer_id: viewerId,
+    });
+  } catch (err) {
+    // Silent fail — tracking should never block user experience
+    console.warn('[Marketplace] trackProfileView error:', err);
+  }
+}
+
+/**
+ * Fetch profile view stats for a vendor (total, by period, and daily chart data).
+ */
+export async function fetchProfileViewStats(vendorId, days = 30) {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  const sinceStr = since.toISOString();
+
+  // Fetch views within the period
+  const { data, error } = await supabase
+    .from('vendor_profile_views')
+    .select('created_at')
+    .eq('vendor_id', vendorId)
+    .gte('created_at', sinceStr)
+    .order('created_at', { ascending: true });
+
+  if (error) { console.error('[Marketplace] fetchProfileViewStats error:', error); return { total: 0, chartData: [] }; }
+
+  const views = data || [];
+
+  // Group by date for chart
+  const dailyMap = {};
+  views.forEach(v => {
+    const day = new Date(v.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    dailyMap[day] = (dailyMap[day] || 0) + 1;
+  });
+
+  const chartData = Object.entries(dailyMap).map(([date, count]) => ({ date, views: count }));
+
+  return { total: views.length, chartData };
+}
+
+/**
+ * Fetch lead source breakdown for a vendor.
+ */
+export async function fetchLeadSourceStats(vendorId) {
+  const { data, error } = await supabase
+    .from('vendor_leads')
+    .select('source')
+    .eq('vendor_id', vendorId);
+
+  if (error) { console.error('[Marketplace] fetchLeadSourceStats error:', error); return []; }
+
+  const sources = {};
+  (data || []).forEach(l => {
+    const src = l.source || 'marketplace';
+    sources[src] = (sources[src] || 0) + 1;
+  });
+
+  const total = Object.values(sources).reduce((a, b) => a + b, 0);
+  const COLORS = { marketplace: '#C0707A', whatsapp: '#25D366', direct: '#F59E0B', blog: '#8B5CF6' };
+  const LABELS = { marketplace: 'Wedora Search', whatsapp: 'WhatsApp Share', direct: 'Direct Link', blog: 'Blog Posts' };
+
+  return Object.entries(sources).map(([key, count]) => ({
+    name: LABELS[key] || key,
+    value: count,
+    pct: total > 0 ? Math.round((count / total) * 100) : 0,
+    color: COLORS[key] || '#94A3B8',
+  }));
 }
 
 /**
