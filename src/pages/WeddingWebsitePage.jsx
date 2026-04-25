@@ -227,7 +227,7 @@ export default function WeddingWebsitePage() {
     '--text-dark': themeConfig.textDark,
     '--text-light': themeConfig.textLight,
     backgroundColor: 'var(--bg-color)',
-    color: isDark ? 'var(--text-light)' : 'var(--text-dark)'
+    color: 'var(--text-dark)'
   };
 
   const formattedDate = site.wedding_date 
@@ -364,7 +364,7 @@ export default function WeddingWebsitePage() {
         <div className="relative z-10 text-center px-4 flex flex-col items-center animate-fade-in-up mt-20">
           {/* Giant background & symbol removed to ensure text readability */}
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-white leading-tight mb-2 drop-shadow-lg">
-            {site.bride_name} <br className="md:hidden"/> <span className="italic text-white opacity-50 mx-2 font-medium">&</span> <br className="md:hidden"/>{site.groom_name}
+            {site.bride_name} <br className="md:hidden"/> <span className="italic text-[var(--color-rose-gold)] opacity-90 mx-2 font-medium">&</span> <br className="md:hidden"/>{site.groom_name}
           </h1>
           
           <div className="w-24 h-px bg-white/40 my-6 mx-auto" />
@@ -594,8 +594,8 @@ export default function WeddingWebsitePage() {
           <div className="max-w-4xl mx-auto text-center">
             
             <div className="flex items-center justify-center gap-4 mb-16 relative">
-               <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200 z-0"></div>
-               <div className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center z-10 relative">
+               <div className={`absolute top-1/2 left-0 right-0 h-px z-0 ${isDark ? 'bg-white/20' : 'bg-gray-200'}`}></div>
+               <div className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center z-10 relative ${isDark ? 'bg-white/10 border border-white/20' : 'bg-white border border-gray-100'}`}>
                   <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" />
                </div>
             </div>
@@ -625,8 +625,8 @@ export default function WeddingWebsitePage() {
                         <a href={`https://wa.me/${site.bride_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#25D366] text-white rounded-[10px] text-sm font-bold shadow-md shadow-green-500/20 hover:-translate-y-0.5 transition-all w-auto">
                           <MessageCircle className="w-4 h-4" /> WhatsApp
                         </a>
-                        <a href={`tel:${site.bride_contact_phone}`} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-[10px] text-sm font-bold hover:bg-gray-100 text-[var(--text-dark)] transition-colors w-auto">
-                          <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" /> Call
+                        <a href={`tel:${site.bride_contact_phone}`} className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-[10px] text-sm font-bold transition-colors w-auto ${isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' : 'bg-[#f8fafc] border-gray-200 hover:bg-gray-100 text-[var(--text-dark)] border'}`}>
+                          <Phone className={`w-4 h-4 ${isDark ? 'text-white' : 'text-[var(--color-plum)]'}`} fill="currentColor" /> Call
                         </a>
                       </>
                     )}
@@ -646,8 +646,8 @@ export default function WeddingWebsitePage() {
                         <a href={`https://wa.me/${site.groom_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#25D366] text-white rounded-[10px] text-sm font-bold shadow-md shadow-green-500/20 hover:-translate-y-0.5 transition-all w-auto">
                           <MessageCircle className="w-4 h-4" /> WhatsApp
                         </a>
-                        <a href={`tel:${site.groom_contact_phone}`} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-[10px] text-sm font-bold hover:bg-gray-100 text-[var(--text-dark)] transition-colors w-auto">
-                          <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" /> Call
+                        <a href={`tel:${site.groom_contact_phone}`} className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-[10px] text-sm font-bold transition-colors w-auto ${isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' : 'bg-[#f8fafc] border-gray-200 hover:bg-gray-100 text-[var(--text-dark)] border'}`}>
+                          <Phone className={`w-4 h-4 ${isDark ? 'text-white' : 'text-[var(--color-plum)]'}`} fill="currentColor" /> Call
                         </a>
                       </>
                     )}
@@ -660,21 +660,21 @@ export default function WeddingWebsitePage() {
       )}
 
       {/* RSVP Section */}
-      <section id="rsvp" className="py-24 px-4 md:px-8 relative bg-white overflow-hidden">
+      <section id="rsvp" className={`py-24 px-4 md:px-8 relative ${isDark ? '' : 'bg-white'} overflow-hidden`}>
         
         {/* Decorative background container similar to the image wrapper */}
         <div className="absolute inset-0 z-0">
-           <div className="absolute top-0 w-full h-full bg-gradient-to-br from-[#FFF5F7]/80 to-[#FDF4F6]/50" />
+           <div className={`absolute top-0 w-full h-full bg-gradient-to-br ${isDark ? 'from-black/20 to-transparent' : 'from-[#FFF5F7]/80 to-[#FDF4F6]/50'}`} />
         </div>
 
         <div className="max-w-3xl mx-auto relative z-10">
           
           <div className="flex items-center justify-center mb-8">
-             <div className="flex-1 h-px bg-gray-200"></div>
-             <div className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center mx-4">
+             <div className={`flex-1 h-px ${isDark ? 'bg-white/20' : 'bg-gray-200'}`}></div>
+             <div className={`w-10 h-10 rounded-full shadow-sm flex items-center justify-center mx-4 ${isDark ? 'bg-white/10 border border-white/20' : 'bg-white border border-gray-100'}`}>
                 <span className="text-[var(--color-rose-gold)] text-sm">💌</span>
              </div>
-             <div className="flex-1 h-px bg-gray-200"></div>
+             <div className={`flex-1 h-px ${isDark ? 'bg-white/20' : 'bg-gray-200'}`}></div>
           </div>
 
           <div className={`${isDark ? 'bg-white/5 text-white border-white/10 backdrop-blur-md' : 'bg-gradient-to-b from-[#FCF7F8] to-[#FDF9FA] text-[var(--text-dark)] border-[#f2e6e8]'} rounded-[32px] shadow-[0_20px_60px_rgba(183,110,121,0.08)] p-8 md:p-14 relative overflow-hidden border`}>
@@ -683,19 +683,20 @@ export default function WeddingWebsitePage() {
                <div className="text-center animate-fade-in py-8">
                   <div className="flex items-center justify-center gap-4 mb-5">
                      <div className="w-8 h-px bg-[var(--color-rose-gold)]/40"></div>
-                     <span className="text-[var(--text-dark)]/50 uppercase tracking-[0.2em] text-[10px] font-bold">RSVP</span>
+                     <span className={`${isDark ? 'text-white/50' : 'text-gray-500'} uppercase tracking-[0.2em] text-[10px] font-bold`}>RSVP</span>
                      <div className="w-8 h-px bg-[var(--color-rose-gold)]/40"></div>
                   </div>
-                  <h2 className="text-4xl md:text-[3.5rem] font-serif mb-6 text-[var(--text-dark)] leading-tight">
+                  <h2 className={`text-4xl md:text-[3.5rem] font-serif mb-6 leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
                      Will you be <span className="italic text-[var(--color-rose-gold)]">joining us?</span>
                   </h2>
-                  <p className="text-[var(--text-dark)]/60 text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
-                     We'd love to know you'll be there. Please confirm your attendance by <span className="font-bold text-[var(--text-dark)]">{site.rsvp_deadline ? new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(site.rsvp_deadline)) : 'the requested date'}</span> so we can make every arrangement perfect.
+                  <p className={`text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                     We'd love to know you'll be there. Please confirm your attendance by <span className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{site.rsvp_deadline ? new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(site.rsvp_deadline)) : 'the requested date'}</span> so we can make every arrangement perfect.
                   </p>
                   
                   <button 
                      onClick={() => setShowRsvpForm(true)}
-                     className="bg-gradient-to-r from-[#B76E79] to-[#6B2D5E] text-white px-10 py-3.5 rounded-full font-bold text-[15px] shadow-[0_10px_25px_rgba(183,110,121,0.3)] hover:-translate-y-0.5 hover:shadow-[0_15px_30px_rgba(183,110,121,0.4)] transition-all inline-flex items-center gap-3"
+                     className="text-white px-10 py-3.5 rounded-full font-bold text-[15px] shadow-[0_10px_25px_rgba(183,110,121,0.3)] hover:-translate-y-0.5 hover:shadow-[0_15px_30px_rgba(183,110,121,0.4)] transition-all inline-flex items-center gap-3"
+                     style={{ background: `linear-gradient(135deg, var(--color-rose-gold), var(--color-plum))` }}
                   >
                      <Heart className="w-4 h-4 fill-white flex-shrink-0" /> Confirm My Attendance
                   </button>
@@ -705,14 +706,14 @@ export default function WeddingWebsitePage() {
             isRsvpClosed ? (
                <div className="text-center py-12">
                    <div className="text-5xl mb-4">⏳</div>
-                   <h3 className="text-2xl font-serif font-bold mb-2 text-[var(--text-dark)]">RSVP Closed</h3>
-                   <p className="text-[var(--text-dark)]/60">The deadline to RSVP has passed. Please contact the couple directly if you have any questions.</p>
+                   <h3 className={`text-2xl font-serif font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>RSVP Closed</h3>
+                   <p className={isDark ? 'text-white/60' : 'text-gray-500'}>The deadline to RSVP has passed. Please contact the couple directly if you have any questions.</p>
                </div>
             ) : alreadyRsvped && !rsvpSuccess ? (
                <div className="text-center py-12">
                   <div className="text-5xl mb-4">💌</div>
-                  <h3 className="text-2xl font-serif font-bold mb-2 text-[var(--text-dark)]">You've already RSVPed</h3>
-                  <p className="text-[var(--text-dark)]/60 mb-6">Thank you for letting us know! We have received your response.</p>
+                  <h3 className={`text-2xl font-serif font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>You've already RSVPed</h3>
+                  <p className={`mb-6 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Thank you for letting us know! We have received your response.</p>
                   <button onClick={() => setAlreadyRsvped(false)} className="text-[var(--color-rose-gold)] underline font-bold text-sm tracking-wide">
                      Update my response
                   </button>
@@ -727,7 +728,7 @@ export default function WeddingWebsitePage() {
             ) : (
                <form onSubmit={handleRsvpSubmit} className={`space-y-8 relative z-10 animate-fade-in ${isDark ? 'bg-black/20 border-white/15' : 'bg-white border-gray-100'} rounded-3xl p-6 sm:p-10 shadow-sm border`}>
                   <div className="text-center mb-8">
-                     <h3 className="text-2xl md:text-3xl font-serif font-semibold text-[var(--text-dark)]">
+                     <h3 className={`text-2xl md:text-3xl font-serif font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         RSVP for {site.bride_name} & {site.groom_name}'s Wedding
                      </h3>
                   </div>
@@ -747,7 +748,7 @@ export default function WeddingWebsitePage() {
 
                   {/* Attendance Toggle */}
                   <div>
-                     <label className="block text-[10px] font-bold mb-3 uppercase tracking-widest text-[var(--text-dark)]/70">Will you be attending?</label>
+                     <label className={`block text-[10px] font-bold mb-3 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Will you be attending?</label>
                      <div className="flex flex-col sm:flex-row gap-2">
                         <button type="button" onClick={() => setRsvpStatus('confirmed')} className={`flex-1 py-3 px-4 rounded-[14px] border ${rsvpStatus === 'confirmed' ? 'border-emerald-200/50 bg-emerald-500/10 text-emerald-600 font-bold' : isDark ? 'border-white/10 text-gray-400 hover:bg-white/5' : 'border-gray-200 text-gray-500 font-medium hover:bg-gray-50'} transition-all flex items-center justify-center gap-2`}>
                            <CheckCircle className={`w-4 h-4 ${rsvpStatus === 'confirmed' ? 'text-emerald-500' : 'text-gray-400 opacity-70'}`} /> Yes, Attending
@@ -764,11 +765,11 @@ export default function WeddingWebsitePage() {
                   {/* Contact Info Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                      <div>
-                        <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">Your Full Name *</label>
+                        <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Your Full Name *</label>
                         <input type="text" required value={rsvpFormData.guest_name} onChange={e => setRsvpFormData(prev => ({...prev, guest_name: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-black/20 border-white/20 focus:ring-white/30 text-white placeholder:text-gray-500' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800 placeholder:text-gray-400'}`} placeholder="e.g. Kavita Sharma" />
                      </div>
                      <div>
-                        <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">Phone Number *</label>
+                        <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Phone Number *</label>
                         <input type="tel" required value={rsvpFormData.guest_phone} onChange={e => setRsvpFormData(prev => ({...prev, guest_phone: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-black/20 border-white/20 focus:ring-white/30 text-white placeholder:text-gray-500' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800 placeholder:text-gray-400'}`} placeholder="+91 98765 43210" />
                      </div>
                   </div>
@@ -777,11 +778,11 @@ export default function WeddingWebsitePage() {
                      <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                            <div>
-                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">Email (Optional)</label>
+                              <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Email (Optional)</label>
                               <input type="email" value={rsvpFormData.guest_email} onChange={e => setRsvpFormData(prev => ({...prev, guest_email: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-black/20 border-white/20 focus:ring-white/30 text-white placeholder:text-gray-500' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] placeholder:text-gray-400'}`} placeholder="you@email.com" />
                            </div>
                            <div>
-                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">Number of Guests</label>
+                              <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Number of Guests</label>
                               <select value={rsvpFormData.guest_count} onChange={e => setRsvpFormData(prev => ({...prev, guest_count: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#111827] border-white/20 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
                                  {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} {n === 1 ? 'person (just me)' : 'people'}</option>)}
                                  <option value="6">6+ people (Please message couple)</option>
@@ -791,13 +792,13 @@ export default function WeddingWebsitePage() {
 
                         {site.events && site.events.length > 0 && (
                            <div>
-                              <label className="block text-[10px] font-bold mb-3 uppercase tracking-widest text-[var(--text-dark)]/60">Which events will you attend?</label>
+                              <label className={`block text-[10px] font-bold mb-3 uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Which events will you attend?</label>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                  {site.events.map((e, i) => {
                                     const isChecked = rsvpFormData.events_attending.includes(e.name);
                                     return (
-                                       <label key={i} className={`flex items-center gap-3 p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 ${isChecked ? 'bg-[var(--color-rose-gold)]/10 border-[var(--color-rose-gold)]/30 shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-gray-50/30'}`}>
-                                          <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--color-rose-gold)]' : 'border-2 border-gray-300'}`}>
+                                       <label key={i} className={`flex items-center gap-3 p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 ${isChecked ? 'bg-[var(--color-rose-gold)]/10 border-[var(--color-rose-gold)]/30 shadow-sm' : isDark ? 'border-white/10 hover:border-white/20 bg-white/5' : 'border-gray-200 hover:border-gray-300 bg-gray-50/30'}`}>
+                                          <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--color-rose-gold)]' : isDark ? 'border-2 border-white/20 bg-black/20' : 'border-2 border-gray-300 bg-white'}`}>
                                             {isChecked && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                                           </div>
                                           <input 
@@ -810,11 +811,11 @@ export default function WeddingWebsitePage() {
                                              className="hidden"
                                           />
                                           <div className="flex flex-col">
-                                             <span className={`font-bold text-xs uppercase tracking-wider ${isChecked ? 'text-[var(--text-dark)]' : 'text-gray-600'}`}>
+                                             <span className={`font-bold text-xs uppercase tracking-wider ${isChecked ? (isDark ? 'text-white' : 'text-gray-900') : isDark ? 'text-white/60' : 'text-gray-500'}`}>
                                                 {e.emoji} {e.name}
                                              </span>
                                              {e.date && (
-                                                <span className="text-[10px] text-gray-500 font-medium mt-0.5 uppercase">
+                                                <span className={`text-[10px] font-medium mt-0.5 uppercase ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
                                                    ({new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' }).format(new Date(e.date))})
                                                 </span>
                                              )}
@@ -828,7 +829,7 @@ export default function WeddingWebsitePage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                            <div>
-                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">Meal Preference</label>
+                              <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>Meal Preference</label>
                               <select value={rsvpFormData.meal_preference} onChange={e => setRsvpFormData(prev => ({...prev, meal_preference: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#111827] border-white/20 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
                                  <option value="Vegetarian">Vegetarian</option>
                                  <option value="Non-Vegetarian">Non-Vegetarian</option>
@@ -837,7 +838,7 @@ export default function WeddingWebsitePage() {
                               </select>
                            </div>
                            <div>
-                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">You Are</label>
+                              <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>You Are</label>
                               <select value={rsvpFormData.guest_side} onChange={e => setRsvpFormData(prev => ({...prev, guest_side: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#111827] border-white/20 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
                                  <option value="Friend of Bride">Friend of Bride</option>
                                  <option value="Friend of Groom">Friend of Groom</option>
@@ -852,11 +853,11 @@ export default function WeddingWebsitePage() {
                   )}
 
                   <div>
-                     <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/70">A Message for the Couple (Optional)</label>
+                     <label className={`block text-[10px] font-bold mb-2 uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-700'}`}>A Message for the Couple (Optional)</label>
                      <textarea value={rsvpFormData.message_to_couple} onChange={e => setRsvpFormData(prev => ({...prev, message_to_couple: e.target.value}))} rows="3" className={`w-full px-5 py-4 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-black/20 border-white/20 focus:ring-white/30 text-white placeholder:text-gray-500' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800 placeholder:text-gray-400'}`} placeholder={`Share your wishes, blessings, or any message for ${site.bride_name} & ${site.groom_name}... 💐`}></textarea>
                   </div>
 
-                  <button type="submit" disabled={rsvpSubmitting} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 bg-gradient-to-r from-[#B76E79] to-[#6B2D5E] flex justify-center items-center gap-2">
+                  <button type="submit" disabled={rsvpSubmitting} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 flex justify-center items-center gap-2" style={{ background: `linear-gradient(135deg, var(--color-rose-gold), var(--color-plum))` }}>
                      {rsvpSubmitting ? 'Sending...' : <><span className="text-xl">✨</span> Confirm My RSVP</>}
                   </button>
                </form>
