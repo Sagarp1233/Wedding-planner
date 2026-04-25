@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import TopBar from '../components/layout/TopBar';
 import Modal from '../components/ui/Modal';
 import Badge from '../components/ui/Badge';
@@ -206,8 +206,13 @@ export default function VendorsPage() {
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400">
           <Store className="w-12 h-12 mb-3 opacity-30" />
-          <p className="text-sm font-medium">{vendors.length === 0 ? 'No vendors yet' : 'No vendors match your filters'}</p>
-          <p className="text-xs text-gray-300 mt-1">Add your first vendor to start tracking contacts and payments</p>
+          <p className="text-sm font-medium text-gray-600 mb-1">{vendors.length === 0 ? 'No vendors yet' : 'No vendors match your filters'}</p>
+          <p className="text-xs text-gray-400 mb-6">Track your bookings, contacts, and payments here.</p>
+          {vendors.length === 0 && (
+            <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gray-900 text-white font-medium shadow hover:bg-gray-800 transition">
+              <Search className="w-4 h-4" /> Browse Marketplace
+            </Link>
+          )}
         </div>
       )}
 

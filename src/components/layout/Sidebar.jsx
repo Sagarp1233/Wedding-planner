@@ -63,7 +63,9 @@ export default function Sidebar({ isOpen, onClose }) {
         { to: '/budget', label: 'Budget Planner', icon: Wallet },
         { to: '/tasks', label: 'Checklist', icon: CheckSquare },
         { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
-        { to: '/vendors', label: 'My Vendors', icon: Store },
+        { to: '/marketplace', label: 'Find Vendors', icon: ShoppingBag },
+        { to: '/vendors', label: 'My Vendor Tracker', icon: Store },
+        { to: '/dashboard/messages', label: 'Vendor Chats', icon: MessageCircle },
       ]
     },
     {
