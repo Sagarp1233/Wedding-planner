@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { MapPin, Phone, Mail, Globe, ChevronRight, BadgeCheck, Heart, Send, MessageCircle, ArrowLeft, Clock, IndianRupee, Star, StarHalf, UserCircle2, Trash2 } from 'lucide-react';
 import PublicNav from '../../components/layout/PublicNav';
