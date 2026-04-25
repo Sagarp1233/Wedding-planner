@@ -364,7 +364,7 @@ export default function WeddingWebsitePage() {
         <div className="relative z-10 text-center px-4 flex flex-col items-center animate-fade-in-up mt-20">
           {/* Giant background & symbol removed to ensure text readability */}
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-white leading-tight mb-2 drop-shadow-lg">
-            {site.bride_name} <br className="md:hidden"/> <span className="italic text-[var(--color-rose-gold)] opacity-90 mx-2 font-medium">&</span> <br className="md:hidden"/>{site.groom_name}
+            {site.bride_name} <br className="md:hidden"/> <span className="italic text-white/50 mx-2 font-light">&</span> <br className="md:hidden"/>{site.groom_name}
           </h1>
           
           <div className="w-24 h-px bg-white/40 my-6 mx-auto" />
