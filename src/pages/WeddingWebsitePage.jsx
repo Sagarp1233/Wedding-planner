@@ -42,6 +42,7 @@ export default function WeddingWebsitePage() {
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
   const [rsvpError, setRsvpError] = useState('');
   const [alreadyRsvped, setAlreadyRsvped] = useState(false);
+  const [showRsvpForm, setShowRsvpForm] = useState(false);
 
   useEffect(() => {
     fetchSiteData();
@@ -503,36 +504,49 @@ export default function WeddingWebsitePage() {
       {/* Venue Section */}
       {(site.venue_name || site.venue_address) && (
         <section id="venue" className="py-24 px-4 md:px-8 max-w-5xl mx-auto text-center">
-          <span className="text-[var(--color-rose-gold)] uppercase tracking-widest text-sm font-semibold mb-2 block">Location</span>
-          <h2 className="text-4xl md:text-5xl font-serif mb-12 text-[var(--text-dark)]">Join Us Here</h2>
+          <div className="flex items-center justify-center gap-4 mb-4">
+             <div className="w-12 h-px bg-[var(--color-rose-gold)]/30"></div>
+             <span className="text-[var(--color-rose-gold)] uppercase tracking-[0.2em] text-xs font-semibold">VENUE</span>
+             <div className="w-12 h-px bg-[var(--color-rose-gold)]/30"></div>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-serif mb-12 text-[var(--text-dark)]">
+            Where we say <span className="italic text-[var(--color-rose-gold)] font-medium">I do</span>
+          </h2>
           
-          <div className={`rounded-3xl shadow-xl overflow-hidden ${isDark ? 'bg-[#1E293B]' : 'bg-white'} border border-opacity-10 border-gray-500 max-w-3xl mx-auto`}>
+          <div className={`rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.06)] overflow-hidden ${isDark ? 'bg-[#1E293B]' : 'bg-white'} border border-[var(--text-dark)]/5 max-w-4xl mx-auto`}>
             {/* Map placeholder */}
-            <div className="h-64 bg-gray-100 flex items-center justify-center relative border-b border-gray-200">
-               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-               <div className="relative z-10 text-center animate-bounce mt-4">
-                  <div className="text-5xl">📍</div>
+            <div className="h-72 flex items-center justify-center relative border-b border-gray-100 overflow-hidden" style={{ backgroundColor: '#fcfcfc', backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/40 via-transparent to-rose-gold/10"></div>
+               <div className="relative z-10 text-center animate-pulse mt-4 shadow-2xl rounded-full">
+                  <div className="w-16 h-16 bg-gradient-to-b from-[#B76E79] to-[#6B2D5E] rounded-b-full rounded-t-full rounded-tr-sm transform -rotate-45 flex items-center justify-center shadow-lg border-2 border-white">
+                     <span className="text-white transform rotate-45 text-2xl filter drop-shadow-sm">🏛️</span>
+                  </div>
                </div>
             </div>
             
-            <div className="p-8 md:p-12">
-              <h3 className="text-2xl font-serif font-bold mb-2 text-[var(--text-dark)]">{site.venue_name}</h3>
-              <p className="text-[var(--text-dark)] opacity-70 mb-8 max-w-lg mx-auto">{site.venue_address}</p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                {site.venue_maps_url && (
-                  <a href={ensureHttps(site.venue_maps_url)} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[var(--color-rose-gold)] text-white rounded-full font-medium hover:bg-opacity-90 transition w-full sm:w-auto justify-center shadow-lg">
-                    <MapIcon className="w-5 h-5" /> Open in Maps
+            <div className="p-8 md:p-12 relative flex flex-col md:flex-row items-center justify-between text-left gap-8">
+              <div className="flex-1">
+                <h3 className="text-3xl font-serif font-medium mb-3 text-[var(--text-dark)]">{site.venue_name}</h3>
+                <p className="text-[var(--text-dark)] opacity-70 mb-6 text-sm font-medium leading-relaxed max-w-sm">{site.venue_address}</p>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {site.venue_maps_url && (
+                    <a href={ensureHttps(site.venue_maps_url)} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6B2D5E] to-[#B76E79] text-white rounded-xl text-sm font-bold shadow-[0_8px_20px_rgba(107,45,94,0.3)] hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center">
+                      <MapIcon className="w-4 h-4" /> Open in Maps
+                    </a>
+                  )}
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(site.venue_address || site.venue_name)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[var(--text-dark)]/5 text-[var(--text-dark)] rounded-xl text-sm font-bold hover:bg-[var(--text-dark)]/10 transition-colors w-full sm:w-auto justify-center">
+                    📍 Get Directions
                   </a>
-                )}
-                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(site.venue_address || site.venue_name)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 border-2 border-[var(--color-rose-gold)] text-[var(--color-rose-gold)] rounded-full font-medium hover:bg-[var(--color-rose-gold)] hover:text-white transition w-full sm:w-auto justify-center">
-                  <Compass className="w-5 h-5" /> Get Directions
-                </a>
+                </div>
               </div>
               
               {site.dress_code && (
-                <div className="mt-10 inline-block px-5 py-2 bg-yellow-50 text-yellow-800 rounded-full text-sm font-medium border border-yellow-200">
-                  <span className="font-bold">Dress Code:</span> {site.dress_code}
+                <div className="bg-[#fdfbf6] border border-[#f0e7d5] rounded-2xl p-6 text-center w-full md:w-64 flex-shrink-0 shadow-sm relative overflow-hidden">
+                  <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#b49257] mb-3">DRESS CODE</div>
+                  <div className="text-lg font-serif font-medium text-[#4a3b2c] flex items-center justify-center gap-2 px-2">
+                    <span className="text-[#d89751]">✨</span> {site.dress_code}
+                  </div>
                 </div>
               )}
             </div>
@@ -543,8 +557,8 @@ export default function WeddingWebsitePage() {
       {/* Gallery Section */}
       <section id="gallery" className="py-24 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <span className="text-[var(--color-rose-gold)] uppercase tracking-widest text-sm font-semibold mb-2 block">Memories</span>
-          <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)]">Gallery</h2>
+          <span className="text-[var(--color-rose-gold)] uppercase tracking-[0.2em] text-xs font-semibold mb-2 block">MEMORIES</span>
+          <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] font-light">Gallery</h2>
         </div>
         
         {site.gallery_images && site.gallery_images.length > 0 ? (
@@ -574,22 +588,43 @@ export default function WeddingWebsitePage() {
 
       {/* Contacts Section */}
       {(site.bride_contact_name || site.groom_contact_name) && (
-        <section id="contact" className={`py-16 px-4 md:px-8 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-serif text-center mb-10 text-[var(--text-dark)]">Need Help?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <section id="contact" className={`py-4 px-4 md:px-8`}>
+          <div className="max-w-4xl mx-auto text-center">
+            
+            <div className="flex items-center justify-center gap-4 mb-16 relative">
+               <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200 z-0"></div>
+               <div className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center z-10 relative">
+                  <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" />
+               </div>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4 mb-4">
+               <div className="w-10 h-px bg-[var(--text-dark)]/20"></div>
+               <span className="text-[var(--text-dark)]/60 uppercase tracking-[0.2em] text-[10px] font-bold">FAMILY CONTACTS</span>
+               <div className="w-10 h-px bg-[var(--text-dark)]/20"></div>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-[var(--text-dark)]">
+              Need any <span className="italic text-[var(--color-rose-gold)]">help?</span>
+            </h2>
+            <p className="text-[var(--text-dark)]/60 text-sm font-medium mb-12">For queries about travel, accommodation, or anything else</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 text-left">
               {site.bride_contact_name && (
-                <div className={`p-6 rounded-2xl ${isDark ? 'bg-[#1E293B]' : 'bg-white'} shadow-md border-t-4`} style={{ borderTopColor: 'var(--color-rose-gold)' }}>
-                  <h3 className="font-serif text-xl font-bold mb-1 text-[var(--text-dark)]">Bride's Family</h3>
-                  <p className="text-[var(--text-dark)]/70 mb-4">{site.bride_contact_name}</p>
+                <div className={`p-8 rounded-3xl ${isDark ? 'bg-[#1E293B]' : 'bg-white'} shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100 relative overflow-hidden`}>
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#B76E79] to-white"></div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-[var(--text-dark)]/50 mb-4">BRIDE'S SIDE</div>
+                  <h3 className="font-serif text-2xl font-medium mb-1 text-[var(--text-dark)]">{site.bride_contact_name}</h3>
+                  <p className="text-[var(--text-dark)]/50 text-sm mb-6">Father of the Bride</p>
+                  
                   <div className="flex gap-3">
                     {site.bride_contact_phone && (
                       <>
-                        <a href={`tel:${site.bride_contact_phone}`} className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 text-gray-800 transition">
-                          <Phone className="w-4 h-4" /> Call
-                        </a>
-                        <a href={`https://wa.me/${site.bride_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#25D366] text-white rounded-lg text-sm font-medium hover:bg-opacity-90 transition">
+                        <a href={`https://wa.me/${site.bride_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#25D366] text-white rounded-[10px] text-sm font-bold shadow-md shadow-green-500/20 hover:-translate-y-0.5 transition-all w-auto">
                           <MessageCircle className="w-4 h-4" /> WhatsApp
+                        </a>
+                        <a href={`tel:${site.bride_contact_phone}`} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-[10px] text-sm font-bold hover:bg-gray-100 text-[var(--text-dark)] transition-colors w-auto">
+                          <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" /> Call
                         </a>
                       </>
                     )}
@@ -597,17 +632,20 @@ export default function WeddingWebsitePage() {
                 </div>
               )}
               {site.groom_contact_name && (
-                <div className={`p-6 rounded-2xl ${isDark ? 'bg-[#1E293B]' : 'bg-white'} shadow-md border-t-4`} style={{ borderTopColor: 'var(--color-plum)' }}>
-                  <h3 className="font-serif text-xl font-bold mb-1 text-[var(--text-dark)]">Groom's Family</h3>
-                  <p className="text-[var(--text-dark)]/70 mb-4">{site.groom_contact_name}</p>
+                <div className={`p-8 rounded-3xl ${isDark ? 'bg-[#1E293B]' : 'bg-white'} shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100 relative overflow-hidden`}>
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#6B2D5E] to-white"></div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-[var(--text-dark)]/50 mb-4">GROOM'S SIDE</div>
+                  <h3 className="font-serif text-2xl font-medium mb-1 text-[var(--text-dark)]">{site.groom_contact_name}</h3>
+                  <p className="text-[var(--text-dark)]/50 text-sm mb-6">Father of the Groom</p>
+                  
                   <div className="flex gap-3">
                     {site.groom_contact_phone && (
                       <>
-                        <a href={`tel:${site.groom_contact_phone}`} className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 text-gray-800 transition">
-                          <Phone className="w-4 h-4" /> Call
-                        </a>
-                        <a href={`https://wa.me/${site.groom_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#25D366] text-white rounded-lg text-sm font-medium hover:bg-opacity-90 transition">
+                        <a href={`https://wa.me/${site.groom_contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#25D366] text-white rounded-[10px] text-sm font-bold shadow-md shadow-green-500/20 hover:-translate-y-0.5 transition-all w-auto">
                           <MessageCircle className="w-4 h-4" /> WhatsApp
+                        </a>
+                        <a href={`tel:${site.groom_contact_phone}`} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#f8fafc] border border-gray-200 rounded-[10px] text-sm font-bold hover:bg-gray-100 text-[var(--text-dark)] transition-colors w-auto">
+                          <Phone className="w-4 h-4 text-[var(--color-plum)]" fill="currentColor" /> Call
                         </a>
                       </>
                     )}
@@ -620,29 +658,60 @@ export default function WeddingWebsitePage() {
       )}
 
       {/* RSVP Section */}
-      <section id="rsvp" className="py-24 px-4 md:px-8 relative bg-gradient-to-br from-[var(--color-rose-gold)]/10 via-[var(--bg-color)] to-[var(--color-plum)]/10">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-             <h2 className="text-5xl font-serif text-[var(--text-dark)] mb-4">Will you be joining us?</h2>
-             {site.rsvp_deadline && !isRsvpClosed && (
-               <p className="text-[var(--text-dark)]/80">Kindly respond by {new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long' }).format(new Date(site.rsvp_deadline))}</p>
-             )}
+      <section id="rsvp" className="py-24 px-4 md:px-8 relative bg-white overflow-hidden">
+        
+        {/* Decorative background container similar to the image wrapper */}
+        <div className="absolute inset-0 z-0">
+           <div className="absolute top-0 w-full h-full bg-gradient-to-br from-[#FFF5F7]/80 to-[#FDF4F6]/50" />
+        </div>
+
+        <div className="max-w-3xl mx-auto relative z-10">
+          
+          <div className="flex items-center justify-center mb-8">
+             <div className="flex-1 h-px bg-gray-200"></div>
+             <div className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center mx-4">
+                <span className="text-[var(--color-rose-gold)] text-sm">💌</span>
+             </div>
+             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
-          <div className={`${isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-gray-900'} rounded-3xl shadow-2xl p-8 md:p-12 relative overflow-hidden border border-gray-100`}>
-            
-            {isRsvpClosed ? (
+          <div className={`${isDark ? 'bg-[#1E293B] text-white border-white/10' : 'bg-gradient-to-b from-[#FCF7F8] to-[#FDF9FA] text-[var(--text-dark)] border-[#f2e6e8]'} rounded-[32px] shadow-[0_20px_60px_rgba(183,110,121,0.08)] p-8 md:p-14 relative overflow-hidden border`}>
+             
+            {!showRsvpForm && !alreadyRsvped && !isRsvpClosed && !rsvpSuccess ? (
+               <div className="text-center animate-fade-in py-8">
+                  <div className="flex items-center justify-center gap-4 mb-5">
+                     <div className="w-8 h-px bg-[var(--color-rose-gold)]/40"></div>
+                     <span className="text-[var(--text-dark)]/50 uppercase tracking-[0.2em] text-[10px] font-bold">RSVP</span>
+                     <div className="w-8 h-px bg-[var(--color-rose-gold)]/40"></div>
+                  </div>
+                  <h2 className="text-4xl md:text-[3.5rem] font-serif mb-6 text-[var(--text-dark)] leading-tight">
+                     Will you be <span className="italic text-[var(--color-rose-gold)]">joining us?</span>
+                  </h2>
+                  <p className="text-[var(--text-dark)]/60 text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
+                     We'd love to know you'll be there. Please confirm your attendance by <span className="font-bold text-[var(--text-dark)]">{site.rsvp_deadline ? new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(site.rsvp_deadline)) : 'the requested date'}</span> so we can make every arrangement perfect.
+                  </p>
+                  
+                  <button 
+                     onClick={() => setShowRsvpForm(true)}
+                     className="bg-gradient-to-r from-[#B76E79] to-[#6B2D5E] text-white px-10 py-3.5 rounded-full font-bold text-[15px] shadow-[0_10px_25px_rgba(183,110,121,0.3)] hover:-translate-y-0.5 hover:shadow-[0_15px_30px_rgba(183,110,121,0.4)] transition-all inline-flex items-center gap-3"
+                  >
+                     <Heart className="w-4 h-4 fill-white flex-shrink-0" /> Confirm My Attendance
+                  </button>
+               </div>
+            ) : 
+
+            isRsvpClosed ? (
                <div className="text-center py-12">
                    <div className="text-5xl mb-4">⏳</div>
-                   <h3 className="text-2xl font-serif font-bold mb-2">RSVP Closed</h3>
-                   <p className="text-gray-500">The deadline to RSVP has passed. Please contact the couple directly if you have any questions.</p>
+                   <h3 className="text-2xl font-serif font-bold mb-2 text-[var(--text-dark)]">RSVP Closed</h3>
+                   <p className="text-[var(--text-dark)]/60">The deadline to RSVP has passed. Please contact the couple directly if you have any questions.</p>
                </div>
             ) : alreadyRsvped && !rsvpSuccess ? (
                <div className="text-center py-12">
                   <div className="text-5xl mb-4">💌</div>
-                  <h3 className="text-2xl font-serif font-bold mb-2">You've already RSVPed</h3>
-                  <p className="text-gray-500 mb-6">Thank you for letting us know! We have received your response.</p>
-                  <button onClick={() => setAlreadyRsvped(false)} className="text-[var(--color-rose-gold)] underline font-medium">
+                  <h3 className="text-2xl font-serif font-bold mb-2 text-[var(--text-dark)]">You've already RSVPed</h3>
+                  <p className="text-[var(--text-dark)]/60 mb-6">Thank you for letting us know! We have received your response.</p>
+                  <button onClick={() => setAlreadyRsvped(false)} className="text-[var(--color-rose-gold)] underline font-bold text-sm tracking-wide">
                      Update my response
                   </button>
                </div>
@@ -650,72 +719,124 @@ export default function WeddingWebsitePage() {
                <div className="text-center py-16 animate-fade-in">
                   <div className="text-6xl mb-6 inline-block animate-bounce">🎉</div>
                   <h3 className="text-3xl font-serif font-bold mb-4 text-[var(--color-rose-gold)]">You're Confirmed!</h3>
-                  <p className="text-lg opacity-80 mb-2">Thank you, {rsvpFormData.guest_name.split(' ')[0]}.</p>
+                  <p className="text-lg opacity-80 mb-2 font-medium">Thank you, {rsvpFormData.guest_name.split(' ')[0]}.</p>
                   <p className="opacity-60 text-sm">We can't wait to celebrate with you.</p>
                </div>
             ) : (
-               <form onSubmit={handleRsvpSubmit} className="space-y-8 relative z-10">
+               <form onSubmit={handleRsvpSubmit} className="space-y-8 relative z-10 animate-fade-in bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-gray-100">
+                  <div className="text-center mb-8">
+                     <h3 className="text-2xl md:text-3xl font-serif font-semibold text-[var(--text-dark)]">
+                        RSVP for {site.bride_name} & {site.groom_name}'s Wedding
+                     </h3>
+                  </div>
+
                   {rsvpClosingSoon && (
-                     <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl flex items-start gap-3 border border-yellow-200">
-                        <Clock className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm font-medium">RSVP closes in {daysToDeadline} days! Please confirm your attendance soon.</p>
+                     <div className="bg-orange-50/50 text-orange-800 p-4 rounded-2xl flex items-start gap-3 border border-orange-100">
+                        <Clock className="w-5 h-5 flex-shrink-0 mt-0.5 text-orange-400" />
+                        <p className="text-sm font-medium">RSVP closes in {daysToDeadline} days. Please confirm your attendance soon.</p>
                      </div>
                   )}
                   
                   {rsvpError && (
-                     <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium">
+                     <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-100">
                         {rsvpError}
                      </div>
                   )}
 
                   {/* Attendance Toggle */}
                   <div>
-                     <label className="block text-sm font-medium mb-4 uppercase tracking-wider text-center">Are you attending?</label>
-                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button type="button" onClick={() => setRsvpStatus('confirmed')} className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition flex items-center justify-center gap-2 ${rsvpStatus === 'confirmed' ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                           <CheckCircle className="w-5 h-5" /> Yes, Accepting
+                     <label className="block text-[10px] font-bold mb-3 uppercase tracking-widest text-[var(--text-dark)]/60">Will you be attending?</label>
+                     <div className="flex flex-col sm:flex-row gap-2">
+                        <button type="button" onClick={() => setRsvpStatus('confirmed')} className={`flex-1 py-3 px-4 rounded-[14px] border ${rsvpStatus === 'confirmed' ? 'border-emerald-200 bg-emerald-50 text-emerald-800 font-bold shadow-sm' : 'border-gray-200 text-gray-500 font-medium hover:bg-gray-50'} transition-all flex items-center justify-center gap-2`}>
+                           <CheckCircle className={`w-4 h-4 ${rsvpStatus === 'confirmed' ? 'text-emerald-500' : 'text-gray-400'}`} /> Yes, Attending
                         </button>
-                        <button type="button" onClick={() => setRsvpStatus('declined')} className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition flex items-center justify-center gap-2 ${rsvpStatus === 'declined' ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                           <XCircle className="w-5 h-5" /> Can't Make It
+                        <button type="button" onClick={() => setRsvpStatus('declined')} className={`flex-1 py-3 px-4 rounded-[14px] border ${rsvpStatus === 'declined' ? 'border-red-200 bg-red-50 text-red-800 font-bold shadow-sm' : 'border-gray-200 text-gray-500 font-medium hover:bg-gray-50'} transition-all flex items-center justify-center gap-2`}>
+                           <XCircle className={`w-4 h-4 ${rsvpStatus === 'declined' ? 'text-red-500' : 'text-gray-400'}`} /> Can't Make It
                         </button>
-                        <button type="button" onClick={() => setRsvpStatus('maybe')} className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition flex items-center justify-center gap-2 ${rsvpStatus === 'maybe' ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                           <HelpCircle className="w-5 h-5" /> Maybe
+                        <button type="button" onClick={() => setRsvpStatus('maybe')} className={`flex-1 py-3 px-4 rounded-[14px] border ${rsvpStatus === 'maybe' ? 'border-amber-200 bg-amber-50 text-amber-800 font-bold shadow-sm' : 'border-gray-200 text-gray-500 font-medium hover:bg-gray-50'} transition-all flex items-center justify-center gap-2`}>
+                           <HelpCircle className={`w-4 h-4 ${rsvpStatus === 'maybe' ? 'text-amber-500' : 'text-gray-400'}`} /> Maybe
                         </button>
                      </div>
                   </div>
 
                   {/* Contact Info Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                      <div>
-                        <label className="block text-sm font-medium mb-2">Full Name *</label>
-                        <input type="text" required value={rsvpFormData.guest_name} onChange={e => setRsvpFormData(prev => ({...prev, guest_name: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 focus:ring-rose-gold text-white' : 'bg-gray-50 border-gray-200 focus:ring-rose-gold/30 focus:border-rose-gold'}`} placeholder="John Doe" />
+                        <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">Your Full Name *</label>
+                        <input type="text" required value={rsvpFormData.guest_name} onChange={e => setRsvpFormData(prev => ({...prev, guest_name: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 focus:ring-rose-gold text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800'}`} placeholder="e.g. Kavita Sharma" />
                      </div>
                      <div>
-                        <label className="block text-sm font-medium mb-2">Phone Number *</label>
-                        <input type="tel" required value={rsvpFormData.guest_phone} onChange={e => setRsvpFormData(prev => ({...prev, guest_phone: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 focus:ring-rose-gold text-white' : 'bg-gray-50 border-gray-200 focus:ring-rose-gold/30 focus:border-rose-gold'}`} placeholder="+91 98765 43210" />
+                        <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">Phone Number *</label>
+                        <input type="tel" required value={rsvpFormData.guest_phone} onChange={e => setRsvpFormData(prev => ({...prev, guest_phone: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 focus:ring-rose-gold text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800'}`} placeholder="+91 98765 43210" />
                      </div>
                   </div>
 
                   {rsvpStatus !== 'declined' && (
                      <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                            <div>
-                              <label className="block text-sm font-medium mb-2">Email Address (Optional)</label>
-                              <input type="email" value={rsvpFormData.guest_email} onChange={e => setRsvpFormData(prev => ({...prev, guest_email: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50 border-gray-200'}`} placeholder="john@example.com" />
+                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">Email (Optional)</label>
+                              <input type="email" value={rsvpFormData.guest_email} onChange={e => setRsvpFormData(prev => ({...prev, guest_email: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`} placeholder="you@email.com" />
                            </div>
                            <div>
-                              <label className="block text-sm font-medium mb-2">Number of Guests</label>
-                              <select value={rsvpFormData.guest_count} onChange={e => setRsvpFormData(prev => ({...prev, guest_count: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50 border-gray-200'}`}>
-                                 {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>)}
-                                 <option value="6">6+ Guests (Please message couple)</option>
+                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">Number of Guests</label>
+                              <select value={rsvpFormData.guest_count} onChange={e => setRsvpFormData(prev => ({...prev, guest_count: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
+                                 {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} {n === 1 ? 'person (just me)' : 'people'}</option>)}
+                                 <option value="6">6+ people (Please message couple)</option>
                               </select>
                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {site.events && site.events.length > 0 && (
                            <div>
-                              <label className="block text-sm font-medium mb-2">You are celebrating with:</label>
-                              <select value={rsvpFormData.guest_side} onChange={e => setRsvpFormData(prev => ({...prev, guest_side: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50 border-gray-200'}`}>
+                              <label className="block text-[10px] font-bold mb-3 uppercase tracking-widest text-[var(--text-dark)]/60">Which events will you attend?</label>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                 {site.events.map((e, i) => {
+                                    const isChecked = rsvpFormData.events_attending.includes(e.name);
+                                    return (
+                                       <label key={i} className={`flex items-center gap-3 p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 ${isChecked ? 'bg-[var(--color-rose-gold)]/10 border-[var(--color-rose-gold)]/30 shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-gray-50/30'}`}>
+                                          <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--color-rose-gold)]' : 'border-2 border-gray-300'}`}>
+                                            {isChecked && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                                          </div>
+                                          <input 
+                                             type="checkbox" 
+                                             checked={isChecked}
+                                             onChange={(evt) => {
+                                                if (evt.target.checked) setRsvpFormData(prev => ({ ...prev, events_attending: [...prev.events_attending, e.name] }));
+                                                else setRsvpFormData(prev => ({ ...prev, events_attending: prev.events_attending.filter(n => n !== e.name) }));
+                                             }}
+                                             className="hidden"
+                                          />
+                                          <div className="flex flex-col">
+                                             <span className={`font-bold text-xs uppercase tracking-wider ${isChecked ? 'text-[var(--text-dark)]' : 'text-gray-600'}`}>
+                                                {e.emoji} {e.name}
+                                             </span>
+                                             {e.date && (
+                                                <span className="text-[10px] text-gray-500 font-medium mt-0.5 uppercase">
+                                                   ({new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' }).format(new Date(e.date))})
+                                                </span>
+                                             )}
+                                          </div>
+                                       </label>
+                                    );
+                                 })}
+                              </div>
+                           </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                           <div>
+                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">Meal Preference</label>
+                              <select value={rsvpFormData.meal_preference} onChange={e => setRsvpFormData(prev => ({...prev, meal_preference: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
+                                 <option value="Vegetarian">Vegetarian</option>
+                                 <option value="Non-Vegetarian">Non-Vegetarian</option>
+                                 <option value="Jain">Jain / No Onion Garlic</option>
+                                 <option value="No Preference">No Preference</option>
+                              </select>
+                           </div>
+                           <div>
+                              <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">You Are</label>
+                              <select value={rsvpFormData.guest_side} onChange={e => setRsvpFormData(prev => ({...prev, guest_side: e.target.value}))} className={`w-full px-5 py-3.5 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)]'}`}>
                                  <option value="Friend of Bride">Friend of Bride</option>
                                  <option value="Friend of Groom">Friend of Groom</option>
                                  <option value="Family of Bride">Family of Bride</option>
@@ -723,48 +844,18 @@ export default function WeddingWebsitePage() {
                                  <option value="Colleague">Colleague / Other</option>
                               </select>
                            </div>
-                           <div>
-                              <label className="block text-sm font-medium mb-2">Meal Preference</label>
-                              <select value={rsvpFormData.meal_preference} onChange={e => setRsvpFormData(prev => ({...prev, meal_preference: e.target.value}))} className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50 border-gray-200'}`}>
-                                 <option value="Vegetarian">Vegetarian</option>
-                                 <option value="Non-Vegetarian">Non-Vegetarian</option>
-                                 <option value="Jain">Jain / No Onion Garlic</option>
-                                 <option value="No Preference">No Preference</option>
-                              </select>
-                           </div>
                         </div>
 
-                        {site.events && site.events.length > 0 && (
-                           <div>
-                              <label className="block text-sm font-medium mb-3">Which events will you attend?</label>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                 {site.events.map((e, i) => (
-                                    <label key={i} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition ${isDark ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-200'}`}>
-                                       <input 
-                                          type="checkbox" 
-                                          checked={rsvpFormData.events_attending.includes(e.name)}
-                                          onChange={(evt) => {
-                                             if (evt.target.checked) setRsvpFormData(prev => ({ ...prev, events_attending: [...prev.events_attending, e.name] }));
-                                             else setRsvpFormData(prev => ({ ...prev, events_attending: prev.events_attending.filter(n => n !== e.name) }));
-                                          }}
-                                          className="w-5 h-5 rounded border-gray-300 text-[var(--color-rose-gold)] focus:ring-[var(--color-rose-gold)]"
-                                       />
-                                       <span className="font-medium text-sm">{e.name}</span>
-                                    </label>
-                                 ))}
-                              </div>
-                           </div>
-                        )}
                      </>
                   )}
 
                   <div>
-                     <label className="block text-sm font-medium mb-2">Message to the Couple (Optional)</label>
-                     <textarea value={rsvpFormData.message_to_couple} onChange={e => setRsvpFormData(prev => ({...prev, message_to_couple: e.target.value}))} rows="3" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50 border-gray-200'}`} placeholder="Share your wishes..."></textarea>
+                     <label className="block text-[10px] font-bold mb-2 uppercase tracking-widest text-[var(--text-dark)]/60">A Message for the Couple (Optional)</label>
+                     <textarea value={rsvpFormData.message_to_couple} onChange={e => setRsvpFormData(prev => ({...prev, message_to_couple: e.target.value}))} rows="3" className={`w-full px-5 py-4 rounded-2xl border focus:ring-2 focus:outline-none transition-all text-sm font-medium ${isDark ? 'bg-[#0D1B2A] border-gray-700 text-white' : 'bg-gray-50/50 border-gray-200 focus:ring-[var(--color-rose-gold)]/20 focus:border-[var(--color-rose-gold)] text-gray-800'}`} placeholder={`Share your wishes, blessings, or any message for ${site.bride_name} & ${site.groom_name}... 💐`}></textarea>
                   </div>
 
-                  <button type="submit" disabled={rsvpSubmitting} className="w-full py-4 rounded-xl font-bold text-white text-lg transition shadow-lg hover:shadow-xl disabled:opacity-70 bg-gradient-to-r from-[var(--color-rose-gold)] to-[var(--color-plum)]">
-                     {rsvpSubmitting ? 'Sending...' : 'Confirm My Attendance'}
+                  <button type="submit" disabled={rsvpSubmitting} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 bg-gradient-to-r from-[#B76E79] to-[#6B2D5E] flex justify-center items-center gap-2">
+                     {rsvpSubmitting ? 'Sending...' : <><span className="text-xl">✨</span> Confirm My RSVP</>}
                   </button>
                </form>
             )}
