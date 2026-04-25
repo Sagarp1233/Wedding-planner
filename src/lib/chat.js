@@ -17,6 +17,14 @@ export async function getOrCreateConversation(coupleId, vendorId, listingId = nu
   }
 
   if (existing) {
+    // Backfill couple_name if it was missing (conversations created before this feature)
+    if (!existing.couple_name && coupleName && coupleName !== 'Couple Request') {
+      await supabase
+        .from('chat_conversations')
+        .update({ couple_name: coupleName })
+        .eq('id', existing.id);
+      existing.couple_name = coupleName;
+    }
     return { success: true, conversation: existing };
   }
 
