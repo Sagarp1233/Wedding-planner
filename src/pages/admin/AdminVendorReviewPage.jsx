@@ -183,10 +183,10 @@ export default function AdminVendorReviewPage() {
       </div>
 
       {/* Listing Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 items-start">
         {/* Cover Image */}
-        <div className="glass-card overflow-hidden lg:col-span-2 animate-fade-in-up flex flex-col" style={{ animationDelay: '100ms' }}>
-          <div className="flex-1 min-h-[200px] w-full bg-gradient-to-br from-gray-100 to-gray-200 relative">
+        <div className="glass-card overflow-hidden lg:col-span-2 animate-fade-in-up bg-gradient-to-br from-gray-100 to-gray-200" style={{ animationDelay: '100ms' }}>
+          <div className="aspect-[21/9] w-full relative">
             {vendor.cover_image ? (
               <img src={vendor.cover_image} alt={vendor.business_name} className="absolute inset-0 w-full h-full object-cover" />
             ) : (
@@ -200,11 +200,18 @@ export default function AdminVendorReviewPage() {
         {/* Details */}
         <div className="glass-card p-6 space-y-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Details</h3>
-          <div className="space-y-2 text-sm">
-            <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400" /> {vendor.city}</p>
-            {vendor.phone && <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-gray-400" /> {vendor.phone}</p>}
-            {vendor.email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-gray-400" /> {vendor.email}</p>}
-            {vendor.website && <p className="flex items-center gap-2"><Globe className="w-4 h-4 text-gray-400" /> <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-rose-gold hover:underline truncate">{vendor.website}</a></p>}
+          <div className="space-y-3 text-sm">
+            <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate">{vendor.city}</span></p>
+            {vendor.phone && <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate">{vendor.phone}</span></p>}
+            {vendor.email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate" title={vendor.email}>{vendor.email}</span></p>}
+            {vendor.website && (
+              <p className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-gray-400 shrink-0" /> 
+                <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-rose-gold hover:underline truncate" title={vendor.website}>
+                  {vendor.website.replace(/^https?:\/\//, '')}
+                </a>
+              </p>
+            )}
             {vendor.price_range_min > 0 && (
               <p className="text-gray-700 font-medium">
                 Price Range: {formatPrice(vendor.price_range_min)} – {formatPrice(vendor.price_range_max)}
