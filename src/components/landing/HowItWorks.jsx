@@ -224,71 +224,33 @@ export default function HowItWorks() {
             <div className="aspect-video bg-slate-900 relative group flex items-center justify-center overflow-hidden">
               
               {isPlaying ? (
-                /* === BEAUTIFUL CSS SIMULATED DASHBOARD === */
-                <div className="absolute inset-0 w-full h-full bg-[#f8fafc] flex flex-col items-center justify-center p-4 sm:p-8 animate-fade-in relative">
-                   <div className="w-full max-w-3xl bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 flex flex-col h-full transform scale-[0.98] transition-transform duration-500">
-                     
-                     {/* Navbar Fake */}
-                     <div className="h-14 border-b border-slate-100 flex items-center px-6 justify-between bg-white/50 backdrop-blur-md z-10 relative">
-                       <div className={`w-28 h-5 rounded-full bg-gradient-to-r ${themeGradient} opacity-50 animate-pulse`} />
-                       <div className="flex gap-3">
-                         <div className="w-8 h-8 rounded-full bg-slate-100 animate-pulse" />
-                       </div>
+                /* === HIGH-FIDELITY SCREENSHOT CAROUSEL === */
+                <div className="absolute inset-0 w-full h-full bg-slate-100 flex flex-col items-center justify-center animate-fade-in relative overflow-hidden">
+                   
+                   {/* Carousel Images */}
+                   {(activeTab === 'couple' 
+                      ? ['/demo-dashboard.png', '/demo-guests.png', '/demo-dashboard.png', '/demo-guests.png']
+                      : ['/demo-vendor.png', '/demo-vendor.png', '/demo-vendor.png', '/demo-vendor.png']
+                   ).map((src, i) => (
+                     <div 
+                        key={i}
+                        className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${demoStep === i ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                     >
+                       <img 
+                          src={src} 
+                          alt="Platform Demo Mockup" 
+                          className="w-full h-full object-cover object-center" 
+                       />
+                       {/* Subtle gradient overlay to ensure text readability */}
+                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
                      </div>
-                     
-                     <div className="flex flex-1 p-6 gap-6 relative bg-[#fbfcfd]">
-                       
-                       {/* Sidebar Fake */}
-                       <div className="w-48 flex flex-col gap-3 border-r border-slate-100 pr-6">
-                         {[0, 1, 2, 3].map(i => (
-                            <div key={i} className={`h-10 rounded-xl transition-all duration-700 ${demoStep === i ? `bg-gradient-to-r ${themeGradient} opacity-20 shadow-sm` : 'bg-slate-50'}`} />
-                         ))}
-                       </div>
-
-                       {/* Content Fake */}
-                       <div className="flex-1 flex flex-col gap-6 relative">
-                          <div className="h-10 w-1/3 bg-slate-100 rounded-xl shadow-inner mb-2" />
-                          
-                          <div className="grid grid-cols-3 gap-5">
-                             {[
-                               { h: 'h-6', w: 'w-1/2', bg: 'bg-emerald-400' },
-                               { h: 'h-4', w: 'w-3/4', bg: 'bg-amber-400' },
-                               { h: 'h-8', w: 'w-2/3', bg: 'bg-blue-400' },
-                             ].map((bar, i) => (
-                               <div key={i} className="h-28 bg-white border border-slate-100 shadow-sm rounded-2xl p-5 flex flex-col justify-end relative overflow-hidden">
-                                  <div className={`absolute top-4 left-4 w-6 h-6 rounded-full bg-slate-100`} />
-                                  <div className={`w-full h-1.5 ${bar.bg} rounded-full mt-4 transition-all duration-1000 ${demoStep === i ? 'w-full' : bar.w}`} />
-                               </div>
-                             ))}
-                          </div>
-
-                          <div className="flex-1 bg-white border border-slate-100 shadow-sm rounded-2xl p-6 mt-2 relative overflow-hidden">
-                             <div className="h-5 w-1/4 bg-slate-200 rounded-full mb-6" />
-                             <div className="space-y-4">
-                                <div className="h-3 w-full bg-slate-50 rounded-full" />
-                                <div className="h-3 w-5/6 bg-slate-50 rounded-full" />
-                                <div className="h-3 w-4/6 bg-slate-50 rounded-full" />
-                             </div>
-                             {/* Fake Cursor Animation */}
-                             <div 
-                               className="absolute w-6 h-6 transition-all duration-700 ease-in-out z-50 drop-shadow-xl text-slate-800 pointer-events-none"
-                               style={{
-                                 left: demoStep === 0 ? '15%' : demoStep === 1 ? '45%' : demoStep === 2 ? '75%' : '40%',
-                                 top: demoStep === 0 ? '40%' : demoStep === 1 ? '20%' : demoStep === 2 ? '80%' : '60%',
-                               }}
-                             >
-                               <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M7 2L21 16L14 18L10 24L7 2Z" /></svg>
-                             </div>
-                          </div>
-                       </div>
-                     </div>
-                   </div>
+                   ))}
 
                    {/* Overlay Text explaining standard demo */}
                    <div className="absolute inset-x-0 bottom-10 flex justify-center z-20 animate-fade-in-up">
-                      <div className="bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl border border-white/10 text-white text-sm font-medium">
-                         <Play className="w-4 h-4 text-rose-gold animate-pulse" fill="currentColor" />
-                         {activeTab === 'couple' ? 'Demo Interface Loaded — You are in control.' : 'Vendor Portal Syncing Leads...'}
+                      <div className="bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_20px_40px_rgba(0,0,0,0.5)] border border-white/10 text-white text-sm font-medium">
+                         <Play className={`w-4 h-4 animate-pulse ${activeTab === 'couple' ? 'text-rose-gold' : 'text-violet-400'}`} fill="currentColor" />
+                         {activeTab === 'couple' ? 'Wedora Interactive Experience' : 'Vendor Success Portal'}
                       </div>
                    </div>
                 </div>
