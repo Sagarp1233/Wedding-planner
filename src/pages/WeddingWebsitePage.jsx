@@ -361,9 +361,7 @@ export default function WeddingWebsitePage() {
         ))}
 
         <div className="relative z-10 text-center px-4 flex flex-col items-center animate-fade-in-up mt-20">
-          <div className="mb-4 text-white/20 select-none pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-serif" style={{ fontSize: '30vw', zIndex: -1 }}>
-            &
-          </div>
+          {/* Giant background & symbol removed to ensure text readability */}
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-white leading-tight mb-2 drop-shadow-lg">
             {site.bride_name} <br className="md:hidden"/> <span className="italic text-rose-gold font-medium">&</span> <br className="md:hidden"/>{site.groom_name}
           </h1>
@@ -456,36 +454,41 @@ export default function WeddingWebsitePage() {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--color-plum)]/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
           
           <div className="max-w-6xl mx-auto relative z-10 text-center">
-            <span className="text-[var(--color-rose-gold)] uppercase tracking-widest text-sm font-semibold mb-2 block">Schedule</span>
-            <h2 className="text-4xl md:text-5xl font-serif mb-16">The Celebrations</h2>
+            <div className="flex items-center justify-center gap-4 mb-4">
+               <div className="w-12 h-px bg-white/20"></div>
+               <span className="text-white/60 uppercase tracking-[0.2em] text-xs font-semibold">EVENTS SCHEDULE</span>
+               <div className="w-12 h-px bg-white/20"></div>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-serif mb-16 font-light">
+              Join us for <span className="italic text-[var(--color-rose-gold)] font-medium">every</span> celebration
+            </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {site.events.map((event, index) => {
                 const isLastOdd = site.events.length % 2 !== 0 && index === site.events.length - 1;
-                const isLastInCol3 = site.events.length === 2 ? false : index >= site.events.length - (site.events.length % 3);
                 
                 return (
-                  <div key={index} className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:-translate-y-2 hover:bg-white/10 transition-all duration-300 ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
-                    <div className="text-4xl mb-4">{event.emoji || '✨'}</div>
-                    <h3 className="text-2xl font-serif font-medium mb-4">{event.name}</h3>
+                  <div key={index} className={`bg-white/5 border border-white/10 rounded-2xl p-8 hover:-translate-y-1 hover:bg-white/10 transition-all duration-300 text-left ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
+                    <div className="text-3xl mb-5 drop-shadow-md">{event.emoji || '✨'}</div>
+                    <h3 className="text-2xl font-serif font-medium mb-3">{event.name}</h3>
                     
-                    <div className="space-y-3 text-white/80 text-sm font-sans flex flex-col items-center">
+                    <div className="space-y-4 text-white/80 text-sm font-sans mt-4">
                       {event.date && (
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-[var(--color-rose-gold)]" />
-                          <span>{new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(event.date))}</span>
+                          <Calendar className="w-4 h-4 text-white/60" />
+                          <span className="font-medium">{new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(event.date))}</span>
                         </div>
                       )}
                       {event.time && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-[var(--color-rose-gold)]" />
-                          <span>{event.time}</span>
+                        <div className="inline-flex items-center gap-2 bg-[var(--color-rose-gold)]/20 px-3 py-1.5 rounded-full border border-[var(--color-rose-gold)]/30">
+                          <Clock className="w-3.5 h-3.5 text-[var(--color-rose-gold)]" />
+                          <span className="text-xs font-bold tracking-wide text-white/90">{event.time}</span>
                         </div>
                       )}
+                      <div className="pt-2"></div>
                       {event.venue && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-[var(--color-rose-gold)]" />
-                          <span>{event.venue}</span>
+                        <div className="text-xs opacity-50 leading-relaxed font-medium">
+                          {event.venue}
                         </div>
                       )}
                     </div>
@@ -546,9 +549,15 @@ export default function WeddingWebsitePage() {
         
         {site.gallery_images && site.gallery_images.length > 0 ? (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {site.gallery_images.map((img, i) => (
+            {site.gallery_images.filter(img => img && img.trim() !== '').map((img, i) => (
               <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[var(--bg-color)]/10" onClick={() => setGalleryModalImage(img)}>
-                <img src={ensureHttps(img)} alt="Gallery Image" className="w-full h-auto transform group-hover:scale-105 transition duration-500" loading="lazy" />
+                <img 
+                  src={ensureHttps(img)} 
+                  alt={`Gallery Image ${i + 1}`} 
+                  onError={(e) => { e.target.closest('div').style.display = 'none'; }} 
+                  className="w-full h-auto transform group-hover:scale-105 transition duration-500" 
+                  loading="lazy" 
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-plum)]/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
               </div>
             ))}
