@@ -182,26 +182,41 @@ export default function AdminVendorReviewPage() {
         </div>
       </div>
 
-      {/* Listing Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 items-start">
-        {/* Cover Image */}
-        <div className="glass-card overflow-hidden lg:col-span-2 animate-fade-in-up bg-gradient-to-br from-gray-100 to-gray-200" style={{ animationDelay: '100ms' }}>
-          <div className="aspect-[21/9] w-full relative">
-            {vendor.cover_image ? (
-              <img src={vendor.cover_image} alt={vendor.business_name} className="absolute inset-0 w-full h-full object-cover" />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-6xl drop-shadow-sm">{getCategoryEmoji(vendor.category)}</span>
-              </div>
-            )}
-          </div>
+      {/* Hero Cover Image */}
+      <div className="glass-card overflow-hidden w-full mb-6 animate-fade-in-up bg-gradient-to-br from-gray-100 to-gray-200" style={{ animationDelay: '100ms' }}>
+        <div className="h-48 sm:h-64 md:h-80 w-full relative">
+          {vendor.cover_image ? (
+            <img src={vendor.cover_image} alt={vendor.business_name} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-6xl drop-shadow-sm">{getCategoryEmoji(vendor.category)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Two Column Layout: Description & Details */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 items-start">
+        {/* Left Column: Description */}
+        <div className="xl:col-span-2 space-y-6">
+          {vendor.description ? (
+            <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+              <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">About the Business</h3>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{vendor.description}</p>
+            </div>
+          ) : (
+            <div className="glass-card p-6 flex flex-col items-center justify-center text-gray-400 py-12 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+              <span className="text-3xl mb-2">📝</span>
+              <p className="text-sm">No description provided.</p>
+            </div>
+          )}
         </div>
 
-        {/* Details */}
-        <div className="glass-card p-6 space-y-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Details</h3>
+        {/* Right Column: Details Box */}
+        <div className="glass-card p-6 space-y-4 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Listing Details</h3>
           <div className="space-y-3 text-sm">
-            <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate">{vendor.city}</span></p>
+            <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate font-medium">{vendor.city}</span></p>
             {vendor.phone && <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate">{vendor.phone}</span></p>}
             {vendor.email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-gray-400 shrink-0" /> <span className="truncate" title={vendor.email}>{vendor.email}</span></p>}
             {vendor.website && (
@@ -213,33 +228,30 @@ export default function AdminVendorReviewPage() {
               </p>
             )}
             {vendor.price_range_min > 0 && (
-              <p className="text-gray-700 font-medium">
-                Price Range: {formatPrice(vendor.price_range_min)} – {formatPrice(vendor.price_range_max)}
-              </p>
+              <div className="pt-3 mt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-1">Pricing</p>
+                <p className="text-gray-900 font-bold">
+                  {formatPrice(vendor.price_range_min)} – {formatPrice(vendor.price_range_max)}
+                </p>
+              </div>
             )}
-            <p className="text-xs text-gray-400 flex items-center gap-1">
-              <Clock className="w-3 h-3" /> Submitted {new Date(vendor.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
+            <div className="pt-3 mt-2 border-t border-gray-100 flex items-center justify-between">
+              <p className="text-xs text-gray-400 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {new Date(vendor.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+              {vendor.status === 'approved' && (
+                <Link
+                  to={`/marketplace/${vendor.category}/${vendor.slug}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-rose-gold hover:underline"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> View Public
+                </Link>
+              )}
+            </div>
           </div>
-          {vendor.status === 'approved' && (
-            <Link
-              to={`/marketplace/${vendor.category}/${vendor.slug}`}
-              target="_blank"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-gold hover:underline mt-2"
-            >
-              <ExternalLink className="w-3 h-3" /> View Public Page
-            </Link>
-          )}
         </div>
       </div>
-
-      {/* Description */}
-      {vendor.description && (
-        <div className="glass-card p-5 mb-6 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Description</h3>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{vendor.description}</p>
-        </div>
-      )}
 
       {/* Portfolio */}
       {media.length > 0 && (
