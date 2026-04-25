@@ -213,6 +213,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const aliveTracker = { alive: true };
+    const loadedUserIdRef = { current: null };
     let subscription = null;
 
     const finishNoUser = () => {
@@ -220,6 +221,7 @@ export function AuthProvider({ children }) {
       setWeddings([]);
       setProfile(null);
       setOnboardingResolved(true);
+      loadedUserIdRef.current = null;
     };
 
     (async () => {
@@ -239,6 +241,7 @@ export function AuthProvider({ children }) {
         setAuthReady(true);
         
         if (session?.user) {
+          loadedUserIdRef.current = session.user.id;
           await loadUserData(session.user, aliveTracker);
         } else {
           finishNoUser();
@@ -263,12 +266,25 @@ export function AuthProvider({ children }) {
           return;
         }
 
+        if (event === 'SIGNED_OUT') {
+          setCurrentUser(null);
+          finishNoUser();
+          return;
+        }
+
+        // At this point, event is strictly SIGNED_IN
         setCurrentUser(session?.user ?? null);
+        
         if (!session?.user) {
           finishNoUser();
           return;
         }
-        await loadUserData(session.user, aliveTracker);
+        
+        // Prevent duplicate loads caused by tab-refocus triggering SIGNED_IN event
+        if (loadedUserIdRef.current !== session.user.id) {
+          loadedUserIdRef.current = session.user.id;
+          await loadUserData(session.user, aliveTracker);
+        }
       });
       subscription = sub;
     })();
