@@ -309,9 +309,9 @@ export default function MyWeddingPageBuilder() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto flex">
+      <div className="max-w-[1440px] mx-auto flex overflow-hidden">
 
-        {/* ===== LEFT NAV TABS ===== */}
+        {/* ===== LEFT NAV TABS (desktop only) ===== */}
         <nav className="w-56 shrink-0 border-r border-gray-100 bg-white/50 min-h-[calc(100vh-57px)] p-4 space-y-1 hidden md:block sticky top-[57px] self-start">
           {TABS.map(tab => {
             const Icon = tab.icon;
@@ -335,7 +335,7 @@ export default function MyWeddingPageBuilder() {
         </nav>
 
         {/* Mobile Tab Selector */}
-        <div className="md:hidden sticky top-[57px] z-20 bg-white border-b border-gray-100 overflow-x-auto">
+        <div className="md:hidden fixed left-0 right-0 top-[57px] z-20 bg-white border-b border-gray-100 overflow-x-auto hide-scrollbar">
           <div className="flex px-4 py-2 gap-1">
             {TABS.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[12px] font-semibold transition ${activeTab === tab.id ? 'bg-plum text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
@@ -346,7 +346,7 @@ export default function MyWeddingPageBuilder() {
         </div>
 
         {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1 p-6 md:p-8 max-w-3xl">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-3xl md:mt-0 mt-10">
 
           {/* BASICS */}
           {activeTab === 'basics' && (
