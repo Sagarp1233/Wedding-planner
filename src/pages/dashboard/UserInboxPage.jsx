@@ -3,7 +3,6 @@ import { useAuth } from '../../context/AuthContext';
 import { fetchUserConversations } from '../../lib/chat';
 import ChatWindow from '../../components/chat/ChatWindow';
 import { MessageCircle, Search, Loader2 } from 'lucide-react';
-import DashboardNav from '../../components/layout/DashboardNav';
 
 export default function UserInboxPage() {
   const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
@@ -30,9 +29,8 @@ export default function UserInboxPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#fafafb]">
-        <DashboardNav />
-        <div className="pt-24 pb-8 max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-center h-[70vh]">
+      <div className="flex-1 bg-[#fafafb]">
+        <div className="pt-8 pb-8 max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-center h-[70vh]">
           <Loader2 className="w-10 h-10 animate-spin text-rose-gold opacity-50" />
         </div>
       </div>
@@ -40,9 +38,8 @@ export default function UserInboxPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafb] flex flex-col">
-      <DashboardNav />
-      <div className="pt-24 pb-8 flex-1 max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col">
+    <div className="flex-1 bg-[#fafafb] flex flex-col">
+      <div className="pt-4 pb-8 flex-1 max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-serif font-bold text-gray-900">Your Messages</h1>
