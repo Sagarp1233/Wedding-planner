@@ -62,8 +62,10 @@ export default function MyWeddingPageBuilder() {
     is_published: false,
     bride_contact_name: '',
     bride_contact_phone: '',
+    bride_contact_relation: 'Father of the Bride',
     groom_contact_name: '',
     groom_contact_phone: '',
+    groom_contact_relation: 'Father of the Groom',
     events: [],
     gallery_images: [],
   });
@@ -149,8 +151,10 @@ export default function MyWeddingPageBuilder() {
         is_published: data.is_published || false,
         bride_contact_name: data.bride_contact_name || '',
         bride_contact_phone: data.bride_contact_phone || '',
+        bride_contact_relation: data.bride_contact_relation || 'Father of the Bride',
         groom_contact_name: data.groom_contact_name || '',
         groom_contact_phone: data.groom_contact_phone || '',
+        groom_contact_relation: data.groom_contact_relation || 'Father of the Groom',
         events: Array.isArray(data.events) ? data.events : [],
         gallery_images: Array.isArray(data.gallery_images) ? data.gallery_images : [],
       });
@@ -506,15 +510,51 @@ export default function MyWeddingPageBuilder() {
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                 <h4 className="text-[13px] font-bold text-gray-700 mb-3 flex items-center gap-2">👰 Bride's Family Contact</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Contact Person" value={form.bride_contact_name} onChange={v => updateField('bride_contact_name', v)} placeholder="Mrs. Lakshmi" compact />
+                  <Field label="Contact Person Name" value={form.bride_contact_name} onChange={v => updateField('bride_contact_name', v)} placeholder="Mrs. Lakshmi" compact />
                   <Field label="Phone Number" value={form.bride_contact_phone} onChange={v => updateField('bride_contact_phone', v)} placeholder="+91 98765 43210" compact />
+                </div>
+                <div className="mt-3">
+                  <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Relationship to Bride</label>
+                  <select
+                    value={form.bride_contact_relation}
+                    onChange={e => updateField('bride_contact_relation', e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-plum/20 focus:border-plum focus:outline-none"
+                  >
+                    <option value="Father of the Bride">Father of the Bride</option>
+                    <option value="Mother of the Bride">Mother of the Bride</option>
+                    <option value="Brother of the Bride">Brother of the Bride</option>
+                    <option value="Sister of the Bride">Sister of the Bride</option>
+                    <option value="Uncle of the Bride">Uncle of the Bride</option>
+                    <option value="Aunt of the Bride">Aunt of the Bride</option>
+                    <option value="Guardian of the Bride">Guardian of the Bride</option>
+                    <option value="Family Representative (Bride's Side)">Family Representative (Bride's Side)</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                 <h4 className="text-[13px] font-bold text-gray-700 mb-3 flex items-center gap-2">🤵 Groom's Family Contact</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Contact Person" value={form.groom_contact_name} onChange={v => updateField('groom_contact_name', v)} placeholder="Mr. Venkata Rao" compact />
+                  <Field label="Contact Person Name" value={form.groom_contact_name} onChange={v => updateField('groom_contact_name', v)} placeholder="Mr. Venkata Rao" compact />
                   <Field label="Phone Number" value={form.groom_contact_phone} onChange={v => updateField('groom_contact_phone', v)} placeholder="+91 91234 56789" compact />
+                </div>
+                <div className="mt-3">
+                  <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Relationship to Groom</label>
+                  <select
+                    value={form.groom_contact_relation}
+                    onChange={e => updateField('groom_contact_relation', e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-plum/20 focus:border-plum focus:outline-none"
+                  >
+                    <option value="Father of the Groom">Father of the Groom</option>
+                    <option value="Mother of the Groom">Mother of the Groom</option>
+                    <option value="Brother of the Groom">Brother of the Groom</option>
+                    <option value="Sister of the Groom">Sister of the Groom</option>
+                    <option value="Uncle of the Groom">Uncle of the Groom</option>
+                    <option value="Aunt of the Groom">Aunt of the Groom</option>
+                    <option value="Guardian of the Groom">Guardian of the Groom</option>
+                    <option value="Family Representative (Groom's Side)">Family Representative (Groom's Side)</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
             </Section>

@@ -615,9 +615,9 @@ export default function WeddingWebsitePage() {
               {site.bride_contact_name && (
                 <div className={`p-8 rounded-3xl ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} shadow-[0_10px_40px_rgba(0,0,0,0.04)] relative overflow-hidden`}>
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--color-rose-gold)] to-transparent opacity-80"></div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-[var(--text-dark)]/70 mb-4">BRIDE'S SIDE</div>
-                  <h3 className="font-serif text-2xl font-medium mb-1 text-[var(--text-dark)]">{site.bride_contact_name}</h3>
-                  <p className="text-[var(--text-dark)]/70 text-sm mb-6">Father of the Bride</p>
+                  <div className={`text-[10px] uppercase tracking-[0.15em] font-bold mb-4 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>BRIDE'S SIDE</div>
+                  <h3 className={`font-serif text-2xl font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{site.bride_contact_name}</h3>
+                  <p className={`text-sm mb-6 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{site.bride_contact_relation || 'Family Contact (Bride\'s Side)'}</p>
                   
                   <div className="flex gap-3">
                     {site.bride_contact_phone && (
@@ -636,9 +636,9 @@ export default function WeddingWebsitePage() {
               {site.groom_contact_name && (
                 <div className={`p-8 rounded-3xl ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} shadow-[0_10px_40px_rgba(0,0,0,0.04)] relative overflow-hidden`}>
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--color-plum)] to-transparent opacity-80"></div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-[var(--text-dark)]/70 mb-4">GROOM'S SIDE</div>
-                  <h3 className="font-serif text-2xl font-medium mb-1 text-[var(--text-dark)]">{site.groom_contact_name}</h3>
-                  <p className="text-[var(--text-dark)]/70 text-sm mb-6">Father of the Groom</p>
+                  <div className={`text-[10px] uppercase tracking-[0.15em] font-bold mb-4 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>GROOM'S SIDE</div>
+                  <h3 className={`font-serif text-2xl font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{site.groom_contact_name}</h3>
+                  <p className={`text-sm mb-6 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{site.groom_contact_relation || 'Family Contact (Groom\'s Side)'}</p>
                   
                   <div className="flex gap-3">
                     {site.groom_contact_phone && (
