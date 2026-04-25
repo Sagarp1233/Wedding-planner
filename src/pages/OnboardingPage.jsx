@@ -26,6 +26,13 @@ export default function OnboardingPage() {
     guestEstimate: '',
   });
 
+  // Vendors should never see the couple onboarding page
+  useEffect(() => {
+    if (currentUser?.user_metadata?.role === 'vendor') {
+      navigate('/vendor/dashboard', { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   // Plan limit guard: if user already has max weddings, redirect to picker
   useEffect(() => {
     if (!canCreateWedding && isOnboarded) {

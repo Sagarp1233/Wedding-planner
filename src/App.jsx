@@ -73,10 +73,15 @@ function ProtectedRoute({ children }) {
 
 // Route guard: redirect to onboarding if not onboarded
 function OnboardedRoute({ children }) {
-  const { isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
+  const { currentUser, isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  // Vendors should never hit couple onboarding — send them to vendor dashboard
+  const isVendor = currentUser?.user_metadata?.role === 'vendor';
+  if (isVendor) return <Navigate to="/vendor/dashboard" replace />;
+  
   if (!isOnboarded) return <Navigate to="/onboarding" replace />;
   if (!activeWeddingId) return <Navigate to="/weddings" replace />;
   return children;
@@ -84,9 +89,14 @@ function OnboardedRoute({ children }) {
 
 // Public route: redirect to dashboard if already logged in
 function PublicRoute({ children }) {
-  const { isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
+  const { currentUser, isAuthenticated, isOnboarded, activeWeddingId, isRecoveringPassword, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (isRecoveringPassword) return <Navigate to="/update-password" replace />;
+  
+  // Vendors should always go to their dashboard, never couple onboarding
+  const isVendor = currentUser?.user_metadata?.role === 'vendor';
+  if (isAuthenticated && isVendor) return <Navigate to="/vendor/dashboard" replace />;
+  
   if (isAuthenticated && isOnboarded && activeWeddingId) return <Navigate to="/dashboard" replace />;
   if (isAuthenticated && isOnboarded && !activeWeddingId) return <Navigate to="/weddings" replace />;
   if (isAuthenticated && !isOnboarded) return <Navigate to="/onboarding" replace />;
