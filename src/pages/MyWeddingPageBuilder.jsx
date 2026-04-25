@@ -283,26 +283,26 @@ export default function MyWeddingPageBuilder() {
 
       {/* ===== STICKY TOP BAR ===== */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-[20px] font-bold text-plum flex items-center gap-2">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+          <div className="shrink-0">
+            <h1 className="font-serif text-[18px] sm:text-[20px] font-bold text-plum flex items-center gap-2">
               My Wedding Page <Sparkles className="w-4 h-4 text-amber-400" />
             </h1>
             <p className="text-[11px] text-gray-400 font-medium">
               wedora.in/w/{form.slug}
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar shrink-0">
             {form.slug && (
-              <a href={`/w/${form.slug}`} target="_blank" rel="noreferrer" className="h-9 px-4 text-[13px] font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center gap-2 shadow-sm">
+              <a href={`/w/${form.slug}`} target="_blank" rel="noreferrer" className="h-8 sm:h-9 px-3 sm:px-4 text-[12px] sm:text-[13px] font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center gap-1.5 shadow-sm whitespace-nowrap shrink-0">
                 <Eye className="w-3.5 h-3.5" /> Preview
               </a>
             )}
-            <button onClick={handleSave} disabled={saving || !hasChanges} className={`h-9 px-5 text-[13px] font-bold rounded-lg shadow-md flex items-center gap-2 transition ${hasChanges ? 'text-white hover:opacity-90' : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed shadow-none'}`} style={hasChanges ? {background: 'linear-gradient(135deg, #b76e79, #4a2040)'} : {}}>
+            <button onClick={handleSave} disabled={saving || !hasChanges} className={`h-8 sm:h-9 px-3 sm:px-5 text-[12px] sm:text-[13px] font-bold rounded-lg shadow-md flex items-center gap-1.5 transition whitespace-nowrap shrink-0 ${hasChanges ? 'text-white hover:opacity-90' : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed shadow-none'}`} style={hasChanges ? {background: 'linear-gradient(135deg, #b76e79, #4a2040)'} : {}}>
               <Save className="w-3.5 h-3.5" /> {saving ? 'Saving...' : 'Save Changes'}
             </button>
-            <button onClick={handleTogglePublish} className={`h-9 px-4 text-[13px] font-bold rounded-lg flex items-center gap-2 transition shadow-sm border ${form.is_published ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}`}>
-              <div className={`w-2.5 h-2.5 rounded-full ${form.is_published ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+            <button onClick={handleTogglePublish} className={`h-8 sm:h-9 px-3 sm:px-4 text-[12px] sm:text-[13px] font-bold rounded-lg flex items-center gap-1.5 transition shadow-sm border whitespace-nowrap shrink-0 ${form.is_published ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}`}>
+              <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${form.is_published ? 'bg-emerald-500' : 'bg-gray-300'}`} />
               {form.is_published ? 'Published' : 'Draft'}
             </button>
           </div>
