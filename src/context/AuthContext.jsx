@@ -256,25 +256,33 @@ export function AuthProvider({ children }) {
 
       const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'INITIAL_SESSION') return;
-
         if (event === 'PASSWORD_RECOVERY') {
           setIsRecoveringPassword(true);
+          return;
         }
 
+        // STABLE STATE UPDATE:
+        // By returning the exact `prev` memory reference if the user ID matches,
+        // React completely aborts the re-render. This prevents downstream pages
+        // (whose useEffects depend on `currentUser`) from triggering redundant 
+        // data fetches that hang indefinitely on waking connections.
+        setCurrentUser(prev => {
+           if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && prev?.id === session?.user?.id) {
+               return prev; 
+           }
+           return session?.user ?? null;
+        });
+
         if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-          setCurrentUser(session?.user ?? null);
           return;
         }
 
         if (event === 'SIGNED_OUT') {
-          setCurrentUser(null);
           finishNoUser();
           return;
         }
 
         // At this point, event is strictly SIGNED_IN
-        setCurrentUser(session?.user ?? null);
-        
         if (!session?.user) {
           finishNoUser();
           return;
