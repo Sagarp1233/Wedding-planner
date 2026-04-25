@@ -449,54 +449,63 @@ export default function WeddingWebsitePage() {
 
       {/* Events Section */}
       {site.events && site.events.length > 0 && (
-        <section id="events" className="py-24 px-4 md:px-8 bg-[#0D1B2A] text-white relative overflow-hidden">
-          {/* Background glows */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-[var(--color-rose-gold)]/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--color-plum)]/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-          
-          <div className="max-w-6xl mx-auto relative z-10 text-center">
-            <div className="flex items-center justify-center gap-4 mb-4">
-               <div className="w-12 h-px bg-white/20"></div>
-               <span className="text-white/60 uppercase tracking-[0.2em] text-xs font-semibold">EVENTS SCHEDULE</span>
-               <div className="w-12 h-px bg-white/20"></div>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif mb-16 font-light">
-              Join us for <span className="italic text-[var(--color-rose-gold)] font-medium">every</span> celebration
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {site.events.map((event, index) => {
-                const isLastOdd = site.events.length % 2 !== 0 && index === site.events.length - 1;
-                
-                return (
-                  <div key={index} className={`bg-white/5 border border-white/10 rounded-2xl p-8 hover:-translate-y-1 hover:bg-white/10 transition-all duration-300 text-left ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
-                    <div className="text-3xl mb-5 drop-shadow-md">{event.emoji || '✨'}</div>
-                    <h3 className="text-2xl font-serif font-medium mb-3">{event.name}</h3>
-                    
-                    <div className="space-y-4 text-white/80 text-sm font-sans mt-4">
-                      {event.date && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-white/60" />
-                          <span className="font-medium">{new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(event.date))}</span>
-                        </div>
-                      )}
-                      {event.time && (
-                        <div className="inline-flex items-center gap-2 bg-[var(--color-rose-gold)]/20 px-3 py-1.5 rounded-full border border-[var(--color-rose-gold)]/30">
-                          <Clock className="w-3.5 h-3.5 text-[var(--color-rose-gold)]" />
-                          <span className="text-xs font-bold tracking-wide text-white/90">{event.time}</span>
-                        </div>
-                      )}
-                      <div className="pt-2"></div>
-                      {event.venue && (
-                        <div className="text-xs opacity-50 leading-relaxed font-medium">
-                          {event.venue}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        <section id="events" className="py-24 px-4 md:px-8 relative z-10 max-w-7xl mx-auto">
+          <div className="flex items-center justify-center mb-12 -mt-12 relative z-20">
+             <div className="w-1/3 h-px bg-gray-200"></div>
+             <div className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center mx-4">
+                <span className="text-lg">🕯️</span>
+             </div>
+             <div className="w-1/3 h-px bg-gray-200"></div>
+          </div>
+
+          <div className="bg-[#3b2331] rounded-[40px] p-8 md:p-14 shadow-2xl relative overflow-hidden text-white">
+             {/* Subtle Inner Glows */}
+             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+
+             <div className="max-w-6xl mx-auto relative z-10 text-center">
+               <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="w-12 h-px bg-white/10"></div>
+                  <span className="text-white/50 uppercase tracking-[0.2em] text-[10px] font-bold">EVENTS SCHEDULE</span>
+                  <div className="w-12 h-px bg-white/10"></div>
+               </div>
+               <h2 className="text-4xl md:text-5xl font-serif mb-12 font-light">
+                 Join us for <span className="italic text-[#bfa1a9] font-medium">every</span> celebration
+               </h2>
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                 {site.events.map((event, index) => {
+                   const isLastOdd = site.events.length % 2 !== 0 && index === site.events.length - 1;
+                   
+                   return (
+                     <div key={index} className={`bg-[#48303e] border border-white/5 rounded-3xl p-8 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
+                       <div className="text-3xl mb-5">{event.emoji || '✨'}</div>
+                       <h3 className="text-2xl font-serif font-medium mb-3 text-white">{event.name}</h3>
+                       
+                       <div className="space-y-4 text-white/70 text-sm font-sans mt-4">
+                         {event.date && (
+                           <div className="flex items-center gap-2">
+                             <Calendar className="w-4 h-4 text-white/40" />
+                             <span className="font-medium">{new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(event.date))}</span>
+                           </div>
+                         )}
+                         {event.time && (
+                           <div className="inline-flex items-center gap-2 bg-[#7a384b]/60 px-3.5 py-1.5 rounded-full border border-white/5">
+                             <Clock className="w-3.5 h-3.5 text-[#e1b4c3]" />
+                             <span className="text-xs font-bold tracking-wider text-white">{event.time}</span>
+                           </div>
+                         )}
+                         <div className="pt-2"></div>
+                         {event.venue && (
+                           <div className="text-xs opacity-60 leading-relaxed font-medium">
+                             {event.venue}
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
           </div>
         </section>
       )}
@@ -555,36 +564,38 @@ export default function WeddingWebsitePage() {
       )}
 
       {/* Gallery Section */}
-      <section id="gallery" className="py-24 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <span className="text-[var(--color-rose-gold)] uppercase tracking-[0.2em] text-xs font-semibold mb-2 block">MEMORIES</span>
-          <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] font-light">Gallery</h2>
-        </div>
-        
-        {site.gallery_images && site.gallery_images.length > 0 ? (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {site.gallery_images.filter(img => img && img.trim() !== '').map((img, i) => (
-              <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[var(--bg-color)]/10" onClick={() => setGalleryModalImage(img)}>
-                <img 
-                  src={ensureHttps(img)} 
-                  alt={`Gallery Image ${i + 1}`} 
-                  onError={(e) => { e.target.closest('div').style.display = 'none'; }} 
-                  className="w-full h-auto transform group-hover:scale-105 transition duration-500" 
-                  loading="lazy" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-plum)]/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
-              </div>
-            ))}
+      {((site.gallery_images && site.gallery_images.filter(img => img && img.trim() !== '').length > 0) || isOwner) && (
+        <section id="gallery" className="py-24 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-[var(--color-rose-gold)] uppercase tracking-[0.2em] text-xs font-semibold mb-2 block">MEMORIES</span>
+            <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] font-light">Gallery</h2>
           </div>
-        ) : (
-          isOwner && (
-            <div className="text-center p-12 border-2 border-dashed border-[var(--text-dark)]/20 rounded-3xl opacity-70">
-              <div className="text-4xl mb-4">📸</div>
-              <p className="text-[var(--text-dark)] font-medium">Add photos in your Wedora Dashboard to share them here.</p>
+          
+          {site.gallery_images && site.gallery_images.filter(img => img && img.trim() !== '').length > 0 ? (
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+              {site.gallery_images.filter(img => img && img.trim() !== '').map((img, i) => (
+                <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[var(--bg-color)]/10" onClick={() => setGalleryModalImage(img)}>
+                  <img 
+                    src={ensureHttps(img)} 
+                    alt={`Gallery Image ${i + 1}`} 
+                    onError={(e) => { e.target.closest('div').style.display = 'none'; }} 
+                    className="w-full h-auto transform group-hover:scale-105 transition duration-500" 
+                    loading="lazy" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-plum)]/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
+                </div>
+              ))}
             </div>
-          )
-        )}
-      </section>
+          ) : (
+            isOwner && (
+              <div className="text-center p-12 border-2 border-dashed border-[var(--text-dark)]/20 rounded-3xl opacity-70">
+                <div className="text-4xl mb-4">📸</div>
+                <p className="text-[var(--text-dark)] font-medium">Add photos in your Wedora Dashboard to share them here.</p>
+              </div>
+            )
+          )}
+        </section>
+      )}
 
       {/* Contacts Section */}
       {(site.bride_contact_name || site.groom_contact_name) && (
