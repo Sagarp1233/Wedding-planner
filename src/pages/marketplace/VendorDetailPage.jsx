@@ -16,6 +16,7 @@ import {
   getCategoryEmoji,
   formatPrice,
 } from '../../lib/marketplace';
+import { getOrCreateConversation } from '../../lib/chat';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 
@@ -41,6 +42,24 @@ export default function VendorDetailPage() {
   const categoryLabel = getCategoryLabel(category);
   const { isAuthenticated, activeWeddingId, currentUser } = useAuth();
   const { state, dispatch } = useApp();
+  const navigate = useNavigate();
+
+  const [startingChat, setStartingChat] = useState(false);
+
+  const handleStartChat = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setStartingChat(true);
+    const result = await getOrCreateConversation(currentUser.id, vendor.user_id, vendor.id);
+    if (result.success) {
+      navigate('/dashboard/messages');
+    } else {
+      alert('Failed to start chat: ' + result.error);
+      setStartingChat(false);
+    }
+  };
 
   const isShortlisted = vendor && state?.vendors?.some(
     v => v.name === vendor.business_name && v.phone === (vendor.phone || '')
@@ -257,14 +276,28 @@ export default function VendorDetailPage() {
                       </span>
                     )}
                   </div>
-                  {(isAuthenticated && activeWeddingId) && (
-                    <button 
-                      onClick={toggleShortlist}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex-shrink-0 ${isShortlisted ? 'bg-rose-gold text-white hover:bg-rose-gold/90' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-rose-gold'}`}
-                    >
-                      <Heart className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`} />
-                      <span className="hidden sm:inline">{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
-                    </button>
+                  {(isAuthenticated) ? (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button 
+                        onClick={handleStartChat}
+                        disabled={startingChat}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-gradient-to-r from-rose-500 to-rose-600 text-white hover:opacity-90 disabled:opacity-50"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="hidden sm:inline">{startingChat ? 'Starting...' : 'Live Chat'}</span>
+                      </button>
+                      <button 
+                        onClick={toggleShortlist}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex-shrink-0 ${isShortlisted ? 'bg-rose-gold text-white hover:bg-rose-gold/90' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-rose-gold'}`}
+                      >
+                        <Heart className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`} />
+                        <span className="hidden sm:inline">{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <Link to="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100">
+                       <MessageCircle className="w-4 h-4" /> Log in to Chat
+                    </Link>
                   )}
                 </div>
 

@@ -15,6 +15,7 @@ import SignupPage from './pages/SignupPage';
 // Everything else — lazy loaded (only downloads when user visits that route)
 const OnboardingPage        = lazy(() => import('./pages/OnboardingPage'));
 const DashboardPage         = lazy(() => import('./pages/DashboardPage'));
+const UserInboxPage         = lazy(() => import('./pages/dashboard/UserInboxPage'));
 const BudgetPage            = lazy(() => import('./pages/BudgetPage'));
 const TasksPage             = lazy(() => import('./pages/TasksPage'));
 const TimelinePage          = lazy(() => import('./pages/TimelinePage'));
@@ -205,6 +206,7 @@ function AppWithContext() {
             {/* Protected App */}
             <Route element={<OnboardedRoute><AppLayout /></OnboardedRoute>}>
               <Route path="/dashboard"   element={<DashboardPage />} />
+              <Route path="/dashboard/messages" element={<UserInboxPage />} />
               <Route path="/invitations" element={<InvitationsPage />} />
               <Route path="/whatsapp"    element={<WhatsappPage />} />
 

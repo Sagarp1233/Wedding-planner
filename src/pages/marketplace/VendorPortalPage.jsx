@@ -12,6 +12,7 @@ import {
   fetchProfileViewStats, fetchLeadSourceStats, updateLeadCRM,
   getCategoryLabel, getCategoryEmoji, formatPrice,
 } from '../../lib/marketplace';
+import VendorInbox from '../../components/chat/VendorInbox';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -466,6 +467,11 @@ export default function VendorPortalPage() {
                </div>
              </div>
           )}
+        </div>
+
+        {/* Real-time Chat Inbox */}
+        <div id="messages" className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <VendorInbox vendorId={listing.user_id} />
         </div>
 
         {/* Charts & Insights */}
