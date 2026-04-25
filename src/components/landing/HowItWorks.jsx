@@ -5,6 +5,19 @@ import { Link } from 'react-router-dom';
 export default function HowItWorks() {
   const [activeTab, setActiveTab] = useState('couple');
   const [showDemo, setShowDemo] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [demoStep, setDemoStep] = useState(0);
+
+  // Simulation timer for the fake interactive demo
+  React.useEffect(() => {
+    let interval;
+    if (isPlaying && showDemo) {
+      interval = setInterval(() => {
+        setDemoStep((s) => (s + 1) % 4);
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, showDemo]);
 
   const coupleSteps = [
     {
@@ -182,8 +195,8 @@ export default function HowItWorks() {
       {showDemo && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md animate-fade-in">
           <div 
-            className="absolute inset-0 cursor-pointer" 
-            onClick={() => setShowDemo(false)}
+            className="absolute inset-0 cursor-pointer bg-slate-900/80" 
+            onClick={() => { setShowDemo(false); setIsPlaying(false); }}
             aria-label="Close demo"
           />
           
@@ -200,48 +213,122 @@ export default function HowItWorks() {
                 </div>
               </div>
               <button 
-                onClick={() => setShowDemo(false)}
+                onClick={() => { setShowDemo(false); setIsPlaying(false); }}
                 className="p-2 rounded-full hover:bg-gray-200 transition-colors text-gray-500"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Content - Player Placeholder */}
-            <div className="aspect-video bg-slate-900 relative group flex items-center justify-center">
-              {/* Optional: You can put an actual YouTube iframe here in the future. Example:
-                 <iframe className="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameBorder="0" allowFullScreen></iframe> 
-              */}
+            {/* Modal Content - Player Placeholder or Simulated UI */}
+            <div className="aspect-video bg-slate-900 relative group flex items-center justify-center overflow-hidden">
               
-              {/* Decorative Mock Player UI */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black overflow-hidden flex flex-col items-center justify-center text-center px-6">
-                
-                {/* Visual Elements inside player */}
-                <div className={`absolute top-1/2 left-1/2 w-96 h-96 blur-[150px] -translate-x-1/2 -translate-y-1/2 rounded-full ${activeTab === 'couple' ? 'bg-rose-gold/30' : 'bg-violet-600/30'}`} />
-                
-                <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-6 border border-white/20 shadow-[-10px_10px_30px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-500 cursor-pointer">
-                  <Play className="w-8 h-8 text-white ml-2" fill="white" />
-                </div>
-                <h4 className="text-2xl sm:text-3xl font-serif text-white mb-3">
-                  {activeTab === 'couple' ? 'Your Dream Wedding Starts Here' : 'Scale Your Wedding Business'}
-                </h4>
-                <p className="text-slate-400 max-w-lg">
-                  Click play to see exactly how Wedora's premium tools can transform your {activeTab === 'couple' ? 'planning experience' : 'sales pipeline'}.
-                </p>
-              </div>
+              {isPlaying ? (
+                /* === BEAUTIFUL CSS SIMULATED DASHBOARD === */
+                <div className="absolute inset-0 w-full h-full bg-[#f8fafc] flex flex-col items-center justify-center p-4 sm:p-8 animate-fade-in relative">
+                   <div className="w-full max-w-3xl bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 flex flex-col h-full transform scale-[0.98] transition-transform duration-500">
+                     
+                     {/* Navbar Fake */}
+                     <div className="h-14 border-b border-slate-100 flex items-center px-6 justify-between bg-white/50 backdrop-blur-md z-10 relative">
+                       <div className={`w-28 h-5 rounded-full bg-gradient-to-r ${themeGradient} opacity-50 animate-pulse`} />
+                       <div className="flex gap-3">
+                         <div className="w-8 h-8 rounded-full bg-slate-100 animate-pulse" />
+                       </div>
+                     </div>
+                     
+                     <div className="flex flex-1 p-6 gap-6 relative bg-[#fbfcfd]">
+                       
+                       {/* Sidebar Fake */}
+                       <div className="w-48 flex flex-col gap-3 border-r border-slate-100 pr-6">
+                         {[0, 1, 2, 3].map(i => (
+                            <div key={i} className={`h-10 rounded-xl transition-all duration-700 ${demoStep === i ? `bg-gradient-to-r ${themeGradient} opacity-20 shadow-sm` : 'bg-slate-50'}`} />
+                         ))}
+                       </div>
 
-              {/* Fake player controls */}
-              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-black/80 to-transparent flex items-end px-6 py-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-full flex items-center gap-4">
-                  <Play className="w-4 h-4 text-white hover:text-rose-gold cursor-pointer" fill="white" />
-                  <div className="flex-1 h-1 bg-white/20 rounded-full relative cursor-pointer group/bar">
-                     <div className={`absolute left-0 top-0 h-full rounded-full w-1/3 bg-gradient-to-r ${themeGradient}`} />
-                     <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/bar:opacity-100 transition-opacity" />
-                  </div>
-                  <div className="text-xs text-white/70 font-medium">1:24 / 3:45</div>
-                  <Settings2 className="w-4 h-4 text-white hover:text-white/80 cursor-pointer" />
+                       {/* Content Fake */}
+                       <div className="flex-1 flex flex-col gap-6 relative">
+                          <div className="h-10 w-1/3 bg-slate-100 rounded-xl shadow-inner mb-2" />
+                          
+                          <div className="grid grid-cols-3 gap-5">
+                             {[
+                               { h: 'h-6', w: 'w-1/2', bg: 'bg-emerald-400' },
+                               { h: 'h-4', w: 'w-3/4', bg: 'bg-amber-400' },
+                               { h: 'h-8', w: 'w-2/3', bg: 'bg-blue-400' },
+                             ].map((bar, i) => (
+                               <div key={i} className="h-28 bg-white border border-slate-100 shadow-sm rounded-2xl p-5 flex flex-col justify-end relative overflow-hidden">
+                                  <div className={`absolute top-4 left-4 w-6 h-6 rounded-full bg-slate-100`} />
+                                  <div className={`w-full h-1.5 ${bar.bg} rounded-full mt-4 transition-all duration-1000 ${demoStep === i ? 'w-full' : bar.w}`} />
+                               </div>
+                             ))}
+                          </div>
+
+                          <div className="flex-1 bg-white border border-slate-100 shadow-sm rounded-2xl p-6 mt-2 relative overflow-hidden">
+                             <div className="h-5 w-1/4 bg-slate-200 rounded-full mb-6" />
+                             <div className="space-y-4">
+                                <div className="h-3 w-full bg-slate-50 rounded-full" />
+                                <div className="h-3 w-5/6 bg-slate-50 rounded-full" />
+                                <div className="h-3 w-4/6 bg-slate-50 rounded-full" />
+                             </div>
+                             {/* Fake Cursor Animation */}
+                             <div 
+                               className="absolute w-6 h-6 transition-all duration-700 ease-in-out z-50 drop-shadow-xl text-slate-800 pointer-events-none"
+                               style={{
+                                 left: demoStep === 0 ? '15%' : demoStep === 1 ? '45%' : demoStep === 2 ? '75%' : '40%',
+                                 top: demoStep === 0 ? '40%' : demoStep === 1 ? '20%' : demoStep === 2 ? '80%' : '60%',
+                               }}
+                             >
+                               <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M7 2L21 16L14 18L10 24L7 2Z" /></svg>
+                             </div>
+                          </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Overlay Text explaining standard demo */}
+                   <div className="absolute inset-x-0 bottom-10 flex justify-center z-20 animate-fade-in-up">
+                      <div className="bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl border border-white/10 text-white text-sm font-medium">
+                         <Play className="w-4 h-4 text-rose-gold animate-pulse" fill="currentColor" />
+                         {activeTab === 'couple' ? 'Demo Interface Loaded — You are in control.' : 'Vendor Portal Syncing Leads...'}
+                      </div>
+                   </div>
                 </div>
-              </div>
+              ) : (
+                /* === MOCK PLAYER WAITING TO BE CLICKED === */
+                <>
+                  {/* Decorative Mock Player UI */}
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black overflow-hidden flex flex-col items-center justify-center text-center px-6 cursor-pointer"
+                    onClick={() => setIsPlaying(true)}
+                  >
+                    
+                    {/* Visual Elements inside player */}
+                    <div className={`absolute top-1/2 left-1/2 w-96 h-96 blur-[150px] -translate-x-1/2 -translate-y-1/2 rounded-full ${activeTab === 'couple' ? 'bg-rose-gold/30' : 'bg-violet-600/30'}`} />
+                    
+                    <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-6 border border-white/20 shadow-[-10px_10px_30px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-500 cursor-pointer">
+                      <Play className="w-8 h-8 text-white ml-2" fill="white" />
+                    </div>
+                    <h4 className="text-2xl sm:text-3xl font-serif text-white mb-3 relative z-10 text-shadow-sm">
+                      {activeTab === 'couple' ? 'Your Dream Wedding Starts Here' : 'Scale Your Wedding Business'}
+                    </h4>
+                    <p className="text-slate-300 max-w-lg relative z-10 drop-shadow-md font-medium">
+                      Click play to see exactly how Wedora's premium tools can transform your {activeTab === 'couple' ? 'planning experience' : 'sales pipeline'}.
+                    </p>
+                  </div>
+
+                  {/* Fake player controls */}
+                  <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-black/80 to-transparent flex items-end px-6 py-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-full flex items-center gap-4">
+                      <Play className="w-4 h-4 text-white hover:text-rose-gold cursor-pointer" fill="white" onClick={() => setIsPlaying(true)} />
+                      <div className="flex-1 h-1 bg-white/20 rounded-full relative cursor-pointer group/bar">
+                         <div className={`absolute left-0 top-0 h-full rounded-full w-1/3 bg-gradient-to-r ${themeGradient}`} />
+                         <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/bar:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="text-xs text-white/70 font-medium tracking-wide">0:00 / 3:45</div>
+                      <Settings2 className="w-4 h-4 text-white hover:text-white/80 cursor-pointer" />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             
             {/* Modal Footer / CTA */}
@@ -251,7 +338,7 @@ export default function HowItWorks() {
               </p>
               <Link 
                 to="/signup" 
-                onClick={() => setShowDemo(false)}
+                onClick={() => { setShowDemo(false); setIsPlaying(false); }}
                 className={`px-6 py-2.5 rounded-xl text-white font-semibold flex items-center gap-2 transition-transform hover:-translate-y-0.5 bg-gradient-to-r ${themeGradient}`}
               >
                 Create Free Account
