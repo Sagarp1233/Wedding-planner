@@ -1,43 +1,88 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown, Mail, MessageCircle, ShoppingBag, Briefcase } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { LayoutDashboard, Wallet, Users, CheckSquare, CalendarHeart, Heart, Settings, Store, Camera, LogOut, User, PenTool, Shield, Newspaper, ArrowLeftRight, Crown, Mail, MessageCircle, ShoppingBag, Briefcase, Globe } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDaysUntil } from '../../utils/helpers';
-
-const NAV_SECTIONS = [
-  {
-    label: 'PLANNING',
-    items: [
-      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/budget', label: 'Budget', icon: Wallet },
-      { to: '/guests', label: 'Guests', icon: Users },
-      { to: '/tasks', label: 'Tasks', icon: CheckSquare },
-      { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
-    ]
-  },
-  {
-    label: 'VENDORS',
-    items: [
-      { to: '/vendors', label: 'My Vendors', icon: Store },
-      { to: '/marketplace', label: 'Find Vendors', icon: ShoppingBag },
-    ]
-  },
-  {
-    label: 'MORE',
-    items: [
-      { to: '/inspiration', label: 'Inspiration', icon: Camera },
-      { to: '/invitations', label: 'Invitations', icon: Mail },
-      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
-      { to: '/blog', label: 'Blog', icon: Newspaper },
-    ]
-  },
-];
 
 export default function Sidebar({ isOpen, onClose }) {
   const { state } = useApp();
   const { currentUser, logout, isAdmin, isPro, weddings } = useAuth();
   const navigate = useNavigate();
   const daysLeft = getDaysUntil(state.wedding.weddingDate);
+  const [pendingRsvps, setPendingRsvps] = useState(0);
+
+  // Fetch initial pending RSVP count
+  useEffect(() => {
+    async function fetchPendingCount() {
+      if (!currentUser) return;
+      try {
+        // Query to get the wedding sites mapping to this couple
+        const { data: site } = await supabase
+          .from('wedding_sites')
+          .select('id')
+          .eq('couple_id', currentUser.id)
+          .single();
+          
+        if (site) {
+          const { count } = await supabase
+            .from('rsvp_responses')
+            .select('*', { count: 'exact', head: true })
+            .eq('wedding_site_id', site.id)
+            .eq('attendance_status', 'pending');
+          setPendingRsvps(count || 0);
+
+          // Listen for live updates
+          const channel = supabase.channel('sidebar_rsvp_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'rsvp_responses', filter: `wedding_site_id=eq.${site.id}` }, payload => {
+              if (payload.new && payload.new.attendance_status === 'pending') {
+                setPendingRsvps(prev => prev + 1);
+              } else if (payload.old && payload.old.attendance_status === 'pending' && payload.new?.attendance_status !== 'pending') {
+                setPendingRsvps(prev => Math.max(0, prev - 1));
+              }
+            })
+            .subscribe();
+            
+          return () => {
+            supabase.removeChannel(channel);
+          };
+        }
+      } catch (err) {
+        console.error('Failed fetching pending RSVPs', err);
+      }
+    }
+    fetchPendingCount();
+  }, [currentUser]);
+
+  const NAV_SECTIONS = [
+    {
+      label: 'MY WEDDING',
+      items: [
+        { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+        { to: '/budget', label: 'Budget Planner', icon: Wallet },
+        { to: '/tasks', label: 'Checklist', icon: CheckSquare },
+        { to: '/timeline', label: 'Timeline', icon: CalendarHeart },
+        { to: '/vendors', label: 'My Vendors', icon: Store },
+      ]
+    },
+    {
+      label: 'WEDDING WEBSITE',
+      items: [
+        { to: '/my-website', label: 'My Wedding Page', icon: Globe },
+        { to: '/dashboard/rsvp', label: 'Guests & RSVPs', icon: Users, badge: pendingRsvps > 0 ? pendingRsvps : null },
+        { to: '/send-reminders', label: 'Send Invitations', icon: MessageCircle },
+        { to: '/themes', label: 'Themes', icon: Camera },
+      ]
+    },
+    {
+      label: 'ACCOUNT',
+      items: [
+        { to: '/settings', label: 'Settings', icon: Settings },
+        { to: '/upgrade', label: 'Upgrade Premium', icon: Crown },
+      ]
+    },
+  ];
 
   async function handleLogout() {
     await logout();
@@ -96,8 +141,17 @@ export default function Sidebar({ isOpen, onClose }) {
                       }
                     `}
                   >
-                    <item.icon className="w-[18px] h-[18px]" />
-                    {item.label}
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5">
+                        <item.icon className="w-[18px] h-[18px]" />
+                        {item.label}
+                      </div>
+                      {item.badge && (
+                        <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
                   </NavLink>
                 ))}
               </div>

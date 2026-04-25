@@ -73,26 +73,31 @@ FOR EACH ROW EXECUTE FUNCTION public.update_vendor_rating();
 ALTER TABLE public.vendor_reviews ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read reviews
+DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON public.vendor_reviews;
 CREATE POLICY "Reviews are viewable by everyone" 
 ON public.vendor_reviews FOR SELECT 
 USING (true);
 
 -- Authenticated couples can insert their own reviews
+DROP POLICY IF EXISTS "Users can insert their own reviews" ON public.vendor_reviews;
 CREATE POLICY "Users can insert their own reviews" 
 ON public.vendor_reviews FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
 -- Authenticated couples can update their own reviews
+DROP POLICY IF EXISTS "Users can update their own reviews" ON public.vendor_reviews;
 CREATE POLICY "Users can update their own reviews" 
 ON public.vendor_reviews FOR UPDATE 
 USING (auth.uid() = user_id);
 
 -- Authenticated couples can delete their own reviews
+DROP POLICY IF EXISTS "Users can delete their own reviews" ON public.vendor_reviews;
 CREATE POLICY "Users can delete their own reviews" 
 ON public.vendor_reviews FOR DELETE 
 USING (auth.uid() = user_id);
 
 -- Admin Policy (fallback)
+DROP POLICY IF EXISTS "Admins can manage all reviews" ON public.vendor_reviews;
 CREATE POLICY "Admins can manage all reviews"
 ON public.vendor_reviews FOR ALL TO authenticated USING (
     auth.jwt() ->> 'email' = 'admin@wedora.in' OR 

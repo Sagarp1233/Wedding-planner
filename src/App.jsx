@@ -16,7 +16,6 @@ import SignupPage from './pages/SignupPage';
 const OnboardingPage        = lazy(() => import('./pages/OnboardingPage'));
 const DashboardPage         = lazy(() => import('./pages/DashboardPage'));
 const BudgetPage            = lazy(() => import('./pages/BudgetPage'));
-const GuestsPage            = lazy(() => import('./pages/GuestsPage'));
 const TasksPage             = lazy(() => import('./pages/TasksPage'));
 const TimelinePage          = lazy(() => import('./pages/TimelinePage'));
 const VendorsPage           = lazy(() => import('./pages/VendorsPage'));
@@ -30,6 +29,13 @@ const WhatsappPage          = lazy(() => import('./pages/WhatsappPage'));
 const UpdatePasswordPage    = lazy(() => import('./pages/UpdatePasswordPage'));
 const PersonalizeWizard     = lazy(() => import('./pages/PersonalizeWizard'));
 
+// Wedding Website & RSVP
+const RSVPDashboardPage          = lazy(() => import('./pages/RSVPDashboardPage'));
+const MyWeddingPageBuilder       = lazy(() => import('./pages/MyWeddingPageBuilder'));
+const SendRemindersPage          = lazy(() => import('./pages/SendRemindersPage'));
+const ThemesPage                 = lazy(() => import('./pages/ThemesPage'));
+const DummyWebsitePlaceholder    = lazy(() => import('./pages/DummyWebsitePlaceholder'));
+
 // Blog Pages
 const BlogListingPage       = lazy(() => import('./pages/BlogListingPage'));
 const BlogPostPage          = lazy(() => import('./pages/BlogPostPage'));
@@ -42,6 +48,10 @@ const CategoryListingPage      = lazy(() => import('./pages/marketplace/Category
 const VendorDetailPage         = lazy(() => import('./pages/marketplace/VendorDetailPage'));
 const VendorPortalPage         = lazy(() => import('./pages/marketplace/VendorPortalPage'));
 const VendorListingEditorPage  = lazy(() => import('./pages/marketplace/VendorListingEditorPage'));
+
+// Public Wedding Website Page
+const WeddingWebsitePage       = lazy(() => import('./pages/WeddingWebsitePage'));
+
 
 // Admin Pages
 const AdminDashboardPage    = lazy(() => import('./pages/admin/AdminDashboardPage'));
@@ -154,6 +164,10 @@ function AppWithContext() {
             <Route path="/wedding-checklist" element={<PublicChecklistPage />} />
             <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
 
+            {/* Public Wedding Website */}
+            <Route path="/w/:weddingSlug" element={<WeddingWebsitePage />} />
+
+
             {/* Public Marketplace (no login required) */}
             <Route path="/marketplace" element={<MarketplaceLandingPage />} />
             <Route path="/marketplace/:category" element={<CategoryListingPage />} />
@@ -183,8 +197,14 @@ function AppWithContext() {
               <Route path="/dashboard"   element={<DashboardPage />} />
               <Route path="/invitations" element={<InvitationsPage />} />
               <Route path="/whatsapp"    element={<WhatsappPage />} />
+
+              {/* Website & RSVP (New Nav) */}
+              <Route path="/dashboard/rsvp" element={<RSVPDashboardPage />} />
+              <Route path="/my-website"     element={<MyWeddingPageBuilder />} />
+              <Route path="/send-reminders" element={<SendRemindersPage />} />
+              <Route path="/themes"         element={<ThemesPage />} />
+
               <Route path="/budget"      element={<BudgetPage />} />
-              <Route path="/guests"      element={<GuestsPage />} />
               <Route path="/tasks"       element={<TasksPage />} />
               <Route path="/timeline"    element={<TimelinePage />} />
               <Route path="/vendors"     element={<VendorsPage />} />
