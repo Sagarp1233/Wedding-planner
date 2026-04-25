@@ -13,6 +13,7 @@ import {
   uploadVendorMedia
 } from '../../lib/marketplace';
 import { optimizeImage } from '../../utils/imageOptimizer';
+import VendorNav from '../../components/layout/VendorNav';
 
 export default function VendorListingEditorPage() {
   const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
@@ -213,7 +214,8 @@ export default function VendorListingEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blush to-ivory px-4 sm:px-6 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-white via-blush to-ivory px-4 sm:px-6 py-8 sm:py-12 pt-20 sm:pt-24">
+      <VendorNav />
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}

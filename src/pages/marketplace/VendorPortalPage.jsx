@@ -13,6 +13,7 @@ import {
   getCategoryLabel, getCategoryEmoji, formatPrice,
 } from '../../lib/marketplace';
 import VendorInbox from '../../components/chat/VendorInbox';
+import VendorNav from '../../components/layout/VendorNav';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -177,7 +178,8 @@ export default function VendorPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/80">
+    <div className="min-h-screen bg-gray-50/80 pt-16">
+      <VendorNav />
       {/* ═══ HERO BANNER ═══ */}
       <div className="relative">
         <div className="h-48 sm:h-64 lg:h-72 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950 overflow-hidden">
@@ -194,10 +196,7 @@ export default function VendorPortalPage() {
         </div>
 
         <div className="absolute top-0 left-0 right-0 z-20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-            <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors text-white">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-end">
             <div className="flex items-center gap-2">
               <Link to="/vendor/dashboard/edit" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-gold to-plum text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                 <Edit3 className="w-4 h-4" /> Edit Listing
