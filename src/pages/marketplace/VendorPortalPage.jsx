@@ -234,7 +234,35 @@ export default function VendorPortalPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 -mt-2 pb-10 relative z-20 space-y-5">
-        
+        {listing.status !== 'approved' ? (
+          <div className={`mt-8 rounded-2xl p-8 sm:p-12 text-center border-2 shadow-sm ${status.color}`}>
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-white shadow-md border border-inherit">
+              <status.icon className="w-10 h-10 border-inherit" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">{status.label}</h2>
+            <p className="text-sm sm:text-base opacity-90 max-w-lg mx-auto leading-relaxed">{status.desc}</p>
+            
+            {listing.status === 'rejected' && (
+              <Link to="/vendor/dashboard/edit" className="inline-block mt-8 px-8 py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition shadow-lg">
+                Edit Listing to Resubmit
+              </Link>
+            )}
+            
+            {listing.status === 'pending' && (
+              <div className="mt-10 p-6 bg-white/50 rounded-xl border border-inherit max-w-xl mx-auto text-left flex flex-col items-center">
+                <div className="w-full">
+                  <h3 className="font-bold text-sm mb-3 text-inherit">What happens next?</h3>
+                  <ul className="text-sm space-y-2 opacity-90 text-inherit">
+                    <li>• Our moderation team reviews all details to ensure quality.</li>
+                    <li>• This usually takes between 12 to 24 hours.</li>
+                    <li>• Once approved, you will unlock this dashboard to view your profile analytics, respond to couples, and track your business.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
         {/* Profile Health Score & Banner */}
         <div className="rounded-2xl bg-white p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm border border-gray-100 animate-fade-in-up">
           <div className="flex items-center gap-4 w-full lg:w-auto">
@@ -628,7 +656,9 @@ export default function VendorPortalPage() {
             </div>
           </div>
           
-        </div>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
