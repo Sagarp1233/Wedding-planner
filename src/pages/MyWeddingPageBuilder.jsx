@@ -308,6 +308,16 @@ export default function MyWeddingPageBuilder() {
           </div>
         </div>
       </div>
+      {/* Mobile Tab Selector - OUTSIDE the flex container so it's not clipped */}
+      <div className="md:hidden sticky top-[57px] z-30 bg-white border-b border-gray-100 overflow-x-auto hide-scrollbar">
+        <div className="flex px-4 py-2 gap-1">
+          {TABS.map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[12px] font-semibold transition ${activeTab === tab.id ? 'bg-plum text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="max-w-[1440px] mx-auto flex overflow-hidden">
 
@@ -334,19 +344,8 @@ export default function MyWeddingPageBuilder() {
           </div>
         </nav>
 
-        {/* Mobile Tab Selector */}
-        <div className="md:hidden fixed left-0 right-0 top-[57px] z-20 bg-white border-b border-gray-100 overflow-x-auto hide-scrollbar">
-          <div className="flex px-4 py-2 gap-1">
-            {TABS.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[12px] font-semibold transition ${activeTab === tab.id ? 'bg-plum text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-3xl md:mt-0 mt-10">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-3xl">
 
           {/* BASICS */}
           {activeTab === 'basics' && (
