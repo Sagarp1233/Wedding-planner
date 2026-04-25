@@ -564,36 +564,27 @@ export default function WeddingWebsitePage() {
       )}
 
       {/* Gallery Section */}
-      {((site.gallery_images && site.gallery_images.filter(img => img && img.trim() !== '').length > 0) || isOwner) && (
+      {site.gallery_images && site.gallery_images.filter(img => img && img.trim() !== '').length > 0 && (
         <section id="gallery" className="py-24 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-[var(--color-rose-gold)] uppercase tracking-[0.2em] text-xs font-semibold mb-2 block">MEMORIES</span>
             <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] font-light">Gallery</h2>
           </div>
           
-          {site.gallery_images && site.gallery_images.filter(img => img && img.trim() !== '').length > 0 ? (
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              {site.gallery_images.filter(img => img && img.trim() !== '').map((img, i) => (
-                <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[var(--bg-color)]/10" onClick={() => setGalleryModalImage(img)}>
-                  <img 
-                    src={ensureHttps(img)} 
-                    alt={`Gallery Image ${i + 1}`} 
-                    onError={(e) => { e.target.closest('div').style.display = 'none'; }} 
-                    className="w-full h-auto transform group-hover:scale-105 transition duration-500" 
-                    loading="lazy" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-plum)]/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            isOwner && (
-              <div className="text-center p-12 border-2 border-dashed border-[var(--text-dark)]/20 rounded-3xl opacity-70">
-                <div className="text-4xl mb-4">📸</div>
-                <p className="text-[var(--text-dark)] font-medium">Add photos in your Wedora Dashboard to share them here.</p>
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            {site.gallery_images.filter(img => img && img.trim() !== '').map((img, i) => (
+              <div key={i} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[var(--bg-color)]/10" onClick={() => setGalleryModalImage(img)}>
+                <img 
+                  src={ensureHttps(img)} 
+                  alt={`Gallery Image ${i + 1}`} 
+                  onError={(e) => { e.target.closest('div').style.display = 'none'; }} 
+                  className="w-full h-auto transform group-hover:scale-105 transition duration-500" 
+                  loading="lazy" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-plum)]/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
               </div>
-            )
-          )}
+            ))}
+          </div>
         </section>
       )}
 
