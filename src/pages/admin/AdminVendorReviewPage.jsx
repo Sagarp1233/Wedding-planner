@@ -183,22 +183,22 @@ export default function AdminVendorReviewPage() {
       </div>
 
       {/* Listing Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Cover Image */}
-        <div className="glass-card overflow-hidden animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="h-52 bg-gradient-to-br from-gray-100 to-gray-200">
+        <div className="glass-card overflow-hidden lg:col-span-2 animate-fade-in-up flex flex-col" style={{ animationDelay: '100ms' }}>
+          <div className="flex-1 min-h-[200px] w-full bg-gradient-to-br from-gray-100 to-gray-200 relative">
             {vendor.cover_image ? (
-              <img src={vendor.cover_image} alt={vendor.business_name} className="w-full h-full object-cover" />
+              <img src={vendor.cover_image} alt={vendor.business_name} className="absolute inset-0 w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-5xl">{getCategoryEmoji(vendor.category)}</span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-6xl drop-shadow-sm">{getCategoryEmoji(vendor.category)}</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Details */}
-        <div className="glass-card p-5 space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <div className="glass-card p-6 space-y-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Details</h3>
           <div className="space-y-2 text-sm">
             <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400" /> {vendor.city}</p>
