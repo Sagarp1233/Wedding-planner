@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Store, ArrowLeft, Save, Plus, X, HelpCircle } from 'lucide-react';
+import { Store, ArrowLeft, Save, Plus, X, HelpCircle, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import {
   MARKETPLACE_CATEGORIES,
   INDIAN_CITIES,
@@ -10,7 +10,9 @@ import {
   upsertListing,
   saveVendorMedia,
   generateSlug,
+  uploadVendorMedia
 } from '../../lib/marketplace';
+import { optimizeImage } from '../../utils/imageOptimizer';
 
 export default function VendorListingEditorPage() {
   const { currentUser, isAuthenticated, loading: authLoading } = useAuth();
@@ -32,8 +34,9 @@ export default function VendorListingEditorPage() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
-  const [coverImage, setCoverImage] = useState('');
-  const [portfolioUrls, setPortfolioUrls] = useState(['']);
+  const [coverImage, setCoverImage] = useState({ url: '', file: null });
+  const [portfolioMedia, setPortfolioMedia] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState('');
 
   useEffect(() => {
     if (authLoading) return;
@@ -52,11 +55,11 @@ export default function VendorListingEditorPage() {
         setPhone(existing.phone || '');
         setEmail(existing.email || '');
         setWebsite(existing.website || '');
-        setCoverImage(existing.cover_image || '');
+        setCoverImage({ url: existing.cover_image || '', file: null });
 
         const media = await fetchVendorMedia(existing.id);
         if (media.length > 0) {
-          setPortfolioUrls(media.map(m => m.image_url));
+          setPortfolioMedia(media.map(m => ({ url: m.image_url, file: null })));
         }
       }
       setLoading(false);
@@ -64,18 +67,39 @@ export default function VendorListingEditorPage() {
     load();
   }, [currentUser, isAuthenticated, authLoading, navigate]);
 
-  function addPortfolioSlot() {
-    if (portfolioUrls.length < 10) {
-      setPortfolioUrls(prev => [...prev, '']);
-    }
+  function handleCoverFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCoverImage({ url, file });
+  }
+
+  function handlePortfolioFiles(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    
+    // Calculate remaining slots
+    const slotsLeft = 10 - portfolioMedia.length;
+    const filesToAdd = files.slice(0, slotsLeft);
+    
+    const newMedia = filesToAdd.map(file => ({
+      url: URL.createObjectURL(file), // Used for fast local preview
+      file: file
+    }));
+    
+    setPortfolioMedia(prev => [...prev, ...newMedia]);
   }
 
   function removePortfolioSlot(index) {
-    setPortfolioUrls(prev => prev.filter((_, i) => i !== index));
-  }
-
-  function updatePortfolioUrl(index, value) {
-    setPortfolioUrls(prev => prev.map((url, i) => i === index ? value : url));
+    setPortfolioMedia(prev => {
+       const newArr = [...prev];
+       // Clean up object URLs to prevent memory leaks in dev
+       if (newArr[index].file && newArr[index].url.startsWith('blob:')) {
+           URL.revokeObjectURL(newArr[index].url);
+       }
+       newArr.splice(index, 1);
+       return newArr;
+    });
   }
 
   async function handleSubmit(e) {
@@ -92,7 +116,7 @@ export default function VendorListingEditorPage() {
     setSaving(true);
 
     const slug = existingId ? undefined : generateSlug(businessName, city);
-    const listingData = {
+    let listingData = {
       businessName: businessName.trim(),
       slug,
       category,
@@ -103,34 +127,73 @@ export default function VendorListingEditorPage() {
       phone: phone.trim(),
       email: email.trim(),
       website: website.trim(),
-      coverImage: coverImage.trim(),
+      coverImage: coverImage.url && !coverImage.file ? coverImage.url : '', // Initially save existing URL if no new file
     };
 
-    // If updating, keep the existing slug
-    if (existingId) {
-      delete listingData.slug;
-    }
+    if (existingId) delete listingData.slug;
 
-    const result = await upsertListing(currentUser.id, listingData, existingId);
+    setUploadProgress('Saving details...');
+    let result = await upsertListing(currentUser.id, listingData, existingId);
 
     if (result.success) {
       const vendorId = result.listing.id;
+      let needsFinalUpdate = false;
 
-      // Save portfolio images
-      const validUrls = portfolioUrls.filter(u => u.trim());
-      if (validUrls.length > 0) {
-        await saveVendorMedia(vendorId, validUrls);
+      // Handles Cover Image Upload
+      if (coverImage.file) {
+         setUploadProgress('Optimizing & uploading cover photo...');
+         try {
+            const optimized = await optimizeImage(coverImage.file, { maxWidth: 1200, maxHeight: 600 });
+            const uploadRes = await uploadVendorMedia(optimized, vendorId);
+            if (uploadRes.success) {
+                listingData.coverImage = uploadRes.publicUrl;
+                needsFinalUpdate = true;
+            } else {
+                console.error("Cover image upload failed:", uploadRes.error);
+                setError("Cover photo couldn't be saved, but listing was created. " + uploadRes.error);
+            }
+         } catch(err) {
+            console.error(err);
+         }
+      }
+      
+      // Update listing with new cover image URL
+      if (needsFinalUpdate) {
+         await upsertListing(currentUser.id, listingData, existingId || vendorId);
       }
 
+      // Handle Portfolio Uploads
+      setUploadProgress('Optimizing & saving portfolio photos...');
+      const finalPortfolioUrls = [];
+      
+      for (const item of portfolioMedia) {
+          if (!item.file && item.url) {
+              // Existing remote URL
+              finalPortfolioUrls.push(item.url);
+          } else if (item.file) {
+              // New local file
+              try {
+                  const optimized = await optimizeImage(item.file, { maxWidth: 1200, maxHeight: 1200 });
+                  const uploadRes = await uploadVendorMedia(optimized, vendorId);
+                  if (uploadRes.success) {
+                      finalPortfolioUrls.push(uploadRes.publicUrl);
+                  }
+              } catch(err) {
+                  console.error("Failed to upload portfolio image", err);
+              }
+          }
+      }
+
+      if (finalPortfolioUrls.length > 0 || portfolioMedia.length === 0) {
+        await saveVendorMedia(vendorId, finalPortfolioUrls);
+      }
+
+      setUploadProgress('');
       setSaved(true);
-      // If it was a new listing, update the existingId so future saves are updates
-      if (!existingId) {
-        setExistingId(vendorId);
-      }
-
-      // Show success briefly then redirect
+      if (!existingId) setExistingId(vendorId);
       setTimeout(() => navigate('/vendor/dashboard'), 2000);
     } else {
+      setUploadProgress('');
       setError(result.error || 'Something went wrong. Please try again.');
     }
     setSaving(false);
@@ -345,58 +408,70 @@ export default function VendorListingEditorPage() {
 
           {/* Section 5: Images */}
           <div className="glass-card p-5 sm:p-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <h2 className="text-base font-serif font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-rose-gold/10 flex items-center justify-center text-xs font-bold text-rose-gold">5</span>
-              Photos
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+              <h2 className="text-base font-serif font-bold text-gray-900 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-rose-gold/10 flex items-center justify-center text-xs font-bold text-rose-gold">5</span>
+                Media & Photos
+              </h2>
+              <span className="text-[10px] bg-rose-gold/10 text-rose-gold font-bold px-2 py-1 rounded tracking-wide uppercase mt-2 sm:mt-0">Auto-Optimized</span>
+            </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Cover Image Upload */}
               <div>
-                <label htmlFor="cover-image" className="block text-xs font-semibold text-gray-700 mb-1">Cover Image URL</label>
-                <input
-                  id="cover-image"
-                  type="url"
-                  value={coverImage}
-                  onChange={e => setCoverImage(e.target.value)}
-                  placeholder="Paste a link to your best photo (e.g. from Google Drive, Instagram, or your website)"
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                />
-                <p className="text-[10px] text-gray-400 mt-1">This is the main photo that appears on your listing card</p>
+                <label className="block text-xs font-semibold text-gray-700 mb-2">Cover Image *</label>
+                {!coverImage.url ? (
+                  <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-rose-gold/30 rounded-2xl bg-rose-gold/5 hover:bg-rose-gold/10 cursor-pointer transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 text-rose-gold/50 mb-2" />
+                      <p className="text-sm font-semibold text-gray-700">Click to upload cover photo</p>
+                      <p className="text-xs text-gray-500 mt-1">Recommended: 1200 x 600px</p>
+                    </div>
+                    <input type="file" className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleCoverFile} />
+                  </label>
+                ) : (
+                  <div className="relative w-full h-40 rounded-2xl overflow-hidden bg-gray-100 group">
+                    <img src={coverImage.url} alt="Cover preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <label className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer hover:bg-gray-50 transition shadow-lg">
+                        Change Photo
+                        <input type="file" className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleCoverFile} />
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Preview */}
-              {coverImage && (
-                <div className="h-40 rounded-xl overflow-hidden bg-gray-100">
-                  <img src={coverImage} alt="Cover preview" className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; }} />
+              {/* Portfolio Uploads */}
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-xs font-semibold text-gray-700">Portfolio Photos</label>
+                  <span className="text-xs font-medium text-gray-500">{portfolioMedia.length} / 10 added</span>
                 </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-2">Portfolio Photos (up to 10)</label>
-                <div className="space-y-2">
-                  {portfolioUrls.map((url, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={e => updatePortfolioUrl(i, e.target.value)}
-                        placeholder={`Photo ${i + 1} URL`}
-                        className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30"
-                      />
-                      {portfolioUrls.length > 1 && (
-                        <button type="button" onClick={() => removePortfolioSlot(i)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {portfolioMedia.map((media, i) => (
+                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group shadow-sm border border-gray-200">
+                      <img src={media.url} alt={`Portfolio ${i+1}`} className="w-full h-full object-cover" />
+                      <button 
+                        type="button" 
+                        onClick={() => removePortfolioSlot(i)}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-md"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      {media.file && <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-500 text-white shadow-sm">NEW</span>}
                     </div>
                   ))}
+
+                  {portfolioMedia.length < 10 && (
+                    <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-rose-gold/5 hover:border-rose-gold/30 cursor-pointer transition-colors">
+                      <Plus className="w-6 h-6 text-gray-400 mb-1" />
+                      <span className="text-[10px] font-semibold text-gray-500">Add Photos</span>
+                      <input type="file" multiple className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handlePortfolioFiles} />
+                    </label>
+                  )}
                 </div>
-                {portfolioUrls.length < 10 && (
-                  <button type="button" onClick={addPortfolioSlot} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-rose-gold hover:underline">
-                    <Plus className="w-3.5 h-3.5" /> Add another photo
-                  </button>
-                )}
-                <p className="text-[10px] text-gray-400 mt-1">Paste image links from Google Drive, Dropbox, Instagram, or any website</p>
               </div>
             </div>
           </div>
@@ -416,7 +491,7 @@ export default function VendorListingEditorPage() {
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-gold to-plum text-white font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               id="save-listing"
             >
-              {saving ? 'Saving...' : saved ? '✅ Saved!' : <><Save className="w-4 h-4" /> {existingId ? 'Update & Resubmit' : 'Submit for Review'}</>}
+              {saving ? (uploadProgress || 'Saving...') : saved ? '✅ Saved!' : <><Save className="w-4 h-4" /> {existingId ? 'Update & Resubmit' : 'Submit for Review'}</>}
             </button>
             <button
               type="button"

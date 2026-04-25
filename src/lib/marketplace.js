@@ -384,6 +384,29 @@ export async function saveVendorMedia(vendorId, imageUrls) {
 }
 
 /**
+ * Upload a single vendor media file to Supabase Storage 'vendor-media' bucket.
+ */
+export async function uploadVendorMedia(file, vendorId) {
+  try {
+    const ext = file.name.split('.').pop() || 'webp';
+    const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`;
+    const filePath = `${vendorId}/${filename}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('vendor-media')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('vendor-media').getPublicUrl(filePath);
+    return { success: true, publicUrl: data.publicUrl };
+  } catch (error) {
+    console.error('[Marketplace] uploadVendorMedia error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Fetch leads for the vendor's own listing.
  */
 export async function fetchLeadsForVendor(vendorId) {
