@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import PublicNav from '../components/layout/PublicNav';
 import { VENDOR_CATEGORIES, WEDDING_TYPES, generateBudgetCategories, generateTasks, generateEvents } from '../data/templates';
+import HowItWorks from '../components/landing/HowItWorks';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-20 relative overflow-x-hidden overflow-y-auto bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative overflow-x-hidden overflow-y-auto bg-white">
       <PublicNav />
       {/* Premium Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-white via-blush to-ivory -z-10" />
@@ -428,6 +429,12 @@ export default function SignupPage() {
         </div>
 
       </div>
+      
+      {/* How It Works Section placed beneath the signup flow to build confidence */}
+      <div className="w-full mt-24 mb-10 overflow-hidden rounded-3xl border border-gray-100 shadow-sm relative z-0">
+        <HowItWorks />
+      </div>
+
     </div>
   );
 }

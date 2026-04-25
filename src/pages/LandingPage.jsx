@@ -7,6 +7,7 @@ import { ensureHttps } from '../utils/ensureHttps';
 import StickyMobileCTA from '../components/landing/StickyMobileCTA';
 import WhatsAppMessageGenerator from '../components/landing/WhatsAppMessageGenerator';
 import InvitationGenerator from '../components/landing/InvitationGenerator';
+import HowItWorks from '../components/landing/HowItWorks';
 
 const SITE_DESCRIPTION =
   'India\'s most complete wedding planner — manage budgets, guests, vendors, timelines & create stunning digital invitations. All free for Indian couples.';
@@ -257,41 +258,7 @@ export default function LandingPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             HOW IT WORKS — Planning Journey
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section id="how-it-works" className="py-12 sm:py-16 px-4 sm:px-6 bg-gray-50/50">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10 sm:mb-14">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-semibold mb-3 tracking-wide uppercase">
-                <Heart className="w-3.5 h-3.5" /> How It Works
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900 mb-3">
-                Plan Your Dream Wedding in 3 Steps
-              </h2>
-              <p className="text-base sm:text-lg text-gray-500">From engagement to reception — we've got every step covered.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {PLANNING_STEPS.map((s, i) => (
-                <div key={i} className="text-center relative">
-                  {i < PLANNING_STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-rose-gold/30 to-transparent" />
-                  )}
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-gold/10 to-plum/5 flex items-center justify-center mx-auto mb-4 border border-rose-gold/15">
-                    <span className="text-2xl">{s.emoji}</span>
-                  </div>
-                  <div className="text-xs font-bold text-rose-gold/60 uppercase tracking-widest mb-1.5">Step {s.num}</div>
-                  <h3 className="text-lg font-serif font-bold text-gray-900 mb-2">{s.title}</h3>
-                  <p className="text-sm text-gray-600 max-w-[280px] mx-auto">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-10">
-              <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold shadow-lg hover:bg-gray-800 transition-all hover:-translate-y-0.5">
-                Create Your Wedding Dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
+        <HowItWorks />
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             TESTIMONIALS — Wedding Planner Focused

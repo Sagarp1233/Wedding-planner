@@ -7,6 +7,7 @@ import { Wallet, Users, CheckSquare, CalendarHeart, TrendingDown, ArrowRight, Al
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import HowItWorks from '../components/landing/HowItWorks';
 
 export default function DashboardPage() {
   const { onMenuClick } = useOutletContext();
@@ -274,7 +275,7 @@ export default function DashboardPage() {
             <p className="text-3xl font-serif font-bold text-gray-900">{totalGuests}</p>
             <p className="text-xs text-gray-500 font-medium">Total Guests</p>
           </div>
-          <Link to="/guests" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-rose-gold hover:underline">
+          <Link to="/dashboard/rsvp" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-rose-gold hover:underline">
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -310,6 +311,10 @@ export default function DashboardPage() {
             <p className="text-sm">No events yet. Add your first wedding event!</p>
           </div>
         )}
+      </div>
+
+      <div className="mt-12 rounded-3xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
+        <HowItWorks />
       </div>
     </>
   );
