@@ -372,23 +372,23 @@ export default function MyWeddingPageBuilder() {
                   </h3>
 
                   {/* URL Display + Copy */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex-1 h-10 px-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center gap-2 overflow-hidden">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+                    <div className="flex-1 h-10 px-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center gap-2 overflow-hidden min-w-0">
                       <Link2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <span className="text-[13px] text-gray-600 font-medium truncate">{pageUrl}</span>
+                      <span className="text-[12px] sm:text-[13px] text-gray-600 font-medium truncate">{pageUrl}</span>
                     </div>
-                    <button onClick={handleCopyLink} className={`h-10 px-4 rounded-lg text-[12px] font-bold flex items-center gap-1.5 transition shrink-0 ${copied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'}`}>
+                    <button onClick={handleCopyLink} className={`h-10 px-4 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 transition shrink-0 ${copied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'}`}>
                       {copied ? <><CheckCircle className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
                     </button>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    <button onClick={handleWhatsAppShare} className="h-10 rounded-lg text-[12px] font-bold flex items-center justify-center gap-2 bg-[#25D366] text-white hover:bg-[#20BD58] transition shadow-sm">
-                      <MessageCircle className="w-4 h-4" /> Share via WhatsApp
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-5">
+                    <button onClick={handleWhatsAppShare} className="h-10 rounded-lg text-[11px] sm:text-[12px] font-bold flex items-center justify-center gap-1.5 sm:gap-2 bg-[#25D366] text-white hover:bg-[#20BD58] transition shadow-sm">
+                      <MessageCircle className="w-4 h-4 shrink-0" /> Share via WhatsApp
                     </button>
-                    <a href={`/w/${form.slug}`} target="_blank" rel="noreferrer" className="h-10 rounded-lg text-[12px] font-bold flex items-center justify-center gap-2 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition">
-                      <ExternalLink className="w-4 h-4" /> Open Live Page
+                    <a href={`/w/${form.slug}`} target="_blank" rel="noreferrer" className="h-10 rounded-lg text-[11px] sm:text-[12px] font-bold flex items-center justify-center gap-1.5 sm:gap-2 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition">
+                      <ExternalLink className="w-4 h-4 shrink-0" /> Open Live Page
                     </a>
                   </div>
 
