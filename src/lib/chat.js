@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 /**
  * Ensures a conversation exists between a couple and a vendor, or creates one.
  */
-export async function getOrCreateConversation(coupleId, vendorId, listingId = null) {
+export async function getOrCreateConversation(coupleId, vendorId, listingId = null, coupleName = 'Couple Request') {
   const { data: existing, error: fetchError } = await supabase
     .from('chat_conversations')
     .select('*')
@@ -25,7 +25,8 @@ export async function getOrCreateConversation(coupleId, vendorId, listingId = nu
     .insert({
       couple_id: coupleId,
       vendor_id: vendorId,
-      listing_id: listingId
+      listing_id: listingId,
+      couple_name: coupleName
     })
     .select()
     .single();

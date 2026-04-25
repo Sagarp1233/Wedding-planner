@@ -52,7 +52,8 @@ export default function VendorDetailPage() {
       return;
     }
     setStartingChat(true);
-    const result = await getOrCreateConversation(currentUser.id, vendor.user_id, vendor.id);
+    const coupleName = currentUser.user_metadata?.first_name ? `${currentUser.user_metadata.first_name} ${currentUser.user_metadata.last_name || ''}`.trim() : 'Couple Request';
+    const result = await getOrCreateConversation(currentUser.id, vendor.user_id, vendor.id, coupleName);
     if (result.success) {
       navigate('/dashboard/messages');
     } else {

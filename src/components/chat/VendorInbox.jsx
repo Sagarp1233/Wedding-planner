@@ -70,7 +70,7 @@ export default function VendorInbox({ vendorId }) {
                 </div>
                 <div className="overflow-hidden flex-1">
                   <div className="flex justify-between items-center mb-0.5">
-                    <p className="font-bold text-gray-900 text-[13px] truncate">Couple Enquiry</p>
+                    <p className="font-bold text-gray-900 text-[13px] truncate">{conv.couple_name || 'Couple Enquiry'}</p>
                     <span className="text-[10px] text-gray-400 font-medium">
                       {new Date(conv.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric'})}
                     </span>
@@ -90,7 +90,7 @@ export default function VendorInbox({ vendorId }) {
         <ChatWindow 
           conversationId={activeConversation?.id} 
           currentUserId={vendorId} 
-          otherPartyName="Couple Request" 
+          otherPartyName={activeConversation?.couple_name || 'Couple Request'} 
         />
       </div>
     </div>
