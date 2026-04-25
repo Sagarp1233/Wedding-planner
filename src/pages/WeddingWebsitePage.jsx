@@ -477,20 +477,20 @@ export default function WeddingWebsitePage() {
                    const isLastOdd = site.events.length % 2 !== 0 && index === site.events.length - 1;
                    
                    return (
-                     <div key={index} className={`bg-[#48303e] border border-white/5 rounded-3xl p-8 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
+                     <div key={index} className={`bg-white/[0.08] border border-white/20 rounded-3xl p-8 hover:-translate-y-1 hover:bg-white/[0.12] hover:shadow-2xl transition-all duration-300 ${isLastOdd ? 'md:col-span-2 lg:col-span-1' : ''}`}>
                        <div className="text-3xl mb-5">{event.emoji || '✨'}</div>
                        <h3 className="text-2xl font-serif font-medium mb-3 text-white">{event.name}</h3>
                        
-                       <div className="space-y-4 text-white/70 text-sm font-sans mt-4">
+                       <div className="space-y-4 text-white/80 text-sm font-sans mt-4">
                          {event.date && (
                            <div className="flex items-center gap-2">
-                             <Calendar className="w-4 h-4 text-white/40" />
+                             <Calendar className="w-4 h-4 text-white/50" />
                              <span className="font-medium">{new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(event.date))}</span>
                            </div>
                          )}
                          {event.time && (
-                           <div className="inline-flex items-center gap-2 bg-[#7a384b]/60 px-3.5 py-1.5 rounded-full border border-white/5">
-                             <Clock className="w-3.5 h-3.5 text-[#e1b4c3]" />
+                           <div className="inline-flex items-center gap-2 bg-[#9B455E] px-3.5 py-1.5 rounded-full shadow-inner">
+                             <Clock className="w-3.5 h-3.5 text-white/90" />
                              <span className="text-xs font-bold tracking-wider text-white">{event.time}</span>
                            </div>
                          )}
